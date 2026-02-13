@@ -10,7 +10,7 @@ async function start() {
       port: 3000,
     });
 
-    app.log.info(`API server listening in ${env.NODE_ENV} mode`);
+    app.log.info(` -- API server listening in ${env.NODE_ENV} mode`);
   } catch (error) {
     app.log.error(error, 'Failed to start API server');
     process.exit(1);
