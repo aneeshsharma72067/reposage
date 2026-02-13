@@ -1,0 +1,18 @@
+{
+  "name": "agentic-engineering-workflow-ai",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "workers/*"
+  ],
+  "scripts": {
+    "dev": "echo 'Run dev script in individual packages'",
+    "build": "echo 'Run build script in individual packages'",
+    "lint": "echo 'Run lint script in individual packages'"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
