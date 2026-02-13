@@ -10,7 +10,15 @@
   "scripts": {
     "dev": "echo 'Run dev script in individual packages'",
     "build": "echo 'Run build script in individual packages'",
-    "lint": "echo 'Run lint script in individual packages'"
+    "lint": "echo 'Run lint script in individual packages'",
+    "dev:server": "npm run dev --workspace=apps/api",
+    "build:server": "npm run build --workspace=apps/api",
+    "start:server": "npm run start --workspace=apps/api",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "build:web": "npm run build --workspace=apps/web",
+    "start:web": "npm run start --workspace=apps/web",
+    "dev:analyzer": "npm run dev --workspace=workers/analyzer",
+    "build:analyzer": "npm run build --workspace=workers/analyzer"
   },
   "devDependencies": {
     "typescript": "^5.0.0"

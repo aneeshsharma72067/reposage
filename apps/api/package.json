@@ -6,18 +6,21 @@
         "dev": "tsx watch src/server.ts",
         "build": "tsc",
         "start": "node dist/server.js",
-        "lint": "eslint ."
+        "lint": "eslint .",
+        "prisma:generate": "prisma generate",
+        "prisma:migrate": "prisma migrate dev"
     },
     "dependencies": {
         "@fastify/cookie": "latest",
         "@fastify/jwt": "latest",
+        "@prisma/client": "^6.16.2",
+        "dotenv": "latest",
         "fastify": "latest",
-        "pg": "latest",
         "zod": "latest"
     },
     "devDependencies": {
         "@types/node": "^20",
-        "@types/pg": "latest",
+        "prisma": "^6.16.2",
         "tsx": "latest"
     }
 }

@@ -1,4 +1,19 @@
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { config as loadDotEnv } from 'dotenv';
 import { z } from 'zod';
+
+const envCandidates = [
+  resolve(process.cwd(), '.env'),
+  resolve(process.cwd(), 'apps/api/.env'),
+  resolve(process.cwd(), '../../.env'),
+];
+
+for (const envPath of new Set(envCandidates)) {
+  if (existsSync(envPath)) {
+    loadDotEnv({ path: envPath, override: false });
+  }
+}
 
 const envSchema = z.object({
   GITHUB_CLIENT_ID: z.string().min(1),
@@ -18,7 +33,9 @@ if (!parsedEnv.success) {
   const issues = parsedEnv.error.issues
     .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
     .join(', ');
-  throw new Error(`Invalid environment configuration: ${issues}`);
+  throw new Error(
+    `Invalid environment configuration: ${issues}. Create apps/api/.env from apps/api/.env.example.`,
+  );
 }
 
 export const env = parsedEnv.data;

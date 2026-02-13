@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { query } from '../db';
+import { prisma } from '../lib/prisma';
 import { AppError } from '../utils/errors';
 import type {
   AuthJwtPayload,
@@ -28,22 +28,17 @@ export async function requireAuth(
     throw new AppError('Unauthorized', 401, 'UNAUTHORIZED');
   }
 
-  const result = await query<{
-    id: string;
-    github_user_id: string;
-    github_login: string;
-    avatar_url: string | null;
-  }>(
-    `
-      SELECT id, github_user_id, github_login, avatar_url
-      FROM users
-      WHERE id = $1
-      LIMIT 1
-    `,
-    [payload.sub],
-  );
-
-  const user = result.rows[0];
+  const user = await prisma.user.findUnique({
+    where: {
+      id: payload.sub,
+    },
+    select: {
+      id: true,
+      githubUserId: true,
+      githubLogin: true,
+      avatarUrl: true,
+    },
+  });
 
   if (!user) {
     throw new AppError('Unauthorized', 401, 'UNAUTHORIZED');
@@ -51,9 +46,9 @@ export async function requireAuth(
 
   request.currentUser = {
     id: user.id,
-    githubUserId: user.github_user_id,
-    githubLogin: user.github_login,
-    avatarUrl: user.avatar_url,
+    githubUserId: user.githubUserId.toString(),
+    githubLogin: user.githubLogin,
+    avatarUrl: user.avatarUrl,
   };
 }
 

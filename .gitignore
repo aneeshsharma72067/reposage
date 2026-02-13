@@ -7,3 +7,4 @@ coverage
 .turbo
 build
 .next
+secrets.txt

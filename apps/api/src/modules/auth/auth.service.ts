@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { env } from '../../config/env';
-import { query } from '../../db';
+import { prisma } from '../../lib/prisma';
 import { AppError } from '../../utils/errors';
 import type {
   AuthJwtPayload,
@@ -103,21 +103,20 @@ export async function fetchGithubUserProfile(
 export async function upsertGithubUser(
   profile: GithubUserProfile,
 ): Promise<UserRecord> {
-  const result = await query<UserRecord>(
-    `
-      INSERT INTO users (github_user_id, github_login, avatar_url)
-      VALUES ($1, $2, $3)
-      ON CONFLICT (github_user_id)
-      DO UPDATE SET
-        github_login = EXCLUDED.github_login,
-        avatar_url = EXCLUDED.avatar_url,
-        updated_at = NOW()
-      RETURNING id, github_user_id, github_login, avatar_url
-    `,
-    [profile.id, profile.login, profile.avatar_url],
-  );
-
-  const user = result.rows[0];
+  const user = await prisma.user.upsert({
+    where: {
+      githubUserId: BigInt(profile.id),
+    },
+    update: {
+      githubLogin: profile.login,
+      avatarUrl: profile.avatar_url,
+    },
+    create: {
+      githubUserId: BigInt(profile.id),
+      githubLogin: profile.login,
+      avatarUrl: profile.avatar_url,
+    },
+  });
 
   if (!user) {
     throw new AppError(
@@ -127,7 +126,12 @@ export async function upsertGithubUser(
     );
   }
 
-  return user;
+  return {
+    id: user.id,
+    github_user_id: user.githubUserId.toString(),
+    github_login: user.githubLogin,
+    avatar_url: user.avatarUrl,
+  };
 }
 
 export async function signSessionToken(
