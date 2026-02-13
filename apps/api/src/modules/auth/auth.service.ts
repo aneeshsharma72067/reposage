@@ -1,4 +1,4 @@
-import type { FastifyInstance } from 'fastify';
+import type { FastifyReply } from 'fastify';
 import { env } from '../../config/env';
 import { prisma } from '../../lib/prisma';
 import { AppError } from '../../utils/errors';
@@ -135,7 +135,7 @@ export async function upsertGithubUser(
 }
 
 export async function signSessionToken(
-  app: FastifyInstance,
+  reply: FastifyReply,
   user: UserRecord,
 ): Promise<string> {
   const payload: AuthJwtPayload = {
@@ -144,6 +144,6 @@ export async function signSessionToken(
     login: user.github_login,
   };
 
-  return app.jwt.sign(payload, { expiresIn: '7d' });
+  return reply.jwtSign(payload, { expiresIn: '7d' });
 }
 

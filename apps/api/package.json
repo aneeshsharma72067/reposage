@@ -13,9 +13,12 @@
     "dependencies": {
         "@fastify/cookie": "latest",
         "@fastify/jwt": "latest",
+        "@fastify/swagger": "latest",
+        "@fastify/swagger-ui": "latest",
         "@prisma/client": "^6.16.2",
         "dotenv": "latest",
         "fastify": "latest",
+        "fastify-plugin": "latest",
         "zod": "latest"
     },
     "devDependencies": {

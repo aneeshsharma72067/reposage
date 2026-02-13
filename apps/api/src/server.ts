@@ -2,7 +2,7 @@ import { env } from './config/env';
 import { buildApp } from './app';
 
 async function start() {
-  const app = buildApp();
+  const app = await buildApp();
 
   try {
     await app.listen({
@@ -11,6 +11,7 @@ async function start() {
     });
 
     app.log.info(` -- API server listening in ${env.NODE_ENV} mode`);
+    console.log('Swagger UI available at http://localhost:3000/docs');
   } catch (error) {
     app.log.error(error, 'Failed to start API server');
     process.exit(1);

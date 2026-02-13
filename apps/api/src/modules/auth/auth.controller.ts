@@ -32,7 +32,7 @@ export async function githubAuthCallback(
   const accessToken = await exchangeCodeForAccessToken(code);
   const githubProfile = await fetchGithubUserProfile(accessToken);
   const user = await upsertGithubUser(githubProfile);
-  const sessionToken = await signSessionToken(request.server, user);
+  const sessionToken = await signSessionToken(reply, user);
 
   reply.setCookie(SESSION_COOKIE_NAME, sessionToken, {
     httpOnly: true,
