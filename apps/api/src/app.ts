@@ -8,6 +8,7 @@ import {
   generateInstallationAccessToken,
 } from './modules/githubApp/githubApp.service';
 import installationRoutes from './modules/installation/installation.routes';
+import repositoryRoutes from './modules/repository/repository.routes';
 import webhookRoutes from './modules/webhook/webhook.routes';
 import { jwtPlugin } from './plugins/jwt';
 import { AppError, registerErrorHandler } from './utils/errors';
@@ -85,6 +86,7 @@ export async function buildApp() {
 
   await app.register(authRoutes, { prefix: '/auth' });
   await app.register(installationRoutes, { prefix: '/install' });
+  await app.register(repositoryRoutes, { prefix: '/repos' });
   await app.register(webhookRoutes, { prefix: '/webhooks' });
 
   return app;

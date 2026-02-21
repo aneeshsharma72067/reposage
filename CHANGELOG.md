@@ -56,3 +56,10 @@
 - Removed manual debug sync route
 - Installation now auto-discovers repositories
 
+## Phase 4.1 - Repository Listing API
+
+- Added GET /repos endpoint
+- Enforced user-level isolation
+- Exposed repository metadata
+- Structured repository module
+
