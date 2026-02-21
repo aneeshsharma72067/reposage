@@ -3,6 +3,7 @@ import type {
   GithubWebhookHeaders,
   GithubWebhookPayload,
 } from './webhook.types';
+import { handleGithubWebhookEvent } from './webhook.service';
 
 function getFirstHeaderValue(value?: string | string[]): string | undefined {
   if (Array.isArray(value)) {
@@ -10,18 +11,6 @@ function getFirstHeaderValue(value?: string | string[]): string | undefined {
   }
 
   return value;
-}
-
-function getPayloadType(payload: unknown): 'array' | 'null' | string {
-  if (Array.isArray(payload)) {
-    return 'array';
-  }
-
-  if (payload === null) {
-    return 'null';
-  }
-
-  return typeof payload;
 }
 
 export async function githubWebhookReceiver(
@@ -36,29 +25,23 @@ export async function githubWebhookReceiver(
   const deliveryId =
     getFirstHeaderValue(request.headers['x-github-delivery']) ?? 'unknown';
   const payload = request.body;
-  console.log('Received GitHub webhook:', {
-    event,
-    deliveryId,
-    payloadType: getPayloadType(payload),
-    action:
-      payload && typeof payload === 'object' && 'action' in payload
-        ? (payload.action ?? null)
-        : null,
-    body: payload,
-  });
-  request.log.info(
-    {
+
+  try {
+    await handleGithubWebhookEvent({
       event,
-      deliveryId,
-      payloadType: getPayloadType(payload),
-      action:
-        payload && typeof payload === 'object' && 'action' in payload
-          ? (payload.action ?? null)
-          : null,
-      body: payload,
-    },
-    'GitHub webhook received',
-  );
+      payload,
+      logger: request.log,
+    });
+  } catch (error) {
+    request.log.error(
+      {
+        err: error,
+        event,
+        deliveryId,
+      },
+      'Failed to process GitHub webhook event',
+    );
+  }
 
   return reply.status(200).send({ received: true });
 }
