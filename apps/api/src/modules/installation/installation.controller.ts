@@ -1,5 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { env } from '../../config/env';
+import { syncInstallationRepositories } from '../githubApp/githubApp.service';
 import { AppError } from '../../utils/errors';
 import {
   getGithubAppInstallationUrl,
@@ -35,6 +36,14 @@ export async function installationCallback(
     );
   }
 
+  if (!/^\d+$/.test(installationId)) {
+    throw new AppError(
+      'Invalid installation_id query parameter',
+      400,
+      'INSTALLATION_ID_INVALID',
+    );
+  }
+
   if (!request.currentUser) {
     throw new AppError('Unauthorized', 401, 'UNAUTHORIZED');
   }
@@ -46,6 +55,25 @@ export async function installationCallback(
     },
     request.log,
   );
+
+  const normalizedInstallationId = BigInt(installationId);
+
+  try {
+    await syncInstallationRepositories(normalizedInstallationId);
+    request.log.info({
+      event: 'installation.repositories.auto_synced',
+      installationId: normalizedInstallationId,
+    });
+  } catch (error) {
+    request.log.error(
+      {
+        event: 'installation.repositories.auto_sync_failed',
+        installationId: normalizedInstallationId,
+        error,
+      },
+      'Automatic repository sync after installation callback failed',
+    );
+  }
 
   reply.redirect(env.FRONTEND_URL);
 }

@@ -3,10 +3,14 @@ import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
 
 import authRoutes from './modules/auth/auth.routes';
+import {
+  generateAppJwt,
+  generateInstallationAccessToken,
+} from './modules/githubApp/githubApp.service';
 import installationRoutes from './modules/installation/installation.routes';
 import webhookRoutes from './modules/webhook/webhook.routes';
 import { jwtPlugin } from './plugins/jwt';
-import { registerErrorHandler } from './utils/errors';
+import { AppError, registerErrorHandler } from './utils/errors';
 
 export async function buildApp() {
   const app = Fastify({
@@ -52,6 +56,33 @@ export async function buildApp() {
   }
 
   await app.register(jwtPlugin);
+
+  app.get('/debug/app-jwt', async () => {
+    const token = await generateAppJwt();
+    void token;
+
+    return { ok: true };
+  });
+
+  app.get('/debug/installation-token/:id', async (request) => {
+    const installationIdParam = (request.params as { id?: string }).id;
+
+    if (!installationIdParam || !/^\d+$/.test(installationIdParam)) {
+      throw new AppError(
+        'Invalid installation id parameter',
+        400,
+        'INSTALLATION_ID_INVALID',
+      );
+    }
+
+    const token = await generateInstallationAccessToken(
+      BigInt(installationIdParam),
+    );
+    void token;
+
+    return { ok: true };
+  });
+
   await app.register(authRoutes, { prefix: '/auth' });
   await app.register(installationRoutes, { prefix: '/install' });
   await app.register(webhookRoutes, { prefix: '/webhooks' });

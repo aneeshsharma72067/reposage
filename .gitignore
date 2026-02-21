@@ -8,3 +8,6 @@ coverage
 build
 .next
 secrets.txt
+secrets/
+keys/
+*.pem
