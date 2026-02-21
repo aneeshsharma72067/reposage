@@ -11,6 +11,22 @@ import {
 } from './auth.service';
 import type { GithubCallbackQuery } from './auth.types';
 
+function buildSessionCookieConfig() {
+  const callbackOrigin = new URL(env.GITHUB_CALLBACK_URL).origin;
+  const frontendOrigin = new URL(env.FRONTEND_URL).origin;
+  const isCrossSite = callbackOrigin !== frontendOrigin;
+  const isSecureOrigin = callbackOrigin.startsWith('https://');
+  const useSameSiteNone = isCrossSite && isSecureOrigin;
+
+  return {
+    httpOnly: true,
+    sameSite: useSameSiteNone ? ('none' as const) : ('lax' as const),
+    secure: useSameSiteNone || isProduction,
+    path: '/',
+    maxAge: 60 * 60 * 24 * 7,
+  };
+}
+
 export async function redirectToGithubAuth(
   _request: FastifyRequest,
   reply: FastifyReply,
@@ -34,13 +50,11 @@ export async function githubAuthCallback(
   const user = await upsertGithubUser(githubProfile);
   const sessionToken = await signSessionToken(reply, user);
 
-  reply.setCookie(SESSION_COOKIE_NAME, sessionToken, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: isProduction,
-    path: '/',
-    maxAge: 60 * 60 * 24 * 7,
-  });
+  reply.setCookie(
+    SESSION_COOKIE_NAME,
+    sessionToken,
+    buildSessionCookieConfig(),
+  );
 
   return reply.redirect(env.FRONTEND_URL);
 }

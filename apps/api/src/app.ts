@@ -3,6 +3,7 @@ import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
 
 import authRoutes from './modules/auth/auth.routes';
+import installationRoutes from './modules/installation/installation.routes';
 import webhookRoutes from './modules/webhook/webhook.routes';
 import { jwtPlugin } from './plugins/jwt';
 import { registerErrorHandler } from './utils/errors';
@@ -24,6 +25,15 @@ export async function buildApp() {
           description: 'Backend API documentation for RepoSage',
           version: '1.0.0',
         },
+        components: {
+          securitySchemes: {
+            cookieAuth: {
+              type: 'apiKey',
+              in: 'cookie',
+              name: 'ae_session',
+            },
+          },
+        },
         servers: [
           {
             url: 'http://localhost:3000',
@@ -43,6 +53,7 @@ export async function buildApp() {
 
   await app.register(jwtPlugin);
   await app.register(authRoutes, { prefix: '/auth' });
+  await app.register(installationRoutes, { prefix: '/install' });
   await app.register(webhookRoutes, { prefix: '/webhooks' });
 
   return app;

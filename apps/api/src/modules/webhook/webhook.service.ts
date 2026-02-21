@@ -1,5 +1,4 @@
 import type { FastifyBaseLogger } from 'fastify';
-import { prisma } from '../../lib/prisma';
 import type { GithubWebhookPayload } from './webhook.types';
 
 interface HandleGithubWebhookEventInput {
@@ -56,53 +55,14 @@ export async function handleGithubWebhookEvent({
   const accountLogin = payload.installation.account.login;
   const accountType = payload.installation.account.type;
 
-  const user = await prisma.user.findFirst({
-    where: {
-      githubLogin: accountLogin,
-    },
-    select: {
-      id: true,
-    },
-  });
-
-  if (!user) {
-    logger.warn(
-      {
-        event: 'installation.created',
-        installationId,
-        account: accountLogin,
-      },
-      'No user found for GitHub installation account login',
-    );
-
-    return;
-  }
-
-  await prisma.githubInstallation.upsert({
-    where: {
-      installationId: BigInt(installationId),
-    },
-    update: {
-      accountLogin,
-      accountType,
-      installedByUserId: user.id,
-    },
-    create: {
-      installationId: BigInt(installationId),
-      accountLogin,
-      accountType,
-      installedByUserId: user.id,
-    },
-  });
-
   logger.info(
     {
       event: 'installation.created',
       installationId,
       account: accountLogin,
-      linkedUserId: user.id,
+      accountType,
     },
-    'GitHub installation persisted',
+    'GitHub installation.created webhook received',
   );
 }
 
