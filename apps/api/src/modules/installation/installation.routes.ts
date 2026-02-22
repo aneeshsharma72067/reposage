@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { requireAuth } from '../../middleware/requireAuth';
 import {
+  getInstallationUrl,
   installationCallback,
   startInstallation,
 } from './installation.controller';
@@ -12,7 +13,7 @@ const installationRoutes: FastifyPluginAsync = async (app) => {
       tags: ['Installation'],
       summary: 'Start GitHub App installation flow',
       description: 'Redirects authenticated users to GitHub App install page.',
-      security: [{ cookieAuth: [] }],
+      security: [{ bearerAuth: [] }],
       response: {
         302: {
           description: 'Redirect to GitHub App installation URL',
@@ -37,19 +38,48 @@ const installationRoutes: FastifyPluginAsync = async (app) => {
     handler: startInstallation,
   });
 
-  app.get('/callback', {
+  app.get('/url', {
     preHandler: requireAuth,
+    schema: {
+      tags: ['Installation'],
+      summary: 'Get GitHub App installation URL',
+      description:
+        'Returns a GitHub App installation URL containing a signed state token for callback verification.',
+      security: [{ bearerAuth: [] }],
+      response: {
+        200: {
+          type: 'object',
+          required: ['url'],
+          properties: {
+            url: { type: 'string', format: 'uri' },
+          },
+        },
+        401: {
+          description: 'Unauthorized request',
+          type: 'object',
+          required: ['error', 'message'],
+          properties: {
+            error: { type: 'string', example: 'UNAUTHORIZED' },
+            message: { type: 'string' },
+          },
+        },
+      },
+    },
+    handler: getInstallationUrl,
+  });
+
+  app.get('/callback', {
     schema: {
       tags: ['Installation'],
       summary: 'Handle GitHub App installation callback',
       description:
-        'Links installation_id to authenticated user and redirects to frontend.',
-      security: [{ cookieAuth: [] }],
+        'Links installation_id to user encoded in signed state token and redirects to frontend.',
       querystring: {
         type: 'object',
-        required: ['installation_id'],
+        required: ['installation_id', 'state'],
         properties: {
           installation_id: { type: 'string', minLength: 1 },
+          state: { type: 'string', minLength: 1 },
         },
       },
       response: {
@@ -72,7 +102,7 @@ const installationRoutes: FastifyPluginAsync = async (app) => {
           },
         },
         401: {
-          description: 'Unauthorized request',
+          description: 'Unauthorized request or state user not found',
           type: 'object',
           required: ['error', 'message'],
           properties: {

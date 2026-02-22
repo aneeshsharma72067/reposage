@@ -31,7 +31,7 @@ const envSchema = z.object({
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
-
+console.log('loaded github callback url :', process.env.GITHUB_CALLBACK_URL);
 if (!parsedEnv.success) {
   const issues = parsedEnv.error.issues
     .map((issue) => `${issue.path.join('.')}: ${issue.message}`)

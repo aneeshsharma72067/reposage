@@ -1,0 +1,1060 @@
+{
+    "$schema": "https://design-tokens.github.io/community-group/format/",
+    "$metadata": {
+        "name": "Agentic.ai Design System — Empty State Dashboard",
+        "version": "1.0.0",
+        "description": "Design tokens extracted from the Agentic.ai empty-state dashboard (Connect your first repository). Extends the Authentication and Onboarding token sets with new patterns: sidebar navigation, topbar with status badge, breadcrumb, empty-state hero, setup steps card, value-prop tiles, user profile block, and status bar.",
+        "source": "Dashboard — Empty State / Connect GitHub",
+        "extends": [
+            "agentic-design-tokens.json",
+            "agentic-onboarding-tokens.json"
+        ]
+    },
+    "color": {
+        "base": {
+            "black": {
+                "$value": "#0a0a0a",
+                "$type": "color"
+            },
+            "surface-100": {
+                "$value": "#111111",
+                "$type": "color",
+                "$description": "Page / sidebar background"
+            },
+            "surface-200": {
+                "$value": "#1a1a1a",
+                "$type": "color",
+                "$description": "Cards, setup-steps panel"
+            },
+            "surface-300": {
+                "$value": "#222222",
+                "$type": "color",
+                "$description": "Nav item active background"
+            },
+            "surface-400": {
+                "$value": "#2c2c2c",
+                "$type": "color",
+                "$description": "Borders, dividers"
+            },
+            "white": {
+                "$value": "#ffffff",
+                "$type": "color"
+            },
+            "white-alpha-90": {
+                "$value": "rgba(255,255,255,0.90)",
+                "$type": "color"
+            },
+            "white-alpha-60": {
+                "$value": "rgba(255,255,255,0.60)",
+                "$type": "color"
+            },
+            "white-alpha-40": {
+                "$value": "rgba(255,255,255,0.40)",
+                "$type": "color"
+            },
+            "white-alpha-20": {
+                "$value": "rgba(255,255,255,0.20)",
+                "$type": "color"
+            },
+            "white-alpha-10": {
+                "$value": "rgba(255,255,255,0.10)",
+                "$type": "color"
+            }
+        },
+        "semantic": {
+            "system-online": {
+                "$value": "#22c55e",
+                "$type": "color",
+                "$description": "Green dot + label in System Online badge"
+            },
+            "system-online-bg": {
+                "$value": "rgba(34,197,94,0.10)",
+                "$type": "color",
+                "$description": "System Online badge background fill"
+            },
+            "system-online-border": {
+                "$value": "rgba(34,197,94,0.25)",
+                "$type": "color",
+                "$description": "System Online badge border"
+            },
+            "api-connected": {
+                "$value": "#22c55e",
+                "$type": "color",
+                "$description": "API: Connected label in status bar"
+            },
+            "step-icon": {
+                "$value": "rgba(255,255,255,0.30)",
+                "$type": "color",
+                "$description": "? icon on setup step rows"
+            }
+        },
+        "nav": {
+            "item-active-bg": {
+                "$value": "#1e1e1e",
+                "$type": "color",
+                "$description": "Highlighted background for active nav item (Dashboard)"
+            },
+            "item-active-border": {
+                "$value": "rgba(255,255,255,0.08)",
+                "$type": "color"
+            },
+            "item-active-text": {
+                "$value": "#ffffff",
+                "$type": "color"
+            },
+            "item-inactive-text": {
+                "$value": "rgba(255,255,255,0.50)",
+                "$type": "color"
+            },
+            "item-hover-bg": {
+                "$value": "rgba(255,255,255,0.05)",
+                "$type": "color"
+            },
+            "divider": {
+                "$value": "rgba(255,255,255,0.08)",
+                "$type": "color"
+            }
+        },
+        "breadcrumb": {
+            "parent": {
+                "$value": "rgba(255,255,255,0.45)",
+                "$type": "color",
+                "$description": "Projects link"
+            },
+            "separator": {
+                "$value": "rgba(255,255,255,0.25)",
+                "$type": "color",
+                "$description": "› chevron"
+            },
+            "current": {
+                "$value": "#ffffff",
+                "$type": "color",
+                "$description": "Connect GitHub — active crumb"
+            }
+        },
+        "github-hero-icon": {
+            "bg": {
+                "$value": "#1c1c1e",
+                "$type": "color",
+                "$description": "Rounded square background behind GitHub mark"
+            },
+            "border": {
+                "$value": "rgba(255,255,255,0.12)",
+                "$type": "color"
+            }
+        }
+    },
+    "typography": {
+        "fontFamily": {
+            "sans": {
+                "$value": "'Inter', 'SF Pro Display', -apple-system, sans-serif",
+                "$type": "fontFamily"
+            },
+            "mono": {
+                "$value": "'JetBrains Mono', 'Fira Code', monospace",
+                "$type": "fontFamily"
+            }
+        },
+        "fontSize": {
+            "2xs": {
+                "$value": "10px",
+                "$type": "dimension"
+            },
+            "xs": {
+                "$value": "11px",
+                "$type": "dimension"
+            },
+            "sm": {
+                "$value": "13px",
+                "$type": "dimension"
+            },
+            "base": {
+                "$value": "14px",
+                "$type": "dimension"
+            },
+            "md": {
+                "$value": "15px",
+                "$type": "dimension"
+            },
+            "lg": {
+                "$value": "18px",
+                "$type": "dimension"
+            },
+            "xl": {
+                "$value": "22px",
+                "$type": "dimension"
+            },
+            "2xl": {
+                "$value": "28px",
+                "$type": "dimension"
+            },
+            "3xl": {
+                "$value": "36px",
+                "$type": "dimension",
+                "$description": "Empty-state headline"
+            }
+        },
+        "fontWeight": {
+            "regular": {
+                "$value": 400,
+                "$type": "number"
+            },
+            "medium": {
+                "$value": 500,
+                "$type": "number"
+            },
+            "semibold": {
+                "$value": 600,
+                "$type": "number"
+            },
+            "bold": {
+                "$value": 700,
+                "$type": "number"
+            }
+        },
+        "lineHeight": {
+            "tight": {
+                "$value": 1.2,
+                "$type": "number"
+            },
+            "snug": {
+                "$value": 1.35,
+                "$type": "number"
+            },
+            "normal": {
+                "$value": 1.5,
+                "$type": "number"
+            },
+            "relaxed": {
+                "$value": 1.65,
+                "$type": "number"
+            }
+        },
+        "letterSpacing": {
+            "tight": {
+                "$value": "-0.02em",
+                "$type": "dimension"
+            },
+            "normal": {
+                "$value": "0em",
+                "$type": "dimension"
+            },
+            "wide": {
+                "$value": "0.04em",
+                "$type": "dimension"
+            }
+        },
+        "roles": {
+            "empty-state-headline": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.3xl}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.bold}"
+                },
+                "lineHeight": {
+                    "$value": "{typography.lineHeight.tight}"
+                },
+                "letterSpacing": {
+                    "$value": "{typography.letterSpacing.tight}"
+                },
+                "color": {
+                    "$value": "{color.base.white}"
+                },
+                "$description": "Connect your first repository"
+            },
+            "empty-state-body": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.md}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "lineHeight": {
+                    "$value": "{typography.lineHeight.relaxed}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-60}"
+                }
+            },
+            "setup-step-title": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.base}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.bold}"
+                },
+                "color": {
+                    "$value": "{color.base.white}"
+                },
+                "$description": "Install GitHub App, Sync Metadata, Activate Agents"
+            },
+            "setup-step-body": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "lineHeight": {
+                    "$value": "{typography.lineHeight.normal}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-60}"
+                }
+            },
+            "setup-step-requires": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-40}"
+                },
+                "$description": "Requires Admin Permissions — beneath CTA button"
+            },
+            "cta-button-label": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.base}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "color": {
+                    "$value": "{color.base.black}"
+                }
+            },
+            "value-prop-title": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.base}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "color": {
+                    "$value": "{color.base.white}"
+                },
+                "$description": "Read-only Access, Zero Latency"
+            },
+            "value-prop-body": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "lineHeight": {
+                    "$value": "{typography.lineHeight.relaxed}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-60}"
+                }
+            },
+            "nav-item-active": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.base}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "color": {
+                    "$value": "{color.nav.item-active-text}"
+                }
+            },
+            "nav-item-inactive": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.base}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "color": {
+                    "$value": "{color.nav.item-inactive-text}"
+                }
+            },
+            "brand-name": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.base}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "color": {
+                    "$value": "{color.base.white}"
+                },
+                "$description": "Agentic AI — top-left wordmark"
+            },
+            "breadcrumb-parent": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "color": {
+                    "$value": "{color.breadcrumb.parent}"
+                }
+            },
+            "breadcrumb-current": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.medium}"
+                },
+                "color": {
+                    "$value": "{color.breadcrumb.current}"
+                }
+            },
+            "system-status-label": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "color": {
+                    "$value": "{color.semantic.system-online}"
+                },
+                "$description": "System Online text in topbar badge"
+            },
+            "user-name": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.base}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "color": {
+                    "$value": "{color.base.white}"
+                }
+            },
+            "user-role": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-40}"
+                }
+            },
+            "status-bar-version": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.mono}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-40}"
+                }
+            },
+            "status-bar-api": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.mono}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "color": {
+                    "$value": "{color.semantic.api-connected}"
+                },
+                "$description": "API: Connected — green monospace in footer bar"
+            },
+            "status-bar-copyright": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-40}"
+                }
+            }
+        }
+    },
+    "spacing": {
+        "0": {
+            "$value": "0px",
+            "$type": "dimension"
+        },
+        "1": {
+            "$value": "4px",
+            "$type": "dimension"
+        },
+        "2": {
+            "$value": "8px",
+            "$type": "dimension"
+        },
+        "3": {
+            "$value": "12px",
+            "$type": "dimension"
+        },
+        "4": {
+            "$value": "16px",
+            "$type": "dimension"
+        },
+        "5": {
+            "$value": "20px",
+            "$type": "dimension"
+        },
+        "6": {
+            "$value": "24px",
+            "$type": "dimension"
+        },
+        "8": {
+            "$value": "32px",
+            "$type": "dimension"
+        },
+        "10": {
+            "$value": "40px",
+            "$type": "dimension"
+        },
+        "12": {
+            "$value": "48px",
+            "$type": "dimension"
+        },
+        "14": {
+            "$value": "56px",
+            "$type": "dimension"
+        },
+        "16": {
+            "$value": "64px",
+            "$type": "dimension"
+        },
+        "20": {
+            "$value": "80px",
+            "$type": "dimension"
+        }
+    },
+    "borderRadius": {
+        "none": {
+            "$value": "0px",
+            "$type": "dimension"
+        },
+        "sm": {
+            "$value": "4px",
+            "$type": "dimension"
+        },
+        "md": {
+            "$value": "8px",
+            "$type": "dimension"
+        },
+        "lg": {
+            "$value": "12px",
+            "$type": "dimension"
+        },
+        "xl": {
+            "$value": "16px",
+            "$type": "dimension",
+            "$description": "Setup-steps card, value-prop tiles"
+        },
+        "2xl": {
+            "$value": "20px",
+            "$type": "dimension",
+            "$description": "GitHub hero icon card"
+        },
+        "full": {
+            "$value": "9999px",
+            "$type": "dimension",
+            "$description": "Pill buttons, system-online badge, avatar"
+        }
+    },
+    "border": {
+        "width": {
+            "default": {
+                "$value": "1px",
+                "$type": "dimension"
+            }
+        },
+        "color": {
+            "default": {
+                "$value": "{color.base.surface-400}",
+                "$type": "color"
+            },
+            "subtle": {
+                "$value": "{color.base.white-alpha-10}",
+                "$type": "color"
+            }
+        }
+    },
+    "shadow": {
+        "card": {
+            "$value": "0 4px 32px rgba(0,0,0,0.55)",
+            "$type": "shadow"
+        },
+        "cta-button": {
+            "$value": "0 2px 16px rgba(0,0,0,0.40)",
+            "$type": "shadow"
+        }
+    },
+    "component": {
+        "topbar": {
+            "height": {
+                "$value": "52px",
+                "$type": "dimension"
+            },
+            "background": {
+                "$value": "{color.base.surface-100}"
+            },
+            "border-bottom": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "padding-x": {
+                "$value": "{spacing.5}"
+            },
+            "$description": "Full-width top navigation bar"
+        },
+        "sidebar": {
+            "width": {
+                "$value": "220px",
+                "$type": "dimension"
+            },
+            "background": {
+                "$value": "{color.base.surface-100}"
+            },
+            "border-right": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "padding-x": {
+                "$value": "{spacing.3}"
+            },
+            "padding-y": {
+                "$value": "{spacing.3}"
+            },
+            "item-height": {
+                "$value": "40px",
+                "$type": "dimension"
+            },
+            "item-border-radius": {
+                "$value": "{borderRadius.md}"
+            },
+            "item-padding-x": {
+                "$value": "{spacing.3}"
+            },
+            "item-gap": {
+                "$value": "{spacing.1}",
+                "$description": "Vertical gap between nav items"
+            },
+            "icon-size": {
+                "$value": "18px",
+                "$type": "dimension"
+            },
+            "icon-gap": {
+                "$value": "{spacing.3}",
+                "$description": "Gap between icon and label"
+            },
+            "section-divider-margin": {
+                "$value": "{spacing.3}"
+            },
+            "$description": "Left-hand primary navigation panel"
+        },
+        "nav-item": {
+            "active": {
+                "background": {
+                    "$value": "{color.nav.item-active-bg}"
+                },
+                "border": {
+                    "$value": "1px solid {color.nav.item-active-border}"
+                },
+                "border-radius": {
+                    "$value": "{borderRadius.md}"
+                },
+                "text-color": {
+                    "$value": "{color.nav.item-active-text}"
+                },
+                "font-weight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                }
+            },
+            "inactive": {
+                "background": {
+                    "$value": "transparent"
+                },
+                "text-color": {
+                    "$value": "{color.nav.item-inactive-text}"
+                },
+                "font-weight": {
+                    "$value": "{typography.fontWeight.regular}"
+                }
+            }
+        },
+        "user-profile": {
+            "avatar-size": {
+                "$value": "32px",
+                "$type": "dimension"
+            },
+            "avatar-border-radius": {
+                "$value": "{borderRadius.full}"
+            },
+            "avatar-bg": {
+                "$value": "#374151",
+                "$type": "color",
+                "$description": "Neutral grey avatar background for initials"
+            },
+            "avatar-text-color": {
+                "$value": "#ffffff",
+                "$type": "color"
+            },
+            "avatar-font-size": {
+                "$value": "{typography.fontSize.sm}"
+            },
+            "avatar-font-weight": {
+                "$value": "{typography.fontWeight.bold}"
+            },
+            "gap": {
+                "$value": "{spacing.3}",
+                "$description": "Horizontal gap between avatar and name/role block"
+            },
+            "position": {
+                "$value": "bottom of sidebar, above status bar"
+            }
+        },
+        "system-status-badge": {
+            "background": {
+                "$value": "{color.semantic.system-online-bg}"
+            },
+            "border": {
+                "$value": "1px solid {color.semantic.system-online-border}"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.full}"
+            },
+            "padding-x": {
+                "$value": "{spacing.3}"
+            },
+            "padding-y": {
+                "$value": "{spacing.1}"
+            },
+            "dot-size": {
+                "$value": "8px",
+                "$type": "dimension"
+            },
+            "dot-color": {
+                "$value": "{color.semantic.system-online}"
+            },
+            "dot-gap": {
+                "$value": "{spacing.2}"
+            },
+            "$description": "Green pill badge in topbar — System Online"
+        },
+        "notification-bell": {
+            "icon-size": {
+                "$value": "20px",
+                "$type": "dimension"
+            },
+            "icon-color": {
+                "$value": "{color.base.white-alpha-60}"
+            }
+        },
+        "breadcrumb": {
+            "font-size": {
+                "$value": "{typography.fontSize.sm}"
+            },
+            "separator-icon": {
+                "$value": "›"
+            },
+            "separator-color": {
+                "$value": "{color.breadcrumb.separator}"
+            },
+            "gap": {
+                "$value": "{spacing.2}"
+            }
+        },
+        "github-hero-icon": {
+            "size": {
+                "$value": "80px",
+                "$type": "dimension"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.2xl}"
+            },
+            "background": {
+                "$value": "{color.github-hero-icon.bg}"
+            },
+            "border": {
+                "$value": "1px solid {color.github-hero-icon.border}"
+            },
+            "icon-size": {
+                "$value": "40px",
+                "$type": "dimension"
+            },
+            "$description": "Large GitHub mark centred above empty-state headline"
+        },
+        "empty-state": {
+            "max-width": {
+                "$value": "640px",
+                "$type": "dimension"
+            },
+            "text-align": {
+                "$value": "center"
+            },
+            "icon-gap": {
+                "$value": "{spacing.8}",
+                "$description": "Gap between hero icon and headline"
+            },
+            "headline-gap": {
+                "$value": "{spacing.4}"
+            },
+            "body-card-gap": {
+                "$value": "{spacing.8}",
+                "$description": "Gap from body copy to setup-steps card"
+            },
+            "$description": "Centred empty-state layout container"
+        },
+        "setup-steps-card": {
+            "background": {
+                "$value": "{color.base.surface-200}"
+            },
+            "border": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.xl}"
+            },
+            "padding-x": {
+                "$value": "{spacing.8}"
+            },
+            "padding-y": {
+                "$value": "{spacing.8}"
+            },
+            "layout": {
+                "$value": "two-column: steps list left, CTA right",
+                "$description": "Steps list on the left, install button + requires label on the right"
+            },
+            "column-gap": {
+                "$value": "{spacing.16}"
+            },
+            "step-gap": {
+                "$value": "{spacing.6}",
+                "$description": "Vertical gap between each step row"
+            },
+            "$description": "Card containing Install / Sync / Activate steps + CTA"
+        },
+        "setup-step-row": {
+            "icon-size": {
+                "$value": "20px",
+                "$type": "dimension"
+            },
+            "icon-color": {
+                "$value": "{color.semantic.step-icon}"
+            },
+            "icon-gap": {
+                "$value": "{spacing.3}"
+            },
+            "title-body-gap": {
+                "$value": "{spacing.1}"
+            }
+        },
+        "install-cta-button": {
+            "background": {
+                "$value": "{color.base.white}"
+            },
+            "text-color": {
+                "$value": "{color.base.black}"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.full}"
+            },
+            "height": {
+                "$value": "52px",
+                "$type": "dimension"
+            },
+            "padding-x": {
+                "$value": "{spacing.8}"
+            },
+            "icon-gap": {
+                "$value": "{spacing.2}"
+            },
+            "font-weight": {
+                "$value": "{typography.fontWeight.semibold}"
+            },
+            "shadow": {
+                "$value": "{shadow.cta-button}"
+            },
+            "$description": "+ Install GitHub Extension — primary CTA pill"
+        },
+        "value-prop-tiles": {
+            "grid-columns": {
+                "$value": "2",
+                "$description": "Two equal-width columns"
+            },
+            "column-gap": {
+                "$value": "{spacing.6}"
+            },
+            "row-gap": {
+                "$value": "{spacing.6}"
+            },
+            "tile": {
+                "background": {
+                    "$value": "transparent",
+                    "$description": "No card background — tiles sit directly on page"
+                },
+                "icon-size": {
+                    "$value": "18px",
+                    "$type": "dimension"
+                },
+                "icon-color": {
+                    "$value": "{color.base.white-alpha-60}"
+                },
+                "icon-gap": {
+                    "$value": "{spacing.2}"
+                },
+                "title-body-gap": {
+                    "$value": "{spacing.2}"
+                }
+            },
+            "$description": "Read-only Access + Zero Latency feature tiles below the card"
+        },
+        "status-bar": {
+            "height": {
+                "$value": "36px",
+                "$type": "dimension"
+            },
+            "background": {
+                "$value": "{color.base.surface-100}"
+            },
+            "border-top": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "padding-x": {
+                "$value": "{spacing.6}"
+            },
+            "left-content": {
+                "$value": "version tag + API status",
+                "$description": "v1.0.4-stable   API: Connected"
+            },
+            "right-content": {
+                "$value": "copyright notice"
+            },
+            "$description": "Thin footer status bar at the bottom of the viewport"
+        },
+        "logo": {
+            "container-size": {
+                "$value": "32px",
+                "$type": "dimension"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.md}"
+            },
+            "background": {
+                "$value": "{color.base.surface-200}"
+            },
+            "border": {
+                "$value": "1px solid {color.base.white-alpha-10}"
+            }
+        }
+    },
+    "motion": {
+        "duration": {
+            "instant": {
+                "$value": "50ms",
+                "$type": "duration"
+            },
+            "fast": {
+                "$value": "100ms",
+                "$type": "duration"
+            },
+            "normal": {
+                "$value": "200ms",
+                "$type": "duration"
+            },
+            "slow": {
+                "$value": "350ms",
+                "$type": "duration"
+            }
+        },
+        "easing": {
+            "ease-out": {
+                "$value": "cubic-bezier(0.0, 0.0, 0.2, 1)",
+                "$type": "cubicBezier"
+            },
+            "ease-inout": {
+                "$value": "cubic-bezier(0.4, 0.0, 0.2, 1)",
+                "$type": "cubicBezier"
+            },
+            "spring": {
+                "$value": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+                "$type": "cubicBezier"
+            }
+        }
+    },
+    "zIndex": {
+        "base": {
+            "$value": 0,
+            "$type": "number"
+        },
+        "sidebar": {
+            "$value": 10,
+            "$type": "number"
+        },
+        "topbar": {
+            "$value": 20,
+            "$type": "number"
+        },
+        "overlay": {
+            "$value": 100,
+            "$type": "number"
+        },
+        "modal": {
+            "$value": 200,
+            "$type": "number"
+        }
+    }
+}

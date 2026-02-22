@@ -20,6 +20,15 @@ export function getGithubAppInstallationUrl(): string {
   return `https://github.com/apps/${env.GITHUB_APP_SLUG}/installations/new`;
 }
 
+export function getGithubAppInstallationUrlWithState(state: string): string {
+  const installUrl = new URL(
+    `https://github.com/apps/${env.GITHUB_APP_SLUG}/installations/new`,
+  );
+
+  installUrl.searchParams.set('state', state);
+  return installUrl.toString();
+}
+
 export async function linkInstallationToUser(
   input: LinkInstallationInput,
   logger: FastifyBaseLogger,

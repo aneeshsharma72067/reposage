@@ -1,0 +1,790 @@
+{
+    "$schema": "https://design-tokens.github.io/community-group/format/",
+    "$metadata": {
+        "name": "Agentic.ai Design System",
+        "version": "1.0.0",
+        "description": "Design tokens extracted from the Agentic.ai authentication interface. A dark, terminal-inspired engineering tool with monochromatic foundations and semantic accent colors.",
+        "source": "Authentication screen — Sign In page"
+    },
+    "color": {
+        "$description": "Core color palette",
+        "base": {
+            "black": {
+                "$value": "#0a0a0a",
+                "$type": "color",
+                "$description": "True background — deepest surface"
+            },
+            "surface-100": {
+                "$value": "#111111",
+                "$type": "color",
+                "$description": "Primary page background"
+            },
+            "surface-200": {
+                "$value": "#1a1a1a",
+                "$type": "color",
+                "$description": "Card / panel background (terminal window, input fields)"
+            },
+            "surface-300": {
+                "$value": "#222222",
+                "$type": "color",
+                "$description": "Elevated surface — hint bar background"
+            },
+            "surface-400": {
+                "$value": "#2a2a2a",
+                "$type": "color",
+                "$description": "Border / divider color"
+            },
+            "white": {
+                "$value": "#ffffff",
+                "$type": "color",
+                "$description": "Primary action buttons, headings"
+            },
+            "white-alpha-90": {
+                "$value": "rgba(255,255,255,0.90)",
+                "$type": "color",
+                "$description": "Primary body text on dark surfaces"
+            },
+            "white-alpha-60": {
+                "$value": "rgba(255,255,255,0.60)",
+                "$type": "color",
+                "$description": "Secondary / subheading text"
+            },
+            "white-alpha-40": {
+                "$value": "rgba(255,255,255,0.40)",
+                "$type": "color",
+                "$description": "Muted text — placeholder, labels, divider OR"
+            },
+            "white-alpha-10": {
+                "$value": "rgba(255,255,255,0.10)",
+                "$type": "color",
+                "$description": "Subtle border, hairlines"
+            }
+        },
+        "semantic": {
+            "terminal-green": {
+                "$value": "#4ade80",
+                "$type": "color",
+                "$description": "Success / positive status in terminal output (CRITICAL_ISSUE_FOUND label, Status line)"
+            },
+            "terminal-orange": {
+                "$value": "#fb923c",
+                "$type": "color",
+                "$description": "Warning / detection highlights in terminal (Breaking change, Architectural violation)"
+            },
+            "terminal-prompt": {
+                "$value": "#4ade80",
+                "$type": "color",
+                "$description": "Shell prompt symbol ($)"
+            },
+            "terminal-command": {
+                "$value": "#4ade80",
+                "$type": "color",
+                "$description": "CLI command text color"
+            },
+            "terminal-output": {
+                "$value": "rgba(255,255,255,0.55)",
+                "$type": "color",
+                "$description": "Standard stdout lines (>> Loading system graph...)"
+            },
+            "link": {
+                "$value": "#ffffff",
+                "$type": "color",
+                "$description": "Inline links — Create an account (bold weight used for emphasis)"
+            },
+            "link-muted": {
+                "$value": "rgba(255,255,255,0.45)",
+                "$type": "color",
+                "$description": "De-emphasized link text — Forgot password?"
+            }
+        },
+        "brand": {
+            "logo-bg": {
+                "$value": "#1c1c1c",
+                "$type": "color",
+                "$description": "Logo icon container fill"
+            },
+            "logo-border": {
+                "$value": "rgba(255,255,255,0.15)",
+                "$type": "color",
+                "$description": "Logo icon container border"
+            }
+        }
+    },
+    "typography": {
+        "$description": "Type scale and font definitions",
+        "fontFamily": {
+            "sans": {
+                "$value": "'Inter', 'SF Pro Display', -apple-system, sans-serif",
+                "$type": "fontFamily",
+                "$description": "Primary UI typeface — headings, body, labels"
+            },
+            "mono": {
+                "$value": "'JetBrains Mono', 'Fira Code', 'Menlo', monospace",
+                "$type": "fontFamily",
+                "$description": "Terminal / code blocks, keyboard hints"
+            }
+        },
+        "fontSize": {
+            "xs": {
+                "$value": "11px",
+                "$type": "dimension"
+            },
+            "sm": {
+                "$value": "13px",
+                "$type": "dimension"
+            },
+            "base": {
+                "$value": "14px",
+                "$type": "dimension",
+                "$description": "Default body text, form labels"
+            },
+            "md": {
+                "$value": "15px",
+                "$type": "dimension",
+                "$description": "Body copy in marketing panel"
+            },
+            "lg": {
+                "$value": "18px",
+                "$type": "dimension",
+                "$description": "Form title — Sign in to Agentic"
+            },
+            "xl": {
+                "$value": "28px",
+                "$type": "dimension"
+            },
+            "2xl": {
+                "$value": "36px",
+                "$type": "dimension",
+                "$description": "Hero headline"
+            },
+            "3xl": {
+                "$value": "42px",
+                "$type": "dimension"
+            }
+        },
+        "fontWeight": {
+            "regular": {
+                "$value": 400,
+                "$type": "number"
+            },
+            "medium": {
+                "$value": 500,
+                "$type": "number"
+            },
+            "semibold": {
+                "$value": 600,
+                "$type": "number"
+            },
+            "bold": {
+                "$value": 700,
+                "$type": "number",
+                "$description": "Hero headline, Create an account link"
+            }
+        },
+        "lineHeight": {
+            "tight": {
+                "$value": 1.2,
+                "$type": "number",
+                "$description": "Headlines"
+            },
+            "snug": {
+                "$value": 1.4,
+                "$type": "number",
+                "$description": "Subheadings"
+            },
+            "normal": {
+                "$value": 1.5,
+                "$type": "number",
+                "$description": "Body text"
+            },
+            "relaxed": {
+                "$value": 1.6,
+                "$type": "number"
+            },
+            "mono": {
+                "$value": 1.7,
+                "$type": "number",
+                "$description": "Terminal lines for readability"
+            }
+        },
+        "letterSpacing": {
+            "tight": {
+                "$value": "-0.02em",
+                "$type": "dimension",
+                "$description": "Headlines"
+            },
+            "normal": {
+                "$value": "0em",
+                "$type": "dimension"
+            },
+            "wide": {
+                "$value": "0.02em",
+                "$type": "dimension",
+                "$description": "Uppercase labels, divider OR text"
+            },
+            "wider": {
+                "$value": "0.05em",
+                "$type": "dimension"
+            }
+        },
+        "roles": {
+            "hero-headline": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.2xl}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.bold}"
+                },
+                "lineHeight": {
+                    "$value": "{typography.lineHeight.tight}"
+                },
+                "letterSpacing": {
+                    "$value": "{typography.letterSpacing.tight}"
+                },
+                "color": {
+                    "$value": "{color.base.white}"
+                }
+            },
+            "body-copy": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.md}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "lineHeight": {
+                    "$value": "{typography.lineHeight.normal}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-60}"
+                }
+            },
+            "form-title": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.lg}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "color": {
+                    "$value": "{color.base.white}"
+                }
+            },
+            "form-subtitle": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.base}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-60}"
+                }
+            },
+            "form-label": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.medium}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-90}"
+                }
+            },
+            "form-input": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.base}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "color": {
+                    "$value": "{color.base.white}"
+                }
+            },
+            "form-placeholder": {
+                "color": {
+                    "$value": "{color.base.white-alpha-40}"
+                }
+            },
+            "button-label": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.base}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "letterSpacing": {
+                    "$value": "{typography.letterSpacing.normal}"
+                }
+            },
+            "terminal-code": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.mono}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "lineHeight": {
+                    "$value": "{typography.lineHeight.mono}"
+                }
+            },
+            "keyboard-hint": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.mono}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-60}"
+                }
+            },
+            "link-inline": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.bold}"
+                },
+                "color": {
+                    "$value": "{color.link}"
+                }
+            },
+            "brand-name": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.md}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "color": {
+                    "$value": "{color.base.white}"
+                }
+            }
+        }
+    },
+    "spacing": {
+        "$description": "Spacing scale — 4px base grid",
+        "0": {
+            "$value": "0px",
+            "$type": "dimension"
+        },
+        "1": {
+            "$value": "4px",
+            "$type": "dimension"
+        },
+        "2": {
+            "$value": "8px",
+            "$type": "dimension"
+        },
+        "3": {
+            "$value": "12px",
+            "$type": "dimension"
+        },
+        "4": {
+            "$value": "16px",
+            "$type": "dimension"
+        },
+        "5": {
+            "$value": "20px",
+            "$type": "dimension"
+        },
+        "6": {
+            "$value": "24px",
+            "$type": "dimension"
+        },
+        "8": {
+            "$value": "32px",
+            "$type": "dimension"
+        },
+        "10": {
+            "$value": "40px",
+            "$type": "dimension"
+        },
+        "12": {
+            "$value": "48px",
+            "$type": "dimension"
+        },
+        "16": {
+            "$value": "64px",
+            "$type": "dimension"
+        },
+        "20": {
+            "$value": "80px",
+            "$type": "dimension"
+        },
+        "24": {
+            "$value": "96px",
+            "$type": "dimension"
+        }
+    },
+    "borderRadius": {
+        "none": {
+            "$value": "0px",
+            "$type": "dimension"
+        },
+        "sm": {
+            "$value": "4px",
+            "$type": "dimension"
+        },
+        "md": {
+            "$value": "8px",
+            "$type": "dimension",
+            "$description": "Input fields, panels, terminal window"
+        },
+        "lg": {
+            "$value": "12px",
+            "$type": "dimension",
+            "$description": "Cards, form container"
+        },
+        "xl": {
+            "$value": "16px",
+            "$type": "dimension"
+        },
+        "full": {
+            "$value": "9999px",
+            "$type": "dimension",
+            "$description": "Pill buttons — Continue with GitHub, Sign In"
+        }
+    },
+    "border": {
+        "width": {
+            "default": {
+                "$value": "1px",
+                "$type": "dimension"
+            }
+        },
+        "color": {
+            "default": {
+                "$value": "{color.base.surface-400}",
+                "$type": "color"
+            },
+            "subtle": {
+                "$value": "{color.base.white-alpha-10}",
+                "$type": "color"
+            }
+        }
+    },
+    "shadow": {
+        "none": {
+            "$value": "none",
+            "$type": "shadow"
+        },
+        "input-focus": {
+            "$value": "0 0 0 2px rgba(255,255,255,0.15)",
+            "$type": "shadow",
+            "$description": "Focus ring on form inputs"
+        },
+        "card": {
+            "$value": "0 4px 24px rgba(0,0,0,0.5)",
+            "$type": "shadow",
+            "$description": "Elevation for the sign-in form panel"
+        }
+    },
+    "component": {
+        "$description": "Component-level tokens derived from primitives",
+        "layout": {
+            "split-left-width": {
+                "$value": "55%",
+                "$description": "Marketing / hero panel width"
+            },
+            "split-right-width": {
+                "$value": "45%",
+                "$description": "Authentication form panel width"
+            },
+            "max-form-width": {
+                "$value": "420px",
+                "$type": "dimension",
+                "$description": "Maximum width of the sign-in form"
+            },
+            "page-padding-x": {
+                "$value": "{spacing.16}",
+                "$description": "Horizontal padding on each split panel"
+            }
+        },
+        "logo": {
+            "container-size": {
+                "$value": "36px",
+                "$type": "dimension"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.sm}"
+            },
+            "background": {
+                "$value": "{color.brand.logo-bg}"
+            },
+            "border": {
+                "$value": "1px solid {color.brand.logo-border}"
+            }
+        },
+        "button": {
+            "primary": {
+                "background": {
+                    "$value": "{color.base.white}"
+                },
+                "text-color": {
+                    "$value": "{color.base.black}"
+                },
+                "border-radius": {
+                    "$value": "{borderRadius.full}"
+                },
+                "height": {
+                    "$value": "52px",
+                    "$type": "dimension"
+                },
+                "padding-x": {
+                    "$value": "{spacing.8}"
+                },
+                "font-weight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "$description": "Sign In — primary CTA pill button"
+            },
+            "secondary": {
+                "background": {
+                    "$value": "{color.base.surface-200}"
+                },
+                "text-color": {
+                    "$value": "{color.base.white}"
+                },
+                "border": {
+                    "$value": "1px solid {color.base.surface-400}"
+                },
+                "border-radius": {
+                    "$value": "{borderRadius.full}"
+                },
+                "height": {
+                    "$value": "52px",
+                    "$type": "dimension"
+                },
+                "padding-x": {
+                    "$value": "{spacing.8}"
+                },
+                "$description": "Continue with GitHub — OAuth pill button"
+            }
+        },
+        "input": {
+            "background": {
+                "$value": "{color.base.surface-200}"
+            },
+            "border": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.md}"
+            },
+            "height": {
+                "$value": "48px",
+                "$type": "dimension"
+            },
+            "padding-x": {
+                "$value": "{spacing.4}"
+            },
+            "text-color": {
+                "$value": "{color.base.white}"
+            },
+            "placeholder-color": {
+                "$value": "{color.base.white-alpha-40}"
+            },
+            "focus-ring": {
+                "$value": "{shadow.input-focus}"
+            }
+        },
+        "form-container": {
+            "background": {
+                "$value": "transparent"
+            },
+            "max-width": {
+                "$value": "{component.layout.max-form-width}"
+            },
+            "gap": {
+                "$value": "{spacing.6}",
+                "$description": "Vertical spacing between form rows"
+            }
+        },
+        "divider": {
+            "color": {
+                "$value": "{color.base.surface-400}"
+            },
+            "label-color": {
+                "$value": "{color.base.white-alpha-40}"
+            },
+            "label-font-size": {
+                "$value": "{typography.fontSize.xs}"
+            },
+            "label-letter-spacing": {
+                "$value": "{typography.letterSpacing.wider}"
+            }
+        },
+        "terminal-window": {
+            "background": {
+                "$value": "{color.base.surface-200}"
+            },
+            "border": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.lg}"
+            },
+            "padding": {
+                "$value": "{spacing.5}"
+            },
+            "traffic-red": {
+                "$value": "#ff5f57",
+                "$type": "color"
+            },
+            "traffic-yellow": {
+                "$value": "#febc2e",
+                "$type": "color"
+            },
+            "traffic-green": {
+                "$value": "#28c840",
+                "$type": "color"
+            },
+            "traffic-light-size": {
+                "$value": "12px",
+                "$type": "dimension"
+            }
+        },
+        "hint-bar": {
+            "background": {
+                "$value": "{color.base.surface-300}"
+            },
+            "border": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.md}"
+            },
+            "padding-x": {
+                "$value": "{spacing.4}"
+            },
+            "padding-y": {
+                "$value": "{spacing.3}"
+            },
+            "$description": "Press Enter to quickly submit bar"
+        },
+        "kbd": {
+            "background": {
+                "$value": "{color.base.surface-400}"
+            },
+            "border": {
+                "$value": "1px solid rgba(255,255,255,0.15)"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.sm}"
+            },
+            "padding-x": {
+                "$value": "{spacing.2}"
+            },
+            "padding-y": {
+                "$value": "2px",
+                "$type": "dimension"
+            },
+            "font-family": {
+                "$value": "{typography.fontFamily.mono}"
+            },
+            "font-size": {
+                "$value": "{typography.fontSize.xs}"
+            },
+            "color": {
+                "$value": "{color.base.white-alpha-90}"
+            }
+        }
+    },
+    "motion": {
+        "duration": {
+            "instant": {
+                "$value": "50ms",
+                "$type": "duration"
+            },
+            "fast": {
+                "$value": "100ms",
+                "$type": "duration"
+            },
+            "normal": {
+                "$value": "200ms",
+                "$type": "duration"
+            },
+            "slow": {
+                "$value": "300ms",
+                "$type": "duration"
+            },
+            "terminal-type": {
+                "$value": "40ms",
+                "$type": "duration",
+                "$description": "Per-character delay for terminal typewriter effect"
+            }
+        },
+        "easing": {
+            "ease-out": {
+                "$value": "cubic-bezier(0.0, 0.0, 0.2, 1)",
+                "$type": "cubicBezier"
+            },
+            "ease-in": {
+                "$value": "cubic-bezier(0.4, 0.0, 1, 1)",
+                "$type": "cubicBezier"
+            },
+            "ease-inout": {
+                "$value": "cubic-bezier(0.4, 0.0, 0.2, 1)",
+                "$type": "cubicBezier"
+            },
+            "spring": {
+                "$value": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+                "$type": "cubicBezier",
+                "$description": "Slight overshoot for interactive elements"
+            }
+        }
+    },
+    "zIndex": {
+        "base": {
+            "$value": 0,
+            "$type": "number"
+        },
+        "raised": {
+            "$value": 10,
+            "$type": "number"
+        },
+        "overlay": {
+            "$value": 100,
+            "$type": "number"
+        },
+        "modal": {
+            "$value": 200,
+            "$type": "number"
+        },
+        "toast": {
+            "$value": 300,
+            "$type": "number"
+        }
+    }
+}

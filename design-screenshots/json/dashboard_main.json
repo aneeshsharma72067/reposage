@@ -1,0 +1,1257 @@
+{
+    "$schema": "https://design-tokens.github.io/community-group/format/",
+    "$metadata": {
+        "name": "Agentic.ai Design System — Main Dashboard (Populated State)",
+        "version": "1.0.0",
+        "description": "Design tokens extracted from the Agentic.ai populated dashboard view. Extends all prior token files and introduces net-new patterns: stat cards, repo cards with status badges, filter/tab bar, search input, connect-repo button, chart panel with time-range picker, nav badges, and expanded sidebar items.",
+        "source": "Dashboard — Main / Populated State",
+        "extends": [
+            "agentic-design-tokens.json",
+            "agentic-onboarding-tokens.json",
+            "agentic-dashboard-empty-tokens.json"
+        ]
+    },
+    "color": {
+        "base": {
+            "black": {
+                "$value": "#0a0a0a",
+                "$type": "color"
+            },
+            "surface-100": {
+                "$value": "#111111",
+                "$type": "color",
+                "$description": "Page / sidebar background"
+            },
+            "surface-200": {
+                "$value": "#191919",
+                "$type": "color",
+                "$description": "Stat cards, repo cards, chart panel"
+            },
+            "surface-300": {
+                "$value": "#222222",
+                "$type": "color",
+                "$description": "Active nav item, filter chip active bg"
+            },
+            "surface-400": {
+                "$value": "#2c2c2c",
+                "$type": "color",
+                "$description": "Card borders, dividers, input border"
+            },
+            "white": {
+                "$value": "#ffffff",
+                "$type": "color"
+            },
+            "white-alpha-90": {
+                "$value": "rgba(255,255,255,0.90)",
+                "$type": "color"
+            },
+            "white-alpha-60": {
+                "$value": "rgba(255,255,255,0.60)",
+                "$type": "color"
+            },
+            "white-alpha-40": {
+                "$value": "rgba(255,255,255,0.40)",
+                "$type": "color"
+            },
+            "white-alpha-20": {
+                "$value": "rgba(255,255,255,0.20)",
+                "$type": "color"
+            },
+            "white-alpha-10": {
+                "$value": "rgba(255,255,255,0.10)",
+                "$type": "color"
+            }
+        },
+        "semantic": {
+            "healthy": {
+                "$value": "rgba(255,255,255,0.80)",
+                "$type": "color",
+                "$description": "Healthy badge text — near-white"
+            },
+            "healthy-bg": {
+                "$value": "rgba(255,255,255,0.08)",
+                "$type": "color",
+                "$description": "Healthy badge background"
+            },
+            "healthy-border": {
+                "$value": "rgba(255,255,255,0.15)",
+                "$type": "color"
+            },
+            "analyzing": {
+                "$value": "#22d3ee",
+                "$type": "color",
+                "$description": "Analyzing badge text — cyan"
+            },
+            "analyzing-bg": {
+                "$value": "rgba(34,211,238,0.12)",
+                "$type": "color"
+            },
+            "analyzing-border": {
+                "$value": "rgba(34,211,238,0.30)",
+                "$type": "color"
+            },
+            "analyzing-dot": {
+                "$value": "#22d3ee",
+                "$type": "color",
+                "$description": "Animated pulse dot inside Analyzing badge"
+            },
+            "issues-prevented": {
+                "$value": "#22c55e",
+                "$type": "color",
+                "$description": "Issues Prevented metric value — green"
+            },
+            "stat-value-default": {
+                "$value": "#ffffff",
+                "$type": "color",
+                "$description": "System Health + Active Agents metric values"
+            },
+            "stat-trend-up": {
+                "$value": "#22c55e",
+                "$type": "color",
+                "$description": "Trend arrow icon next to 98.2%"
+            },
+            "chart-line": {
+                "$value": "#ffffff",
+                "$type": "color",
+                "$description": "Velocity chart line stroke"
+            },
+            "chart-dot": {
+                "$value": "#ffffff",
+                "$type": "color",
+                "$description": "Data-point dots on the chart line"
+            },
+            "chart-dot-border": {
+                "$value": "#111111",
+                "$type": "color",
+                "$description": "Inner border of chart dots for contrast"
+            },
+            "chart-fill": {
+                "$value": "rgba(255,255,255,0.04)",
+                "$type": "color",
+                "$description": "Subtle area fill beneath chart line"
+            },
+            "chart-axis": {
+                "$value": "rgba(255,255,255,0.15)",
+                "$type": "color",
+                "$description": "Axis tick labels on x-axis"
+            },
+            "filter-active-bg": {
+                "$value": "rgba(255,255,255,0.10)",
+                "$type": "color",
+                "$description": "Active filter chip (Analyzing, Issues Found) background"
+            },
+            "filter-active-border": {
+                "$value": "rgba(255,255,255,0.20)",
+                "$type": "color"
+            }
+        }
+    },
+    "typography": {
+        "fontFamily": {
+            "sans": {
+                "$value": "'Inter', 'SF Pro Display', -apple-system, sans-serif",
+                "$type": "fontFamily"
+            },
+            "mono": {
+                "$value": "'JetBrains Mono', 'Fira Code', monospace",
+                "$type": "fontFamily"
+            }
+        },
+        "fontSize": {
+            "2xs": {
+                "$value": "10px",
+                "$type": "dimension"
+            },
+            "xs": {
+                "$value": "11px",
+                "$type": "dimension"
+            },
+            "sm": {
+                "$value": "13px",
+                "$type": "dimension"
+            },
+            "base": {
+                "$value": "14px",
+                "$type": "dimension"
+            },
+            "md": {
+                "$value": "15px",
+                "$type": "dimension"
+            },
+            "lg": {
+                "$value": "18px",
+                "$type": "dimension"
+            },
+            "xl": {
+                "$value": "22px",
+                "$type": "dimension"
+            },
+            "2xl": {
+                "$value": "32px",
+                "$type": "dimension"
+            },
+            "3xl": {
+                "$value": "40px",
+                "$type": "dimension",
+                "$description": "Stat metric value — 98.2%, 14, 127"
+            }
+        },
+        "fontWeight": {
+            "regular": {
+                "$value": 400,
+                "$type": "number"
+            },
+            "medium": {
+                "$value": 500,
+                "$type": "number"
+            },
+            "semibold": {
+                "$value": 600,
+                "$type": "number"
+            },
+            "bold": {
+                "$value": 700,
+                "$type": "number"
+            }
+        },
+        "lineHeight": {
+            "none": {
+                "$value": 1.0,
+                "$type": "number",
+                "$description": "Stat values — single-line display numbers"
+            },
+            "tight": {
+                "$value": 1.2,
+                "$type": "number"
+            },
+            "snug": {
+                "$value": 1.35,
+                "$type": "number"
+            },
+            "normal": {
+                "$value": 1.5,
+                "$type": "number"
+            },
+            "relaxed": {
+                "$value": 1.6,
+                "$type": "number"
+            }
+        },
+        "letterSpacing": {
+            "tight": {
+                "$value": "-0.02em",
+                "$type": "dimension"
+            },
+            "normal": {
+                "$value": "0em",
+                "$type": "dimension"
+            },
+            "wide": {
+                "$value": "0.06em",
+                "$type": "dimension",
+                "$description": "Stat card micro-label — SYSTEM HEALTH, ACTIVE AGENTS"
+            },
+            "wider": {
+                "$value": "0.10em",
+                "$type": "dimension"
+            }
+        },
+        "roles": {
+            "stat-label": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.mono}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "letterSpacing": {
+                    "$value": "{typography.letterSpacing.wide}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-40}"
+                },
+                "$description": "SYSTEM HEALTH / ACTIVE AGENTS / ISSUES PREVENTED — uppercase mono micro-labels"
+            },
+            "stat-value": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.3xl}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.bold}"
+                },
+                "lineHeight": {
+                    "$value": "{typography.lineHeight.none}"
+                },
+                "letterSpacing": {
+                    "$value": "{typography.letterSpacing.tight}"
+                },
+                "color": {
+                    "$value": "{color.semantic.stat-value-default}"
+                },
+                "$description": "98.2%, 14, 127 — large metric display value"
+            },
+            "stat-value-green": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.3xl}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.bold}"
+                },
+                "lineHeight": {
+                    "$value": "{typography.lineHeight.none}"
+                },
+                "letterSpacing": {
+                    "$value": "{typography.letterSpacing.tight}"
+                },
+                "color": {
+                    "$value": "{color.semantic.issues-prevented}"
+                },
+                "$description": "127 — Issues Prevented value in green"
+            },
+            "section-title": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.lg}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.bold}"
+                },
+                "color": {
+                    "$value": "{color.base.white}"
+                },
+                "$description": "Connected Repositories, Agent Analysis Velocity"
+            },
+            "repo-name": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.base}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.bold}"
+                },
+                "color": {
+                    "$value": "{color.base.white}"
+                },
+                "$description": "core-api-service, auth-provider-v2, etc."
+            },
+            "repo-description": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.mono}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-60}"
+                },
+                "$description": "Single-line repo description in monospace"
+            },
+            "repo-meta-label": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.mono}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.2xs}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "letterSpacing": {
+                    "$value": "{typography.letterSpacing.wide}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-40}"
+                },
+                "$description": "LAST ACTIVITY / BRANCHES / LANGUAGE — column headers"
+            },
+            "repo-meta-value": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.mono}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.medium}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-90}"
+                },
+                "$description": "2m ago, 12, Go, etc. — meta data values"
+            },
+            "repo-action-link": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-60}"
+                },
+                "$description": "View history link in card footer"
+            },
+            "repo-open-details": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.medium}"
+                },
+                "color": {
+                    "$value": "{color.base.white}"
+                },
+                "$description": "Open Details → right-aligned card footer link"
+            },
+            "status-badge-healthy": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.medium}"
+                },
+                "color": {
+                    "$value": "{color.semantic.healthy}"
+                }
+            },
+            "status-badge-analyzing": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.medium}"
+                },
+                "color": {
+                    "$value": "{color.semantic.analyzing}"
+                }
+            },
+            "filter-chip-label": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.medium}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-90}"
+                }
+            },
+            "search-placeholder": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-40}"
+                }
+            },
+            "search-value": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-90}"
+                }
+            },
+            "connect-repo-button": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "color": {
+                    "$value": "{color.base.black}"
+                }
+            },
+            "breadcrumb-parent": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-40}"
+                }
+            },
+            "breadcrumb-current": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "color": {
+                    "$value": "{color.base.white}"
+                }
+            },
+            "chart-title": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.base}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.bold}"
+                },
+                "color": {
+                    "$value": "{color.base.white}"
+                }
+            },
+            "chart-subtitle": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.mono}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-40}"
+                }
+            },
+            "chart-axis-label": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "color": {
+                    "$value": "{color.semantic.chart-axis}"
+                }
+            },
+            "time-range-picker": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.medium}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-90}"
+                }
+            },
+            "nav-badge": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.mono}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.2xs}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.bold}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-60}"
+                },
+                "$description": "12 badge on Repositories nav item"
+            },
+            "user-plan": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-40}"
+                },
+                "$description": "Pro Plan — user role/plan label"
+            },
+            "wordmark": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.base}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.bold}"
+                },
+                "letterSpacing": {
+                    "$value": "{typography.letterSpacing.wide}"
+                },
+                "color": {
+                    "$value": "{color.base.white}"
+                },
+                "$description": "AGENTIC.AI — sidebar wordmark"
+            }
+        }
+    },
+    "spacing": {
+        "0": {
+            "$value": "0px",
+            "$type": "dimension"
+        },
+        "1": {
+            "$value": "4px",
+            "$type": "dimension"
+        },
+        "2": {
+            "$value": "8px",
+            "$type": "dimension"
+        },
+        "3": {
+            "$value": "12px",
+            "$type": "dimension"
+        },
+        "4": {
+            "$value": "16px",
+            "$type": "dimension"
+        },
+        "5": {
+            "$value": "20px",
+            "$type": "dimension"
+        },
+        "6": {
+            "$value": "24px",
+            "$type": "dimension"
+        },
+        "8": {
+            "$value": "32px",
+            "$type": "dimension"
+        },
+        "10": {
+            "$value": "40px",
+            "$type": "dimension"
+        },
+        "12": {
+            "$value": "48px",
+            "$type": "dimension"
+        },
+        "16": {
+            "$value": "64px",
+            "$type": "dimension"
+        }
+    },
+    "borderRadius": {
+        "none": {
+            "$value": "0px",
+            "$type": "dimension"
+        },
+        "sm": {
+            "$value": "4px",
+            "$type": "dimension"
+        },
+        "md": {
+            "$value": "8px",
+            "$type": "dimension"
+        },
+        "lg": {
+            "$value": "10px",
+            "$type": "dimension",
+            "$description": "Stat cards, repo cards, chart panel"
+        },
+        "xl": {
+            "$value": "14px",
+            "$type": "dimension"
+        },
+        "full": {
+            "$value": "9999px",
+            "$type": "dimension",
+            "$description": "Badges, chips, connect-repo button"
+        }
+    },
+    "border": {
+        "width": {
+            "default": {
+                "$value": "1px",
+                "$type": "dimension"
+            }
+        },
+        "color": {
+            "default": {
+                "$value": "{color.base.surface-400}",
+                "$type": "color"
+            },
+            "subtle": {
+                "$value": "{color.base.white-alpha-10}",
+                "$type": "color"
+            }
+        }
+    },
+    "shadow": {
+        "card": {
+            "$value": "0 2px 16px rgba(0,0,0,0.45)",
+            "$type": "shadow"
+        },
+        "chart": {
+            "$value": "0 4px 32px rgba(0,0,0,0.50)",
+            "$type": "shadow"
+        }
+    },
+    "component": {
+        "topbar": {
+            "height": {
+                "$value": "52px",
+                "$type": "dimension"
+            },
+            "background": {
+                "$value": "{color.base.surface-100}"
+            },
+            "border-bottom": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "padding-x": {
+                "$value": "{spacing.5}"
+            }
+        },
+        "sidebar": {
+            "width": {
+                "$value": "220px",
+                "$type": "dimension"
+            },
+            "background": {
+                "$value": "{color.base.surface-100}"
+            },
+            "border-right": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "padding-x": {
+                "$value": "{spacing.3}"
+            },
+            "padding-y": {
+                "$value": "{spacing.3}"
+            },
+            "item-height": {
+                "$value": "40px",
+                "$type": "dimension"
+            },
+            "item-border-radius": {
+                "$value": "{borderRadius.md}"
+            },
+            "item-padding-x": {
+                "$value": "{spacing.3}"
+            },
+            "item-gap": {
+                "$value": "{spacing.1}"
+            },
+            "icon-size": {
+                "$value": "18px",
+                "$type": "dimension"
+            },
+            "icon-gap": {
+                "$value": "{spacing.3}"
+            }
+        },
+        "nav-badge": {
+            "min-width": {
+                "$value": "20px",
+                "$type": "dimension"
+            },
+            "height": {
+                "$value": "18px",
+                "$type": "dimension"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.sm}"
+            },
+            "background": {
+                "$value": "rgba(255,255,255,0.10)"
+            },
+            "border": {
+                "$value": "1px solid {color.base.white-alpha-10}"
+            },
+            "padding-x": {
+                "$value": "{spacing.1}"
+            },
+            "$description": "Numeric badge on nav items — e.g. 12 on Repositories"
+        },
+        "nav-icon-badge": {
+            "size": {
+                "$value": "6px",
+                "$type": "dimension"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.full}"
+            },
+            "background": {
+                "$value": "{color.base.white-alpha-40}"
+            },
+            "$description": "Small dot badge beside AI Agents, Integrations sidebar icons"
+        },
+        "search-input": {
+            "width": {
+                "$value": "260px",
+                "$type": "dimension"
+            },
+            "height": {
+                "$value": "36px",
+                "$type": "dimension"
+            },
+            "background": {
+                "$value": "{color.base.surface-200}"
+            },
+            "border": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.lg}"
+            },
+            "padding-x": {
+                "$value": "{spacing.4}"
+            },
+            "icon-size": {
+                "$value": "16px",
+                "$type": "dimension"
+            },
+            "icon-color": {
+                "$value": "{color.base.white-alpha-40}"
+            },
+            "icon-gap": {
+                "$value": "{spacing.2}"
+            }
+        },
+        "connect-repo-button": {
+            "background": {
+                "$value": "{color.base.white}"
+            },
+            "text-color": {
+                "$value": "{color.base.black}"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.full}"
+            },
+            "height": {
+                "$value": "36px",
+                "$type": "dimension"
+            },
+            "padding-x": {
+                "$value": "{spacing.5}"
+            },
+            "icon-gap": {
+                "$value": "{spacing.2}"
+            },
+            "font-weight": {
+                "$value": "{typography.fontWeight.semibold}"
+            },
+            "$description": "+ Connect Repository — topbar pill button"
+        },
+        "stat-card": {
+            "background": {
+                "$value": "{color.base.surface-200}"
+            },
+            "border": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.lg}"
+            },
+            "padding-x": {
+                "$value": "{spacing.6}"
+            },
+            "padding-y": {
+                "$value": "{spacing.6}"
+            },
+            "label-value-gap": {
+                "$value": "{spacing.3}"
+            },
+            "grid-columns": {
+                "$value": "3",
+                "$description": "Three equal-width stat cards in a row"
+            },
+            "column-gap": {
+                "$value": "{spacing.4}"
+            },
+            "$description": "System Health, Active Agents, Issues Prevented cards"
+        },
+        "trend-icon": {
+            "size": {
+                "$value": "20px",
+                "$type": "dimension"
+            },
+            "color": {
+                "$value": "{color.semantic.stat-trend-up}"
+            },
+            "gap": {
+                "$value": "{spacing.2}",
+                "$description": "Gap between metric value and trend icon"
+            }
+        },
+        "filter-bar": {
+            "gap": {
+                "$value": "{spacing.2}",
+                "$description": "Horizontal gap between filter chips"
+            },
+            "chip": {
+                "height": {
+                    "$value": "32px",
+                    "$type": "dimension"
+                },
+                "border-radius": {
+                    "$value": "{borderRadius.md}"
+                },
+                "padding-x": {
+                    "$value": "{spacing.4}"
+                },
+                "default-bg": {
+                    "$value": "transparent"
+                },
+                "default-border": {
+                    "$value": "1px solid {color.base.surface-400}"
+                },
+                "active-bg": {
+                    "$value": "{color.semantic.filter-active-bg}"
+                },
+                "active-border": {
+                    "$value": "1px solid {color.semantic.filter-active-border}"
+                },
+                "icon-gap": {
+                    "$value": "{spacing.2}"
+                },
+                "$description": "All Repos (dropdown), Analyzing, Issues Found filter chips"
+            }
+        },
+        "status-badge": {
+            "height": {
+                "$value": "24px",
+                "$type": "dimension"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.full}"
+            },
+            "padding-x": {
+                "$value": "{spacing.3}"
+            },
+            "healthy": {
+                "background": {
+                    "$value": "{color.semantic.healthy-bg}"
+                },
+                "border": {
+                    "$value": "1px solid {color.semantic.healthy-border}"
+                },
+                "text-color": {
+                    "$value": "{color.semantic.healthy}"
+                }
+            },
+            "analyzing": {
+                "background": {
+                    "$value": "{color.semantic.analyzing-bg}"
+                },
+                "border": {
+                    "$value": "1px solid {color.semantic.analyzing-border}"
+                },
+                "text-color": {
+                    "$value": "{color.semantic.analyzing}"
+                },
+                "dot-size": {
+                    "$value": "6px",
+                    "$type": "dimension"
+                },
+                "dot-color": {
+                    "$value": "{color.semantic.analyzing-dot}"
+                },
+                "dot-gap": {
+                    "$value": "{spacing.1}"
+                }
+            }
+        },
+        "repo-card": {
+            "background": {
+                "$value": "{color.base.surface-200}"
+            },
+            "border": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.lg}"
+            },
+            "padding-x": {
+                "$value": "{spacing.6}"
+            },
+            "padding-y": {
+                "$value": "{spacing.5}"
+            },
+            "header-gap": {
+                "$value": "{spacing.3}",
+                "$description": "Gap between GitHub icon and repo name"
+            },
+            "name-desc-gap": {
+                "$value": "{spacing.2}"
+            },
+            "desc-meta-gap": {
+                "$value": "{spacing.5}",
+                "$description": "Gap between description and meta row"
+            },
+            "meta-divider-gap": {
+                "$value": "{spacing.4}",
+                "$description": "Gap between meta row and divider line"
+            },
+            "footer-gap": {
+                "$value": "{spacing.4}",
+                "$description": "Gap between divider and card footer"
+            },
+            "meta-columns": {
+                "$value": "3",
+                "$description": "LAST ACTIVITY | BRANCHES | LANGUAGE"
+            },
+            "meta-column-gap": {
+                "$value": "{spacing.8}"
+            },
+            "divider-color": {
+                "$value": "{color.base.surface-400}"
+            },
+            "grid-columns": {
+                "$value": "2",
+                "$description": "Two-column repo card grid"
+            },
+            "column-gap": {
+                "$value": "{spacing.4}"
+            },
+            "row-gap": {
+                "$value": "{spacing.4}"
+            }
+        },
+        "repo-card-footer": {
+            "layout": {
+                "$value": "space-between"
+            },
+            "view-history-icon": {
+                "$value": "clock/history icon"
+            },
+            "icon-size": {
+                "$value": "14px",
+                "$type": "dimension"
+            },
+            "icon-color": {
+                "$value": "{color.base.white-alpha-40}"
+            },
+            "icon-label-gap": {
+                "$value": "{spacing.2}"
+            },
+            "arrow-icon-gap": {
+                "$value": "{spacing.1}"
+            }
+        },
+        "chart-panel": {
+            "background": {
+                "$value": "{color.base.surface-200}"
+            },
+            "border": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.lg}"
+            },
+            "padding-x": {
+                "$value": "{spacing.6}"
+            },
+            "padding-y": {
+                "$value": "{spacing.6}"
+            },
+            "header-chart-gap": {
+                "$value": "{spacing.8}"
+            },
+            "chart-height": {
+                "$value": "180px",
+                "$type": "dimension",
+                "$description": "Approximate rendered chart area height"
+            },
+            "$description": "Agent Analysis Velocity chart container"
+        },
+        "chart-line": {
+            "stroke-color": {
+                "$value": "{color.semantic.chart-line}"
+            },
+            "stroke-width": {
+                "$value": "2px",
+                "$type": "dimension"
+            },
+            "stroke-linecap": {
+                "$value": "round"
+            },
+            "stroke-linejoin": {
+                "$value": "round"
+            },
+            "curve-type": {
+                "$value": "monotone",
+                "$description": "Smooth bezier curve through data points"
+            },
+            "fill": {
+                "$value": "{color.semantic.chart-fill}"
+            },
+            "dot-size": {
+                "$value": "5px",
+                "$type": "dimension"
+            },
+            "dot-fill": {
+                "$value": "{color.semantic.chart-dot}"
+            },
+            "dot-border": {
+                "$value": "2px solid {color.semantic.chart-dot-border}"
+            }
+        },
+        "time-range-picker": {
+            "height": {
+                "$value": "30px",
+                "$type": "dimension"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.full}"
+            },
+            "background": {
+                "$value": "transparent"
+            },
+            "border": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "padding-x": {
+                "$value": "{spacing.4}"
+            },
+            "chevron-gap": {
+                "$value": "{spacing.2}"
+            },
+            "chevron-color": {
+                "$value": "{color.base.white-alpha-40}"
+            },
+            "$description": "Last 7 Days dropdown in chart header"
+        },
+        "user-profile-block": {
+            "avatar-size": {
+                "$value": "32px",
+                "$type": "dimension"
+            },
+            "avatar-border-radius": {
+                "$value": "{borderRadius.full}"
+            },
+            "avatar-bg": {
+                "$value": "#374151",
+                "$type": "color"
+            },
+            "avatar-text-color": {
+                "$value": "#ffffff",
+                "$type": "color"
+            },
+            "avatar-font-size": {
+                "$value": "{typography.fontSize.sm}"
+            },
+            "avatar-font-weight": {
+                "$value": "{typography.fontWeight.bold}"
+            },
+            "text-gap": {
+                "$value": "{spacing.3}"
+            },
+            "name-role-gap": {
+                "$value": "{spacing.1}"
+            },
+            "chevron-color": {
+                "$value": "{color.base.white-alpha-40}"
+            },
+            "$description": "John Doe / Pro Plan block at bottom of sidebar"
+        }
+    },
+    "motion": {
+        "duration": {
+            "instant": {
+                "$value": "50ms",
+                "$type": "duration"
+            },
+            "fast": {
+                "$value": "100ms",
+                "$type": "duration"
+            },
+            "normal": {
+                "$value": "200ms",
+                "$type": "duration"
+            },
+            "slow": {
+                "$value": "350ms",
+                "$type": "duration"
+            },
+            "analyzing-pulse": {
+                "$value": "1500ms",
+                "$type": "duration",
+                "$description": "Cyan dot pulse cycle on Analyzing badge"
+            }
+        },
+        "easing": {
+            "ease-out": {
+                "$value": "cubic-bezier(0.0, 0.0, 0.2, 1)",
+                "$type": "cubicBezier"
+            },
+            "ease-inout": {
+                "$value": "cubic-bezier(0.4, 0.0, 0.2, 1)",
+                "$type": "cubicBezier"
+            },
+            "spring": {
+                "$value": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+                "$type": "cubicBezier"
+            }
+        }
+    },
+    "zIndex": {
+        "base": {
+            "$value": 0,
+            "$type": "number"
+        },
+        "sidebar": {
+            "$value": 10,
+            "$type": "number"
+        },
+        "topbar": {
+            "$value": 20,
+            "$type": "number"
+        },
+        "overlay": {
+            "$value": 100,
+            "$type": "number"
+        },
+        "modal": {
+            "$value": 200,
+            "$type": "number"
+        }
+    }
+}

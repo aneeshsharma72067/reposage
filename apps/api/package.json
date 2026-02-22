@@ -11,6 +11,7 @@
         "prisma:migrate": "prisma migrate dev"
     },
     "dependencies": {
+        "@fastify/cors": "latest",
         "@fastify/cookie": "latest",
         "@fastify/jwt": "latest",
         "@fastify/swagger": "latest",

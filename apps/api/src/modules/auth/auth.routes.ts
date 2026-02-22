@@ -27,7 +27,7 @@ const authRoutes: FastifyPluginAsync = async (app) => {
       tags: ['Auth'],
       summary: 'Handle GitHub OAuth callback',
       description:
-        'Exchanges OAuth code, upserts user, sets session cookie, then redirects to frontend.',
+        'Exchanges OAuth code, upserts user, returns JWT via frontend redirect hash, then redirects to frontend.',
       querystring: {
         type: 'object',
         required: ['code'],
@@ -42,10 +42,6 @@ const authRoutes: FastifyPluginAsync = async (app) => {
             location: {
               description: 'Frontend URL',
               schema: { type: 'string', format: 'uri' },
-            },
-            'set-cookie': {
-              description: 'HTTP-only session cookie',
-              schema: { type: 'string' },
             },
           },
         },

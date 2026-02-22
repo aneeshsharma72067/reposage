@@ -10,7 +10,7 @@ const repositoryRoutes: FastifyPluginAsync = async (app) => {
       summary: 'List repositories for authenticated user',
       description:
         'Returns repositories linked to GitHub installations owned by the authenticated user.',
-      security: [{ cookieAuth: [] }],
+      security: [{ bearerAuth: [] }],
       response: {
         200: {
           type: 'array',

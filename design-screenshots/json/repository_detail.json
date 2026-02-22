@@ -1,0 +1,1184 @@
+{
+    "$schema": "https://design-tokens.github.io/community-group/format/",
+    "$metadata": {
+        "name": "Agentic.ai Design System — Repository Detail",
+        "version": "1.0.0",
+        "description": "Design tokens extracted from the Agentic.ai Repository Detail page (infrastructure-core). Extends all prior token files and introduces net-new patterns: two-line breadcrumb header with inline status badge, four-column stat bar, activity feed with event-type icons and event status badges, Agentic Insights panel with AI summary + rule chips, system coverage donut chart, ghost action buttons, and a WORKSPACE sidebar section label.",
+        "source": "Repository Detail — infrastructure-core (Healthy)",
+        "extends": [
+            "agentic-design-tokens.json",
+            "agentic-onboarding-tokens.json",
+            "agentic-dashboard-empty-tokens.json",
+            "agentic-dashboard-main-tokens.json"
+        ]
+    },
+    "color": {
+        "base": {
+            "black": {
+                "$value": "#0a0a0a",
+                "$type": "color"
+            },
+            "surface-100": {
+                "$value": "#111111",
+                "$type": "color"
+            },
+            "surface-200": {
+                "$value": "#191919",
+                "$type": "color",
+                "$description": "Stat cards, panels, activity rows (hover), rule chips"
+            },
+            "surface-300": {
+                "$value": "#202020",
+                "$type": "color",
+                "$description": "Active nav item background"
+            },
+            "surface-400": {
+                "$value": "#2c2c2c",
+                "$type": "color",
+                "$description": "Card borders, dividers, rule chip borders"
+            },
+            "white": {
+                "$value": "#ffffff",
+                "$type": "color"
+            },
+            "white-alpha-90": {
+                "$value": "rgba(255,255,255,0.90)",
+                "$type": "color"
+            },
+            "white-alpha-60": {
+                "$value": "rgba(255,255,255,0.60)",
+                "$type": "color"
+            },
+            "white-alpha-40": {
+                "$value": "rgba(255,255,255,0.40)",
+                "$type": "color"
+            },
+            "white-alpha-20": {
+                "$value": "rgba(255,255,255,0.20)",
+                "$type": "color"
+            },
+            "white-alpha-10": {
+                "$value": "rgba(255,255,255,0.10)",
+                "$type": "color"
+            }
+        },
+        "semantic": {
+            "healthy": {
+                "$value": "#22c55e",
+                "$type": "color",
+                "$description": "HEALTHY badge text and dot"
+            },
+            "healthy-bg": {
+                "$value": "rgba(34,197,94,0.15)",
+                "$type": "color"
+            },
+            "healthy-border": {
+                "$value": "rgba(34,197,94,0.30)",
+                "$type": "color"
+            },
+            "event-verified": {
+                "$value": "#22c55e",
+                "$type": "color",
+                "$description": "VERIFIED event status dot + text"
+            },
+            "event-verified-bg": {
+                "$value": "rgba(34,197,94,0.00)",
+                "$type": "color",
+                "$description": "No background fill — label only"
+            },
+            "event-analyzed": {
+                "$value": "#22d3ee",
+                "$type": "color",
+                "$description": "ANALYZED event status dot + text — cyan"
+            },
+            "event-analyzed-bg": {
+                "$value": "rgba(34,211,238,0.00)",
+                "$type": "color"
+            },
+            "event-pending": {
+                "$value": "#f59e0b",
+                "$type": "color",
+                "$description": "PENDING event status dot + text — amber"
+            },
+            "event-pending-bg": {
+                "$value": "rgba(245,158,11,0.00)",
+                "$type": "color"
+            },
+            "ai-insights-accent": {
+                "$value": "#ffffff",
+                "$type": "color",
+                "$description": "✦ sparkle icon and AI Analysis Active heading"
+            },
+            "ai-insights-body": {
+                "$value": "rgba(255,255,255,0.65)",
+                "$type": "color",
+                "$description": "AI summary paragraph text"
+            },
+            "rules-label": {
+                "$value": "rgba(255,255,255,0.35)",
+                "$type": "color",
+                "$description": "Rules applied: micro label"
+            },
+            "donut-mapped": {
+                "$value": "#ffffff",
+                "$type": "color",
+                "$description": "White arc — mapped codebase portion"
+            },
+            "donut-unmapped": {
+                "$value": "rgba(255,255,255,0.12)",
+                "$type": "color",
+                "$description": "Dim arc — unmapped portion"
+            },
+            "donut-label": {
+                "$value": "rgba(255,255,255,0.40)",
+                "$type": "color",
+                "$description": "Unmapped callout label"
+            },
+            "coverage-value": {
+                "$value": "#ffffff",
+                "$type": "color",
+                "$description": "85% and 1.2k display values"
+            },
+            "coverage-sub-label": {
+                "$value": "rgba(255,255,255,0.40)",
+                "$type": "color",
+                "$description": "Codebase mapped / Files tracked"
+            },
+            "ghost-button-text": {
+                "$value": "rgba(255,255,255,0.80)",
+                "$type": "color",
+                "$description": "Resync Repository + Run Analysis ghost buttons"
+            },
+            "ghost-button-border": {
+                "$value": "rgba(255,255,255,0.20)",
+                "$type": "color"
+            },
+            "ghost-button-bg": {
+                "$value": "rgba(255,255,255,0.05)",
+                "$type": "color"
+            },
+            "run-analysis-bg": {
+                "$value": "#1a1a1a",
+                "$type": "color",
+                "$description": "Run Analysis button — slightly elevated dark fill"
+            },
+            "run-analysis-border": {
+                "$value": "rgba(255,255,255,0.25)",
+                "$type": "color"
+            }
+        },
+        "event-icon": {
+            "merged-pr": {
+                "$value": "rgba(255,255,255,0.55)",
+                "$type": "color",
+                "$description": "Merge arrow icon for Merged PR events"
+            },
+            "push": {
+                "$value": "rgba(255,255,255,0.55)",
+                "$type": "color",
+                "$description": "Push arrow icon"
+            },
+            "opened-pr": {
+                "$value": "rgba(255,255,255,0.55)",
+                "$type": "color",
+                "$description": "? icon for Opened PR"
+            },
+            "bg": {
+                "$value": "rgba(255,255,255,0.08)",
+                "$type": "color",
+                "$description": "Circle background behind event icons"
+            }
+        }
+    },
+    "typography": {
+        "fontFamily": {
+            "sans": {
+                "$value": "'Inter', 'SF Pro Display', -apple-system, sans-serif",
+                "$type": "fontFamily"
+            },
+            "mono": {
+                "$value": "'JetBrains Mono', 'Fira Code', monospace",
+                "$type": "fontFamily"
+            }
+        },
+        "fontSize": {
+            "2xs": {
+                "$value": "10px",
+                "$type": "dimension"
+            },
+            "xs": {
+                "$value": "11px",
+                "$type": "dimension"
+            },
+            "sm": {
+                "$value": "13px",
+                "$type": "dimension"
+            },
+            "base": {
+                "$value": "14px",
+                "$type": "dimension"
+            },
+            "md": {
+                "$value": "15px",
+                "$type": "dimension"
+            },
+            "lg": {
+                "$value": "18px",
+                "$type": "dimension"
+            },
+            "xl": {
+                "$value": "22px",
+                "$type": "dimension"
+            },
+            "2xl": {
+                "$value": "30px",
+                "$type": "dimension"
+            },
+            "3xl": {
+                "$value": "40px",
+                "$type": "dimension",
+                "$description": "TypeScript stat value display"
+            }
+        },
+        "fontWeight": {
+            "regular": {
+                "$value": 400,
+                "$type": "number"
+            },
+            "medium": {
+                "$value": 500,
+                "$type": "number"
+            },
+            "semibold": {
+                "$value": 600,
+                "$type": "number"
+            },
+            "bold": {
+                "$value": 700,
+                "$type": "number"
+            }
+        },
+        "lineHeight": {
+            "none": {
+                "$value": 1.0,
+                "$type": "number"
+            },
+            "tight": {
+                "$value": 1.2,
+                "$type": "number"
+            },
+            "snug": {
+                "$value": 1.35,
+                "$type": "number"
+            },
+            "normal": {
+                "$value": 1.5,
+                "$type": "number"
+            },
+            "relaxed": {
+                "$value": 1.65,
+                "$type": "number"
+            }
+        },
+        "letterSpacing": {
+            "tight": {
+                "$value": "-0.02em",
+                "$type": "dimension"
+            },
+            "normal": {
+                "$value": "0em",
+                "$type": "dimension"
+            },
+            "wide": {
+                "$value": "0.06em",
+                "$type": "dimension"
+            },
+            "wider": {
+                "$value": "0.10em",
+                "$type": "dimension"
+            }
+        },
+        "roles": {
+            "page-repo-name": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.base}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.bold}"
+                },
+                "color": {
+                    "$value": "{color.base.white}"
+                },
+                "$description": "infrastructure-core — bold repo name in two-line topbar header"
+            },
+            "page-breadcrumb-parent": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-40}"
+                },
+                "$description": "Repositories › breadcrumb parent"
+            },
+            "page-breadcrumb-current": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.medium}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-90}"
+                },
+                "$description": "infrastructure-core — breadcrumb leaf (top line)"
+            },
+            "stat-label": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.mono}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "letterSpacing": {
+                    "$value": "{typography.letterSpacing.wide}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-40}"
+                },
+                "$description": "Main Language / Total Commits / Active Findings / Last Sync — mono micro-labels"
+            },
+            "stat-value-display": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.3xl}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.bold}"
+                },
+                "lineHeight": {
+                    "$value": "{typography.lineHeight.none}"
+                },
+                "letterSpacing": {
+                    "$value": "{typography.letterSpacing.tight}"
+                },
+                "color": {
+                    "$value": "{color.base.white}"
+                },
+                "$description": "TypeScript, 1,284, 0, 4m ago"
+            },
+            "section-title": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.lg}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.bold}"
+                },
+                "color": {
+                    "$value": "{color.base.white}"
+                },
+                "$description": "Recent Repository Activity, Agentic Insights, System Coverage"
+            },
+            "view-all-link": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-60}"
+                }
+            },
+            "event-title": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.base}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "color": {
+                    "$value": "{color.base.white}"
+                },
+                "$description": "Merged PR #442: update-k8s-schemas, Push to main: hotfix/api-gateway …"
+            },
+            "event-meta": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.mono}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-40}"
+                },
+                "$description": "github-actions • 12 min ago — author + timestamp"
+            },
+            "event-meta-author": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.mono}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.medium}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-60}"
+                },
+                "$description": "Author portion slightly brighter than timestamp"
+            },
+            "event-status-verified": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "letterSpacing": {
+                    "$value": "{typography.letterSpacing.wide}"
+                },
+                "color": {
+                    "$value": "{color.semantic.event-verified}"
+                }
+            },
+            "event-status-analyzed": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "letterSpacing": {
+                    "$value": "{typography.letterSpacing.wide}"
+                },
+                "color": {
+                    "$value": "{color.semantic.event-analyzed}"
+                }
+            },
+            "event-status-pending": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "letterSpacing": {
+                    "$value": "{typography.letterSpacing.wide}"
+                },
+                "color": {
+                    "$value": "{color.semantic.event-pending}"
+                }
+            },
+            "ai-insights-title": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.base}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.bold}"
+                },
+                "color": {
+                    "$value": "{color.semantic.ai-insights-accent}"
+                },
+                "$description": "AI Analysis Active — with sparkle icon prefix"
+            },
+            "ai-insights-body": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "lineHeight": {
+                    "$value": "{typography.lineHeight.relaxed}"
+                },
+                "color": {
+                    "$value": "{color.semantic.ai-insights-body}"
+                }
+            },
+            "rules-micro-label": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.mono}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "letterSpacing": {
+                    "$value": "{typography.letterSpacing.wide}"
+                },
+                "color": {
+                    "$value": "{color.semantic.rules-label}"
+                },
+                "$description": "Rules applied: — uppercase mono label"
+            },
+            "rule-chip-label": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.medium}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-80}"
+                },
+                "$description": "API Contract, Clean Arch, No Circular Deps"
+            },
+            "coverage-value": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xl}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.bold}"
+                },
+                "letterSpacing": {
+                    "$value": "{typography.letterSpacing.tight}"
+                },
+                "color": {
+                    "$value": "{color.semantic.coverage-value}"
+                },
+                "$description": "85% and 1.2k"
+            },
+            "coverage-sub-label": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.mono}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "letterSpacing": {
+                    "$value": "{typography.letterSpacing.wide}"
+                },
+                "color": {
+                    "$value": "{color.semantic.coverage-sub-label}"
+                },
+                "$description": "Codebase mapped / Files tracked"
+            },
+            "donut-callout-label": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "color": {
+                    "$value": "{color.semantic.donut-label}"
+                },
+                "$description": "Unmapped label pointing to dim arc segment"
+            },
+            "ghost-button-label": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.medium}"
+                },
+                "color": {
+                    "$value": "{color.semantic.ghost-button-text}"
+                }
+            },
+            "sidebar-section-label": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.mono}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.2xs}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "letterSpacing": {
+                    "$value": "{typography.letterSpacing.wider}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-30}"
+                },
+                "$description": "WORKSPACE — uppercase section divider label in sidebar"
+            }
+        }
+    },
+    "spacing": {
+        "0": {
+            "$value": "0px",
+            "$type": "dimension"
+        },
+        "1": {
+            "$value": "4px",
+            "$type": "dimension"
+        },
+        "2": {
+            "$value": "8px",
+            "$type": "dimension"
+        },
+        "3": {
+            "$value": "12px",
+            "$type": "dimension"
+        },
+        "4": {
+            "$value": "16px",
+            "$type": "dimension"
+        },
+        "5": {
+            "$value": "20px",
+            "$type": "dimension"
+        },
+        "6": {
+            "$value": "24px",
+            "$type": "dimension"
+        },
+        "8": {
+            "$value": "32px",
+            "$type": "dimension"
+        },
+        "10": {
+            "$value": "40px",
+            "$type": "dimension"
+        },
+        "12": {
+            "$value": "48px",
+            "$type": "dimension"
+        },
+        "16": {
+            "$value": "64px",
+            "$type": "dimension"
+        }
+    },
+    "borderRadius": {
+        "none": {
+            "$value": "0px",
+            "$type": "dimension"
+        },
+        "sm": {
+            "$value": "4px",
+            "$type": "dimension"
+        },
+        "md": {
+            "$value": "8px",
+            "$type": "dimension"
+        },
+        "lg": {
+            "$value": "10px",
+            "$type": "dimension"
+        },
+        "xl": {
+            "$value": "14px",
+            "$type": "dimension"
+        },
+        "full": {
+            "$value": "9999px",
+            "$type": "dimension"
+        }
+    },
+    "border": {
+        "width": {
+            "default": {
+                "$value": "1px",
+                "$type": "dimension"
+            }
+        },
+        "color": {
+            "default": {
+                "$value": "{color.base.surface-400}",
+                "$type": "color"
+            },
+            "subtle": {
+                "$value": "{color.base.white-alpha-10}",
+                "$type": "color"
+            }
+        }
+    },
+    "shadow": {
+        "card": {
+            "$value": "0 2px 16px rgba(0,0,0,0.45)",
+            "$type": "shadow"
+        },
+        "panel": {
+            "$value": "0 4px 32px rgba(0,0,0,0.50)",
+            "$type": "shadow"
+        }
+    },
+    "component": {
+        "topbar-detail": {
+            "height": {
+                "$value": "60px",
+                "$type": "dimension",
+                "$description": "Two-line header: breadcrumb top, repo name + badge bottom"
+            },
+            "background": {
+                "$value": "{color.base.surface-100}"
+            },
+            "border-bottom": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "padding-x": {
+                "$value": "{spacing.5}"
+            },
+            "padding-y": {
+                "$value": "{spacing.3}"
+            },
+            "line-gap": {
+                "$value": "{spacing.1}",
+                "$description": "Gap between breadcrumb line and repo-name line"
+            },
+            "badge-name-gap": {
+                "$value": "{spacing.3}",
+                "$description": "Gap between repo name and HEALTHY badge"
+            },
+            "$description": "Two-line topbar: row 1 = Repositories › infrastructure-core, row 2 = repo name + status badge"
+        },
+        "repo-status-badge": {
+            "height": {
+                "$value": "22px",
+                "$type": "dimension"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.full}"
+            },
+            "padding-x": {
+                "$value": "{spacing.3}"
+            },
+            "dot-size": {
+                "$value": "6px",
+                "$type": "dimension"
+            },
+            "dot-gap": {
+                "$value": "{spacing.2}"
+            },
+            "healthy": {
+                "background": {
+                    "$value": "{color.semantic.healthy-bg}"
+                },
+                "border": {
+                    "$value": "1px solid {color.semantic.healthy-border}"
+                },
+                "dot-color": {
+                    "$value": "{color.semantic.healthy}"
+                },
+                "text-color": {
+                    "$value": "{color.semantic.healthy}"
+                }
+            }
+        },
+        "ghost-button": {
+            "height": {
+                "$value": "34px",
+                "$type": "dimension"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.full}"
+            },
+            "padding-x": {
+                "$value": "{spacing.4}"
+            },
+            "icon-gap": {
+                "$value": "{spacing.2}"
+            },
+            "icon-size": {
+                "$value": "14px",
+                "$type": "dimension"
+            },
+            "default": {
+                "background": {
+                    "$value": "{color.semantic.ghost-button-bg}"
+                },
+                "border": {
+                    "$value": "1px solid {color.semantic.ghost-button-border}"
+                },
+                "text-color": {
+                    "$value": "{color.semantic.ghost-button-text}"
+                }
+            },
+            "run-analysis": {
+                "background": {
+                    "$value": "{color.semantic.run-analysis-bg}"
+                },
+                "border": {
+                    "$value": "1px solid {color.semantic.run-analysis-border}"
+                },
+                "text-color": {
+                    "$value": "{color.semantic.ghost-button-text}"
+                }
+            },
+            "$description": "Resync Repository (outlined) and Run Analysis (slightly elevated) — top-right action buttons"
+        },
+        "stat-bar": {
+            "grid-columns": {
+                "$value": "4",
+                "$description": "Main Language | Total Commits | Active Findings | Last Sync"
+            },
+            "column-gap": {
+                "$value": "{spacing.4}"
+            },
+            "card": {
+                "background": {
+                    "$value": "{color.base.surface-200}"
+                },
+                "border": {
+                    "$value": "1px solid {color.base.surface-400}"
+                },
+                "border-radius": {
+                    "$value": "{borderRadius.lg}"
+                },
+                "padding-x": {
+                    "$value": "{spacing.6}"
+                },
+                "padding-y": {
+                    "$value": "{spacing.5}"
+                },
+                "label-value-gap": {
+                    "$value": "{spacing.3}"
+                }
+            },
+            "$description": "Four equal stat cards beneath the topbar"
+        },
+        "activity-feed": {
+            "background": {
+                "$value": "{color.base.surface-200}"
+            },
+            "border": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.lg}"
+            },
+            "row-padding-x": {
+                "$value": "{spacing.5}"
+            },
+            "row-padding-y": {
+                "$value": "{spacing.5}"
+            },
+            "row-divider": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "row-gap": {
+                "$value": "0px",
+                "$description": "Rows are divided by borders, not gap"
+            },
+            "icon-gap": {
+                "$value": "{spacing.4}",
+                "$description": "Gap between event icon and text block"
+            },
+            "title-meta-gap": {
+                "$value": "{spacing.1}"
+            },
+            "$description": "Recent Repository Activity list — five event rows"
+        },
+        "event-icon": {
+            "size": {
+                "$value": "32px",
+                "$type": "dimension"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.full}"
+            },
+            "background": {
+                "$value": "{color.event-icon.bg}"
+            },
+            "icon-size": {
+                "$value": "16px",
+                "$type": "dimension"
+            }
+        },
+        "event-status-badge": {
+            "dot-size": {
+                "$value": "6px",
+                "$type": "dimension"
+            },
+            "dot-gap": {
+                "$value": "{spacing.1}"
+            },
+            "font-size": {
+                "$value": "{typography.fontSize.xs}"
+            },
+            "font-weight": {
+                "$value": "{typography.fontWeight.semibold}"
+            },
+            "letter-spacing": {
+                "$value": "{typography.letterSpacing.wide}"
+            },
+            "verified": {
+                "dot-color": {
+                    "$value": "{color.semantic.event-verified}"
+                },
+                "text-color": {
+                    "$value": "{color.semantic.event-verified}"
+                }
+            },
+            "analyzed": {
+                "dot-color": {
+                    "$value": "{color.semantic.event-analyzed}"
+                },
+                "text-color": {
+                    "$value": "{color.semantic.event-analyzed}"
+                }
+            },
+            "pending": {
+                "dot-color": {
+                    "$value": "{color.semantic.event-pending}"
+                },
+                "text-color": {
+                    "$value": "{color.semantic.event-pending}"
+                }
+            },
+            "$description": "Right-aligned dot + label status per activity row"
+        },
+        "insights-panel": {
+            "background": {
+                "$value": "{color.base.surface-200}"
+            },
+            "border": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.lg}"
+            },
+            "padding-x": {
+                "$value": "{spacing.6}"
+            },
+            "padding-y": {
+                "$value": "{spacing.6}"
+            },
+            "title-body-gap": {
+                "$value": "{spacing.3}"
+            },
+            "body-rules-gap": {
+                "$value": "{spacing.5}"
+            },
+            "rules-chips-gap": {
+                "$value": "{spacing.3}"
+            },
+            "sparkle-icon-gap": {
+                "$value": "{spacing.2}"
+            },
+            "$description": "Agentic Insights right panel — AI Analysis Active summary + rule chips"
+        },
+        "rule-chip": {
+            "height": {
+                "$value": "32px",
+                "$type": "dimension"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.md}"
+            },
+            "padding-x": {
+                "$value": "{spacing.4}"
+            },
+            "background": {
+                "$value": "transparent"
+            },
+            "border": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "gap": {
+                "$value": "{spacing.2}",
+                "$description": "Gap between chips in the rules row"
+            },
+            "$description": "API Contract, Clean Arch, No Circular Deps — outlined tag chips"
+        },
+        "coverage-panel": {
+            "background": {
+                "$value": "{color.base.surface-200}"
+            },
+            "border": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.lg}"
+            },
+            "padding-x": {
+                "$value": "{spacing.6}"
+            },
+            "padding-y": {
+                "$value": "{spacing.6}"
+            },
+            "title-chart-gap": {
+                "$value": "{spacing.6}"
+            },
+            "chart-stats-gap": {
+                "$value": "{spacing.6}"
+            },
+            "$description": "System Coverage panel with donut chart"
+        },
+        "donut-chart": {
+            "size": {
+                "$value": "140px",
+                "$type": "dimension",
+                "$description": "Outer diameter of the donut"
+            },
+            "stroke-width": {
+                "$value": "14px",
+                "$type": "dimension"
+            },
+            "mapped-color": {
+                "$value": "{color.semantic.donut-mapped}"
+            },
+            "unmapped-color": {
+                "$value": "{color.semantic.donut-unmapped}"
+            },
+            "gap-angle": {
+                "$value": "3deg",
+                "$description": "Angular gap between arc segments"
+            },
+            "callout-line-color": {
+                "$value": "{color.base.white-alpha-20}"
+            }
+        },
+        "coverage-stats-row": {
+            "layout": {
+                "$value": "space-between"
+            },
+            "stat-gap": {
+                "$value": "{spacing.1}",
+                "$description": "Value to sub-label vertical gap"
+            },
+            "$description": "85% Codebase mapped | 1.2k Files tracked — bottom of coverage panel"
+        },
+        "sidebar-section": {
+            "label-margin-top": {
+                "$value": "{spacing.5}"
+            },
+            "label-margin-bottom": {
+                "$value": "{spacing.2}"
+            },
+            "label-padding-x": {
+                "$value": "{spacing.3}"
+            },
+            "$description": "WORKSPACE section divider label above nav items"
+        },
+        "layout": {
+            "sidebar-width": {
+                "$value": "220px",
+                "$type": "dimension"
+            },
+            "main-content-padding": {
+                "$value": "{spacing.6}"
+            },
+            "two-col-gap": {
+                "$value": "{spacing.5}",
+                "$description": "Gap between activity feed column and insights column"
+            },
+            "activity-col-width": {
+                "$value": "60%",
+                "$description": "Left column — activity feed"
+            },
+            "insights-col-width": {
+                "$value": "40%",
+                "$description": "Right column — insights + coverage stacked"
+            }
+        }
+    },
+    "motion": {
+        "duration": {
+            "instant": {
+                "$value": "50ms",
+                "$type": "duration"
+            },
+            "fast": {
+                "$value": "100ms",
+                "$type": "duration"
+            },
+            "normal": {
+                "$value": "200ms",
+                "$type": "duration"
+            },
+            "slow": {
+                "$value": "350ms",
+                "$type": "duration"
+            }
+        },
+        "easing": {
+            "ease-out": {
+                "$value": "cubic-bezier(0.0, 0.0, 0.2, 1)",
+                "$type": "cubicBezier"
+            },
+            "ease-inout": {
+                "$value": "cubic-bezier(0.4, 0.0, 0.2, 1)",
+                "$type": "cubicBezier"
+            },
+            "spring": {
+                "$value": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+                "$type": "cubicBezier"
+            }
+        }
+    },
+    "zIndex": {
+        "base": {
+            "$value": 0,
+            "$type": "number"
+        },
+        "sidebar": {
+            "$value": 10,
+            "$type": "number"
+        },
+        "topbar": {
+            "$value": 20,
+            "$type": "number"
+        },
+        "overlay": {
+            "$value": 100,
+            "$type": "number"
+        },
+        "modal": {
+            "$value": 200,
+            "$type": "number"
+        }
+    }
+}

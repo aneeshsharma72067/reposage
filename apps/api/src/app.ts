@@ -1,6 +1,8 @@
 import Fastify from 'fastify';
+import cors from '@fastify/cors';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
+import { env } from './config/env';
 
 import authRoutes from './modules/auth/auth.routes';
 import {
@@ -18,7 +20,53 @@ export async function buildApp() {
     logger: true,
   });
 
+  const allowedOrigins = new Set([
+    env.FRONTEND_URL,
+    'https://lucia-asbestine-deucedly.ngrok-free.dev',
+    'http://localhost:8000',
+  ]);
+
+  const isAllowedOrigin = (origin: string): boolean => {
+    if (allowedOrigins.has(origin)) {
+      return true;
+    }
+
+    try {
+      const parsedOrigin = new URL(origin);
+      const isLocalhost =
+        parsedOrigin.hostname === 'localhost' || parsedOrigin.hostname === '127.0.0.1';
+
+      if (isLocalhost) {
+        return true;
+      }
+
+      return parsedOrigin.hostname.endsWith('.ngrok-free.dev');
+    } catch {
+      return false;
+    }
+  };
+
   registerErrorHandler(app);
+
+  await app.register(cors, {
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'ngrok-skip-browser-warning',
+      'Accept',
+      'Origin',
+    ],
+    origin: (origin, callback) => {
+      if (!origin || isAllowedOrigin(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(null, false);
+    },
+  });
 
   // Swagger only in development
   if (process.env.NODE_ENV !== 'production') {
@@ -32,10 +80,10 @@ export async function buildApp() {
         },
         components: {
           securitySchemes: {
-            cookieAuth: {
-              type: 'apiKey',
-              in: 'cookie',
-              name: 'ae_session',
+            bearerAuth: {
+              type: 'http',
+              scheme: 'bearer',
+              bearerFormat: 'JWT',
             },
           },
         },

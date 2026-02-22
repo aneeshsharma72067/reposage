@@ -1,0 +1,1039 @@
+{
+    "$schema": "https://design-tokens.github.io/community-group/format/",
+    "$metadata": {
+        "name": "Agentic.ai Design System — Onboarding",
+        "version": "1.0.0",
+        "description": "Design tokens extracted from the Agentic.ai GitHub App onboarding screen (Step 2: Install App). Extends the Authentication screen token set with new patterns: stepper navigation, feature lists, info callouts, integration cards, connection diagrams, and a footer bar.",
+        "source": "Onboarding screen — Install GitHub App (Step 2 of 3)",
+        "extends": "agentic-design-tokens.json"
+    },
+    "color": {
+        "$description": "Colors new or clarified on this screen",
+        "base": {
+            "black": {
+                "$value": "#0a0a0a",
+                "$type": "color"
+            },
+            "surface-100": {
+                "$value": "#111111",
+                "$type": "color",
+                "$description": "Page background"
+            },
+            "surface-200": {
+                "$value": "#1a1a1a",
+                "$type": "color",
+                "$description": "Card / panel — install card, integration chips"
+            },
+            "surface-300": {
+                "$value": "#222222",
+                "$type": "color",
+                "$description": "Elevated surface used inside cards"
+            },
+            "surface-400": {
+                "$value": "#2a2a2a",
+                "$type": "color",
+                "$description": "Borders, dividers"
+            },
+            "white": {
+                "$value": "#ffffff",
+                "$type": "color"
+            },
+            "white-alpha-90": {
+                "$value": "rgba(255,255,255,0.90)",
+                "$type": "color",
+                "$description": "Primary text"
+            },
+            "white-alpha-60": {
+                "$value": "rgba(255,255,255,0.60)",
+                "$type": "color",
+                "$description": "Subheading / body"
+            },
+            "white-alpha-40": {
+                "$value": "rgba(255,255,255,0.40)",
+                "$type": "color",
+                "$description": "Muted — secure label, footer links"
+            },
+            "white-alpha-20": {
+                "$value": "rgba(255,255,255,0.20)",
+                "$type": "color",
+                "$description": "Inactive stepper connector line"
+            },
+            "white-alpha-10": {
+                "$value": "rgba(255,255,255,0.10)",
+                "$type": "color",
+                "$description": "Hairline borders"
+            }
+        },
+        "semantic": {
+            "success": {
+                "$value": "#22c55e",
+                "$type": "color",
+                "$description": "Checkmark icons on feature list items"
+            },
+            "success-dim": {
+                "$value": "rgba(34,197,94,0.15)",
+                "$type": "color",
+                "$description": "Success icon circle fill"
+            },
+            "encrypted-dot-active": {
+                "$value": "#22c55e",
+                "$type": "color",
+                "$description": "First (lit) dot in the ENCRYPTED indicator"
+            },
+            "encrypted-dot-inactive": {
+                "$value": "rgba(34,197,94,0.35)",
+                "$type": "color",
+                "$description": "Remaining dots in the ENCRYPTED indicator"
+            },
+            "encrypted-label": {
+                "$value": "#22c55e",
+                "$type": "color",
+                "$description": "ENCRYPTED text label"
+            },
+            "info-bg": {
+                "$value": "rgba(6,182,212,0.08)",
+                "$type": "color",
+                "$description": "Info callout background (teal tint)"
+            },
+            "info-border": {
+                "$value": "rgba(6,182,212,0.30)",
+                "$type": "color",
+                "$description": "Info callout border"
+            },
+            "info-icon": {
+                "$value": "#06b6d4",
+                "$type": "color",
+                "$description": "Info callout (ℹ) icon color"
+            },
+            "info-text": {
+                "$value": "#22d3ee",
+                "$type": "color",
+                "$description": "Info callout body text — teal"
+            }
+        },
+        "stepper": {
+            "active-bg": {
+                "$value": "#ffffff",
+                "$type": "color",
+                "$description": "Active step number badge background"
+            },
+            "active-text": {
+                "$value": "#000000",
+                "$type": "color",
+                "$description": "Active step number text"
+            },
+            "active-label": {
+                "$value": "#ffffff",
+                "$type": "color",
+                "$description": "Active step name label"
+            },
+            "inactive-bg": {
+                "$value": "transparent",
+                "$type": "color",
+                "$description": "Inactive step badge background"
+            },
+            "inactive-border": {
+                "$value": "rgba(255,255,255,0.30)",
+                "$type": "color",
+                "$description": "Inactive step badge border"
+            },
+            "inactive-text": {
+                "$value": "rgba(255,255,255,0.40)",
+                "$type": "color",
+                "$description": "Inactive step number and label"
+            },
+            "connector": {
+                "$value": "rgba(255,255,255,0.20)",
+                "$type": "color",
+                "$description": "Horizontal line connecting steps"
+            }
+        },
+        "connection-diagram": {
+            "github-bg": {
+                "$value": "#1c1c1e",
+                "$type": "color",
+                "$description": "GitHub icon card background (dark)"
+            },
+            "github-border": {
+                "$value": "rgba(255,255,255,0.12)",
+                "$type": "color",
+                "$description": "GitHub icon card border"
+            },
+            "agentic-bg": {
+                "$value": "#ffffff",
+                "$type": "color",
+                "$description": "Agentic icon card background (white)"
+            },
+            "agentic-icon": {
+                "$value": "#000000",
+                "$type": "color",
+                "$description": "Agentic robot icon color on white card"
+            }
+        }
+    },
+    "typography": {
+        "fontFamily": {
+            "sans": {
+                "$value": "'Inter', 'SF Pro Display', -apple-system, sans-serif",
+                "$type": "fontFamily"
+            },
+            "mono": {
+                "$value": "'JetBrains Mono', 'Fira Code', monospace",
+                "$type": "fontFamily"
+            }
+        },
+        "fontSize": {
+            "2xs": {
+                "$value": "10px",
+                "$type": "dimension"
+            },
+            "xs": {
+                "$value": "11px",
+                "$type": "dimension"
+            },
+            "sm": {
+                "$value": "13px",
+                "$type": "dimension"
+            },
+            "base": {
+                "$value": "14px",
+                "$type": "dimension"
+            },
+            "md": {
+                "$value": "15px",
+                "$type": "dimension"
+            },
+            "lg": {
+                "$value": "18px",
+                "$type": "dimension"
+            },
+            "xl": {
+                "$value": "22px",
+                "$type": "dimension"
+            },
+            "2xl": {
+                "$value": "28px",
+                "$type": "dimension"
+            },
+            "3xl": {
+                "$value": "36px",
+                "$type": "dimension",
+                "$description": "Hero headline — Connect your Engineering Environment"
+            }
+        },
+        "fontWeight": {
+            "regular": {
+                "$value": 400,
+                "$type": "number"
+            },
+            "medium": {
+                "$value": 500,
+                "$type": "number"
+            },
+            "semibold": {
+                "$value": 600,
+                "$type": "number"
+            },
+            "bold": {
+                "$value": 700,
+                "$type": "number"
+            }
+        },
+        "lineHeight": {
+            "tight": {
+                "$value": 1.2,
+                "$type": "number"
+            },
+            "snug": {
+                "$value": 1.35,
+                "$type": "number"
+            },
+            "normal": {
+                "$value": 1.5,
+                "$type": "number"
+            },
+            "relaxed": {
+                "$value": 1.6,
+                "$type": "number"
+            }
+        },
+        "letterSpacing": {
+            "tight": {
+                "$value": "-0.02em",
+                "$type": "dimension"
+            },
+            "normal": {
+                "$value": "0em",
+                "$type": "dimension"
+            },
+            "wide": {
+                "$value": "0.06em",
+                "$type": "dimension",
+                "$description": "Section micro-label — WHY GITHUB APP?"
+            },
+            "wider": {
+                "$value": "0.10em",
+                "$type": "dimension",
+                "$description": "ENCRYPTED badge label"
+            }
+        },
+        "roles": {
+            "page-headline": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.3xl}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.bold}"
+                },
+                "lineHeight": {
+                    "$value": "{typography.lineHeight.tight}"
+                },
+                "letterSpacing": {
+                    "$value": "{typography.letterSpacing.tight}"
+                },
+                "color": {
+                    "$value": "{color.base.white}"
+                },
+                "$description": "Connect your Engineering Environment"
+            },
+            "page-subheading": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.md}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "lineHeight": {
+                    "$value": "{typography.lineHeight.relaxed}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-60}"
+                }
+            },
+            "section-micro-label": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "letterSpacing": {
+                    "$value": "{typography.letterSpacing.wide}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-40}"
+                },
+                "$description": "WHY GITHUB APP? — uppercase small label"
+            },
+            "feature-title": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.base}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                },
+                "color": {
+                    "$value": "{color.base.white}"
+                }
+            },
+            "feature-body": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "lineHeight": {
+                    "$value": "{typography.lineHeight.normal}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-60}"
+                }
+            },
+            "info-callout-text": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "lineHeight": {
+                    "$value": "{typography.lineHeight.relaxed}"
+                },
+                "color": {
+                    "$value": "{color.semantic.info-text}"
+                }
+            },
+            "card-title": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xl}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.bold}"
+                },
+                "color": {
+                    "$value": "{color.base.white}"
+                },
+                "$description": "Install Agentic AI GitHub App"
+            },
+            "card-subtitle": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.base}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "lineHeight": {
+                    "$value": "{typography.lineHeight.relaxed}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-60}"
+                }
+            },
+            "button-label": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.base}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.semibold}"
+                }
+            },
+            "secure-label": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-40}"
+                },
+                "$description": "Secure OAuth2 Connection via GitHub Enterprise"
+            },
+            "other-integrations-label": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.base}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-60}"
+                },
+                "$description": "Looking for other integrations?"
+            },
+            "integration-chip-label": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.base}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.medium}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-90}"
+                }
+            },
+            "encrypted-badge": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.mono}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.2xs}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.bold}"
+                },
+                "letterSpacing": {
+                    "$value": "{typography.letterSpacing.wider}"
+                },
+                "color": {
+                    "$value": "{color.semantic.encrypted-label}"
+                },
+                "$description": "ENCRYPTED label between GitHub and Agentic icons"
+            },
+            "stepper-label-active": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.base}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.bold}"
+                },
+                "color": {
+                    "$value": "{color.stepper.active-label}"
+                }
+            },
+            "stepper-label-inactive": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.base}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "color": {
+                    "$value": "{color.stepper.inactive-text}"
+                }
+            },
+            "nav-wordmark": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.mono}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.bold}"
+                },
+                "letterSpacing": {
+                    "$value": "{typography.letterSpacing.wide}"
+                },
+                "color": {
+                    "$value": "{color.base.white}"
+                },
+                "$description": "AGENTIC // WORKFLOW — top-left nav wordmark"
+            },
+            "footer-link": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.sans}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.sm}"
+                },
+                "fontWeight": {
+                    "$value": "{typography.fontWeight.regular}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-40}"
+                }
+            },
+            "version-tag": {
+                "fontFamily": {
+                    "$value": "{typography.fontFamily.mono}"
+                },
+                "fontSize": {
+                    "$value": "{typography.fontSize.xs}"
+                },
+                "color": {
+                    "$value": "{color.base.white-alpha-40}"
+                },
+                "$description": "v1.0.4-stable — bottom right"
+            }
+        }
+    },
+    "spacing": {
+        "0": {
+            "$value": "0px",
+            "$type": "dimension"
+        },
+        "1": {
+            "$value": "4px",
+            "$type": "dimension"
+        },
+        "2": {
+            "$value": "8px",
+            "$type": "dimension"
+        },
+        "3": {
+            "$value": "12px",
+            "$type": "dimension"
+        },
+        "4": {
+            "$value": "16px",
+            "$type": "dimension"
+        },
+        "5": {
+            "$value": "20px",
+            "$type": "dimension"
+        },
+        "6": {
+            "$value": "24px",
+            "$type": "dimension"
+        },
+        "8": {
+            "$value": "32px",
+            "$type": "dimension"
+        },
+        "10": {
+            "$value": "40px",
+            "$type": "dimension"
+        },
+        "12": {
+            "$value": "48px",
+            "$type": "dimension"
+        },
+        "16": {
+            "$value": "64px",
+            "$type": "dimension"
+        },
+        "20": {
+            "$value": "80px",
+            "$type": "dimension"
+        }
+    },
+    "borderRadius": {
+        "none": {
+            "$value": "0px",
+            "$type": "dimension"
+        },
+        "sm": {
+            "$value": "4px",
+            "$type": "dimension"
+        },
+        "md": {
+            "$value": "8px",
+            "$type": "dimension"
+        },
+        "lg": {
+            "$value": "12px",
+            "$type": "dimension",
+            "$description": "Logo icon, install card, integration chips"
+        },
+        "xl": {
+            "$value": "16px",
+            "$type": "dimension"
+        },
+        "2xl": {
+            "$value": "20px",
+            "$type": "dimension",
+            "$description": "Connection diagram icon cards"
+        },
+        "full": {
+            "$value": "9999px",
+            "$type": "dimension",
+            "$description": "Pill button — Install & Authorize on GitHub"
+        }
+    },
+    "border": {
+        "width": {
+            "default": {
+                "$value": "1px",
+                "$type": "dimension"
+            }
+        },
+        "color": {
+            "default": {
+                "$value": "{color.base.surface-400}",
+                "$type": "color"
+            },
+            "subtle": {
+                "$value": "{color.base.white-alpha-10}",
+                "$type": "color"
+            }
+        }
+    },
+    "shadow": {
+        "card": {
+            "$value": "0 4px 32px rgba(0,0,0,0.6)",
+            "$type": "shadow"
+        },
+        "icon-card": {
+            "$value": "0 2px 12px rgba(0,0,0,0.4)",
+            "$type": "shadow",
+            "$description": "GitHub / Agentic icon cards in diagram"
+        },
+        "chip": {
+            "$value": "0 1px 4px rgba(0,0,0,0.3)",
+            "$type": "shadow",
+            "$description": "Integration chips (GitLab, Bitbucket)"
+        }
+    },
+    "component": {
+        "topnav": {
+            "height": {
+                "$value": "56px",
+                "$type": "dimension"
+            },
+            "background": {
+                "$value": "{color.base.surface-100}"
+            },
+            "border-bottom": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "padding-x": {
+                "$value": "{spacing.6}"
+            },
+            "$description": "Top navigation bar containing wordmark and stepper"
+        },
+        "layout": {
+            "split-left-width": {
+                "$value": "38%",
+                "$description": "Explanation / feature-list panel"
+            },
+            "split-right-width": {
+                "$value": "62%",
+                "$description": "Install card + connection diagram panel"
+            },
+            "content-max-width": {
+                "$value": "1280px",
+                "$type": "dimension"
+            },
+            "page-padding-x": {
+                "$value": "{spacing.16}"
+            },
+            "page-padding-y": {
+                "$value": "{spacing.12}"
+            }
+        },
+        "stepper": {
+            "badge-size": {
+                "$value": "28px",
+                "$type": "dimension"
+            },
+            "badge-border-radius": {
+                "$value": "{borderRadius.sm}"
+            },
+            "badge-font-size": {
+                "$value": "{typography.fontSize.sm}"
+            },
+            "badge-font-weight": {
+                "$value": "{typography.fontWeight.bold}"
+            },
+            "connector-height": {
+                "$value": "1px",
+                "$type": "dimension"
+            },
+            "connector-width": {
+                "$value": "48px",
+                "$type": "dimension"
+            },
+            "item-gap": {
+                "$value": "{spacing.3}"
+            },
+            "active": {
+                "badge-bg": {
+                    "$value": "{color.stepper.active-bg}"
+                },
+                "badge-text": {
+                    "$value": "{color.stepper.active-text}"
+                },
+                "label-color": {
+                    "$value": "{color.stepper.active-label}"
+                },
+                "label-weight": {
+                    "$value": "{typography.fontWeight.bold}"
+                }
+            },
+            "inactive": {
+                "badge-bg": {
+                    "$value": "{color.stepper.inactive-bg}"
+                },
+                "badge-border": {
+                    "$value": "1px solid {color.stepper.inactive-border}"
+                },
+                "badge-text": {
+                    "$value": "{color.stepper.inactive-text}"
+                },
+                "label-color": {
+                    "$value": "{color.stepper.inactive-text}"
+                },
+                "label-weight": {
+                    "$value": "{typography.fontWeight.regular}"
+                }
+            }
+        },
+        "feature-list": {
+            "item-gap": {
+                "$value": "{spacing.6}"
+            },
+            "icon-size": {
+                "$value": "22px",
+                "$type": "dimension"
+            },
+            "icon-color": {
+                "$value": "{color.semantic.success}"
+            },
+            "icon-bg": {
+                "$value": "{color.semantic.success-dim}"
+            },
+            "icon-bg-radius": {
+                "$value": "{borderRadius.full}"
+            },
+            "text-gap": {
+                "$value": "{spacing.3}",
+                "$description": "Gap between icon and text block"
+            },
+            "title-body-gap": {
+                "$value": "{spacing.1}"
+            }
+        },
+        "info-callout": {
+            "background": {
+                "$value": "{color.semantic.info-bg}"
+            },
+            "border": {
+                "$value": "1px solid {color.semantic.info-border}"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.lg}"
+            },
+            "padding-x": {
+                "$value": "{spacing.5}"
+            },
+            "padding-y": {
+                "$value": "{spacing.4}"
+            },
+            "icon-color": {
+                "$value": "{color.semantic.info-icon}"
+            },
+            "icon-size": {
+                "$value": "18px",
+                "$type": "dimension"
+            },
+            "icon-gap": {
+                "$value": "{spacing.3}"
+            }
+        },
+        "install-card": {
+            "background": {
+                "$value": "{color.base.surface-200}"
+            },
+            "border": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.xl}"
+            },
+            "padding-x": {
+                "$value": "{spacing.10}"
+            },
+            "padding-y": {
+                "$value": "{spacing.10}"
+            },
+            "text-align": {
+                "$value": "center"
+            },
+            "title-gap": {
+                "$value": "{spacing.2}"
+            },
+            "subtitle-gap": {
+                "$value": "{spacing.8}"
+            },
+            "button-gap": {
+                "$value": "{spacing.4}"
+            },
+            "secure-gap": {
+                "$value": "{spacing.3}"
+            }
+        },
+        "install-button": {
+            "background": {
+                "$value": "{color.base.white}"
+            },
+            "text-color": {
+                "$value": "{color.base.black}"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.full}"
+            },
+            "height": {
+                "$value": "56px",
+                "$type": "dimension"
+            },
+            "padding-x": {
+                "$value": "{spacing.10}"
+            },
+            "icon-gap": {
+                "$value": "{spacing.2}"
+            },
+            "font-weight": {
+                "$value": "{typography.fontWeight.semibold}"
+            },
+            "$description": "Install & Authorize on GitHub — primary CTA"
+        },
+        "connection-diagram": {
+            "container-gap": {
+                "$value": "{spacing.6}",
+                "$description": "Horizontal gap between items in the diagram row"
+            },
+            "icon-card-size": {
+                "$value": "80px",
+                "$type": "dimension"
+            },
+            "icon-card-radius": {
+                "$value": "{borderRadius.2xl}"
+            },
+            "github-card": {
+                "background": {
+                    "$value": "{color.connection-diagram.github-bg}"
+                },
+                "border": {
+                    "$value": "1px solid {color.connection-diagram.github-border}"
+                }
+            },
+            "agentic-card": {
+                "background": {
+                    "$value": "{color.connection-diagram.agentic-bg}"
+                }
+            },
+            "encrypted-indicator": {
+                "dot-size": {
+                    "$value": "8px",
+                    "$type": "dimension"
+                },
+                "dot-gap": {
+                    "$value": "{spacing.1}"
+                },
+                "dot-active": {
+                    "$value": "{color.semantic.encrypted-dot-active}"
+                },
+                "dot-inactive": {
+                    "$value": "{color.semantic.encrypted-dot-inactive}"
+                },
+                "label-gap": {
+                    "$value": "{spacing.1}"
+                }
+            }
+        },
+        "integration-chip": {
+            "background": {
+                "$value": "{color.base.surface-200}"
+            },
+            "border": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.lg}"
+            },
+            "height": {
+                "$value": "44px",
+                "$type": "dimension"
+            },
+            "padding-x": {
+                "$value": "{spacing.5}"
+            },
+            "icon-gap": {
+                "$value": "{spacing.2}"
+            },
+            "$description": "GitLab and Bitbucket chips"
+        },
+        "logo": {
+            "container-size": {
+                "$value": "36px",
+                "$type": "dimension"
+            },
+            "border-radius": {
+                "$value": "{borderRadius.md}"
+            },
+            "background": {
+                "$value": "{color.base.surface-200}"
+            },
+            "border": {
+                "$value": "1px solid {color.base.white-alpha-10}"
+            }
+        },
+        "footer": {
+            "height": {
+                "$value": "52px",
+                "$type": "dimension"
+            },
+            "border-top": {
+                "$value": "1px solid {color.base.surface-400}"
+            },
+            "padding-x": {
+                "$value": "{spacing.8}"
+            },
+            "link-gap": {
+                "$value": "{spacing.6}"
+            },
+            "$description": "Bottom bar — Documentation, Security Policy, Support / v1.0.4-stable"
+        }
+    },
+    "motion": {
+        "duration": {
+            "instant": {
+                "$value": "50ms",
+                "$type": "duration"
+            },
+            "fast": {
+                "$value": "100ms",
+                "$type": "duration"
+            },
+            "normal": {
+                "$value": "200ms",
+                "$type": "duration"
+            },
+            "slow": {
+                "$value": "350ms",
+                "$type": "duration"
+            },
+            "pulse": {
+                "$value": "2000ms",
+                "$type": "duration",
+                "$description": "ENCRYPTED dot pulse animation cycle"
+            }
+        },
+        "easing": {
+            "ease-out": {
+                "$value": "cubic-bezier(0.0, 0.0, 0.2, 1)",
+                "$type": "cubicBezier"
+            },
+            "ease-inout": {
+                "$value": "cubic-bezier(0.4, 0.0, 0.2, 1)",
+                "$type": "cubicBezier"
+            },
+            "spring": {
+                "$value": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+                "$type": "cubicBezier"
+            }
+        }
+    },
+    "zIndex": {
+        "base": {
+            "$value": 0,
+            "$type": "number"
+        },
+        "raised": {
+            "$value": 10,
+            "$type": "number"
+        },
+        "overlay": {
+            "$value": 100,
+            "$type": "number"
+        },
+        "modal": {
+            "$value": 200,
+            "$type": "number"
+        }
+    }
+}
