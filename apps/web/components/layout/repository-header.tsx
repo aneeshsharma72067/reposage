@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import type { RepositoryListItem } from '@/types/repository';
+import type { RepositoryDetails, RepositoryListItem } from '@/types/repository';
 
 interface RepositoryHeaderProps {
-  repository: RepositoryListItem;
+  repository: RepositoryListItem | RepositoryDetails;
 }
 
 export function RepositoryHeader({ repository }: RepositoryHeaderProps) {
@@ -30,7 +30,7 @@ export function RepositoryHeader({ repository }: RepositoryHeaderProps) {
           type="button"
           className="h-10 rounded-full border border-white/20 bg-transparent px-4 text-[14px] font-medium text-textPrimary"
         >
-          ⟳ Resync Repository
+          ↻ Resync Repository
         </button>
         <button
           type="button"

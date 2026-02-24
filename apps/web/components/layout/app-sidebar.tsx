@@ -21,7 +21,7 @@ export function AppSidebar() {
   };
 
   return (
-    <aside className="flex h-screen w-[216px] flex-col border-r border-surface400 bg-surface100 px-3 py-3">
+    <aside className="sticky top-0 flex h-screen w-[216px] shrink-0 flex-col overflow-y-auto border-r border-surface400 bg-surface100 px-3 py-3">
       <div className="mb-5 flex items-center gap-3 px-2">
         <div className="flex h-8 w-8 items-center justify-center rounded-tokenMd border border-white/10 bg-surface200 text-xs">
           ⚙

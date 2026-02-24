@@ -83,10 +83,10 @@ export default function DashboardPage() {
   const analyzingRepositoryCount = repositories.length - activeRepositoryCount;
 
   return (
-    <main className="flex min-h-screen bg-black text-white">
+    <main className="flex h-screen overflow-hidden bg-black text-white">
       <AppSidebar />
 
-      <section className="flex min-h-screen flex-1 flex-col">
+      <section className="flex h-screen flex-1 flex-col overflow-y-auto">
         <DashboardHeader onSearchChange={setSearchText} />
 
         <div className="px-6 py-6">
@@ -109,15 +109,30 @@ export default function DashboardPage() {
             <section className="mt-8 rounded-tokenLg border border-surface400 bg-surface200 px-6 py-8 text-[14px] text-textSecondary">
               Loading repositories...
             </section>
+          ) : errorMessage ? (
+            <section className="mt-8 rounded-tokenLg border border-rose-500/30 bg-rose-500/10 px-6 py-6 text-[14px] text-rose-300">
+              <div className="flex items-center justify-between gap-3">
+                <span>{errorMessage}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void loadRepositories();
+                  }}
+                  className="rounded-full border border-rose-400/40 px-3 py-1 text-[12px]"
+                >
+                  Retry
+                </button>
+              </div>
+            </section>
           ) : !hasRepositories ? (
             <section className="mx-auto mt-10 max-w-[760px] text-center">
               <div className="mx-auto flex h-[92px] w-[92px] items-center justify-center rounded-token2xl border border-white/10 bg-[#1c1c1e] text-4xl">
                 ⌥
               </div>
-              <h2 className="mt-8 text-[36px] font-bold leading-tight">Connect your first repository</h2>
+              <h2 className="mt-8 text-[36px] font-bold leading-tight">No repositories found</h2>
               <p className="mx-auto mt-4 max-w-[640px] text-[15px] leading-[1.65] text-textSecondary">
-                Agentic AI monitors your GitHub events in real-time to detect API breaks,
-                architectural drift, and risky refactors before they hit production.
+                Your account is authenticated, but we did not receive any repositories yet.
+                Install the GitHub App or refresh after installation sync completes.
               </p>
 
               <div className="mt-8 rounded-tokenXl border border-surface400 bg-surface200 px-8 py-8 text-left">
@@ -141,12 +156,23 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  <Link
-                    href="/onboarding"
-                    className="inline-flex h-14 items-center justify-center rounded-full bg-white px-8 text-[14px] font-semibold text-black"
-                  >
-                    + Install GitHub Extension
-                  </Link>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void loadRepositories();
+                      }}
+                      className="inline-flex h-14 items-center justify-center rounded-full border border-white/15 px-8 text-[14px] font-semibold text-white"
+                    >
+                      Refresh
+                    </button>
+                    <Link
+                      href="/onboarding"
+                      className="inline-flex h-14 items-center justify-center rounded-full bg-white px-8 text-[14px] font-semibold text-black"
+                    >
+                      + Install GitHub Extension
+                    </Link>
+                  </div>
                 </div>
               </div>
             </section>
@@ -192,22 +218,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {errorMessage ? (
-                  <div className="rounded-tokenLg border border-rose-500/30 bg-rose-500/10 px-6 py-4 text-[14px] text-rose-300">
-                    <div className="flex items-center justify-between gap-3">
-                      <span>{errorMessage}</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          void loadRepositories();
-                        }}
-                        className="rounded-full border border-rose-400/40 px-3 py-1 text-[12px]"
-                      >
-                        Retry
-                      </button>
-                    </div>
-                  </div>
-                ) : filteredRepositories.length === 0 ? (
+                {filteredRepositories.length === 0 ? (
                   <div className="rounded-tokenLg border border-surface400 bg-surface200 px-6 py-8 text-[14px] text-textSecondary">
                     No repositories matched the current search/filter.
                   </div>

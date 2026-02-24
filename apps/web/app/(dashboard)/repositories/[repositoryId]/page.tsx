@@ -1,24 +1,43 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import { RepositoryHeader } from '@/components/layout/repository-header';
-import { getAccessToken, listRepositories } from '@/lib/auth';
-import type { RepositoryListItem } from '@/types/repository';
+import { getAccessToken, getRepositoryDetails } from '@/lib/auth';
+import type { RepositoryDetails } from '@/types/repository';
 
-function StatCard({ label, value }: { label: string; value: string }) {
+function toReadableDate(value: string | null): string {
+  if (!value) {
+    return 'N/A';
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return 'N/A';
+  }
+
+  return date.toLocaleString();
+}
+
+function StatCard({ icon, label, value }: { icon: string; label: string; value: string }) {
   return (
-    <div className="rounded-tokenLg border border-surface400 bg-surface200 px-4 py-3">
-      <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">{label}</p>
-      <p className="mt-2 text-[22px] font-bold text-white">{value}</p>
+    <div className="rounded-tokenLg border border-surface400 bg-surface200 px-4 py-4">
+      <div className="flex items-center gap-2">
+        <span className="inline-flex h-7 w-7 items-center justify-center rounded-tokenMd border border-surface400 bg-surface300 text-[14px]">
+          {icon}
+        </span>
+        <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">{label}</p>
+      </div>
+      <p className="mt-3 text-[24px] font-bold text-white">{value}</p>
     </div>
   );
 }
 
 export default function RepositoryDetailPage() {
   const params = useParams<{ repositoryId: string }>();
-  const [repositories, setRepositories] = useState<RepositoryListItem[]>([]);
+  const [repository, setRepository] = useState<RepositoryDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -28,34 +47,29 @@ export default function RepositoryDetailPage() {
       return;
     }
 
-    const loadRepositories = async () => {
+    const loadRepositoryDetails = async () => {
       setIsLoading(true);
 
       try {
-        const data = await listRepositories();
-        setRepositories(data);
+        const data = await getRepositoryDetails(params.repositoryId);
+        setRepository(data);
         setErrorMessage(null);
       } catch {
-        setRepositories([]);
+        setRepository(null);
         setErrorMessage('Unable to load repository data.');
       } finally {
         setIsLoading(false);
       }
     };
 
-    void loadRepositories();
-  }, []);
-
-  const repository = useMemo(
-    () => repositories.find((item) => item.id === params.repositoryId) ?? null,
-    [params.repositoryId, repositories],
-  );
+    void loadRepositoryDetails();
+  }, [params.repositoryId]);
 
   return (
-    <main className="flex min-h-screen bg-black text-white">
+    <main className="flex h-screen overflow-hidden bg-black text-white">
       <AppSidebar />
 
-      <section className="flex min-h-screen flex-1 flex-col">
+      <section className="flex h-screen flex-1 flex-col overflow-y-auto">
         {repository ? <RepositoryHeader repository={repository} /> : null}
 
         <div className="px-6 py-6">
@@ -73,69 +87,213 @@ export default function RepositoryDetailPage() {
             </div>
           ) : (
             <>
-              <section className="grid grid-cols-1 gap-4 lg:grid-cols-4">
-                <StatCard label="Main Language" value={repository.private ? 'Private' : 'Public'} />
-                <StatCard label="Default Branch" value={repository.defaultBranch || 'unknown'} />
-                <StatCard label="Active Findings" value="0" />
-                <StatCard label="Repository Status" value={repository.isActive ? 'Healthy' : 'Analyzing'} />
+              <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <StatCard
+                  icon="★"
+                  label="Stars"
+                  value={repository.stargazersCount.toLocaleString()}
+                />
+                <StatCard icon="⑂" label="Forks" value={repository.forksCount.toLocaleString()} />
+                <StatCard
+                  icon="!"
+                  label="Open Issues"
+                  value={repository.openIssuesCount.toLocaleString()}
+                />
+                <StatCard
+                  icon="◉"
+                  label="Watchers"
+                  value={repository.watchersCount.toLocaleString()}
+                />
               </section>
 
-              <section className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-[1.6fr_1fr]">
-                <div>
-                  <div className="mb-3 flex items-center justify-between">
-                    <h2 className="text-[22px] font-semibold">Recent Repository Activity</h2>
-                    <span className="text-[14px] text-textSecondary">View all</span>
-                  </div>
+              <section className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-[1.5fr_1fr]">
+                <article className="rounded-tokenLg border border-surface400 bg-surface200 px-5 py-5">
+                  <h2 className="text-[22px] font-semibold">Repository Overview</h2>
+                  <p className="mt-3 text-[14px] leading-[1.6] text-textSecondary">
+                    {repository.description ?? 'No repository description available.'}
+                  </p>
 
-                  <div className="rounded-tokenLg border border-surface400 bg-surface200">
-                    <div className="border-b border-surface400 px-4 py-4">
-                      <p className="text-[14px] text-textSecondary">
-                        No activity events are available yet for this repository.
+                  <div className="mt-5 grid grid-cols-1 gap-4 border-t border-surface400 pt-5 md:grid-cols-2">
+                    <div>
+                      <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">
+                        Full Name
+                      </p>
+                      <p className="mt-1 text-[14px] text-white">{repository.fullName}</p>
+                    </div>
+                    <div>
+                      <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">
+                        Visibility
+                      </p>
+                      <p className="mt-1 text-[14px] text-white">{repository.visibility}</p>
+                    </div>
+                    <div>
+                      <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">
+                        Main Language
+                      </p>
+                      <p className="mt-1 text-[14px] text-white">{repository.language ?? 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">
+                        Default Branch
+                      </p>
+                      <p className="mt-1 text-[14px] text-white">
+                        {repository.defaultBranch || 'N/A'}
                       </p>
                     </div>
-                    <div className="px-4 py-4 text-[13px] text-textMuted">
-                      Activity feed will appear after webhook events are ingested.
+                    <div>
+                      <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">
+                        Size
+                      </p>
+                      <p className="mt-1 text-[14px] text-white">
+                        {repository.size.toLocaleString()} KB
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">
+                        License
+                      </p>
+                      <p className="mt-1 text-[14px] text-white">
+                        {repository.licenseName ?? 'N/A'}
+                      </p>
                     </div>
                   </div>
-                </div>
 
-                <div className="space-y-4">
-                  <div className="rounded-tokenLg border border-cyan-400/40 bg-surface200 px-4 py-4">
-                    <h3 className="text-[22px] font-semibold">✦ AI Analysis Active</h3>
-                    <p className="mt-2 text-[14px] leading-[1.5] text-textSecondary">
-                      AI insights for this repository are not available yet. Trigger analysis to populate
-                      this panel.
+                  <div className="mt-5 border-t border-surface400 pt-5">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">
+                      Topics
                     </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {repository.topics.length > 0 ? (
+                        repository.topics.map((topic) => (
+                          <span
+                            key={topic}
+                            className="rounded-full border border-surface400 bg-surface300 px-3 py-1 text-[12px] text-textPrimary"
+                          >
+                            #{topic}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-[13px] text-textSecondary">
+                          No topics configured.
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
-                    <div className="mt-4 border-t border-surface400 pt-4">
-                      <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">Rules applied:</p>
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        <span className="rounded-tokenMd border border-surface400 px-3 py-1 text-[13px] text-textPrimary">API Contract</span>
-                        <span className="rounded-tokenMd border border-surface400 px-3 py-1 text-[13px] text-textPrimary">Clean Arch</span>
-                        <span className="rounded-tokenMd border border-surface400 px-3 py-1 text-[13px] text-textPrimary">No Circular Deps</span>
-                      </div>
+                  <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-surface400 pt-5">
+                    <Link
+                      href={repository.htmlUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex h-10 items-center rounded-full border border-white/20 bg-white px-4 text-[13px] font-semibold text-black"
+                    >
+                      Open on GitHub
+                    </Link>
+                    {repository.homepage ? (
+                      <Link
+                        href={repository.homepage}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex h-10 items-center rounded-full border border-white/20 px-4 text-[13px] font-medium text-textPrimary"
+                      >
+                        Visit Homepage
+                      </Link>
+                    ) : null}
+                  </div>
+                </article>
+
+                <aside className="space-y-4">
+                  <div className="rounded-tokenLg border border-surface400 bg-surface200 px-4 py-4">
+                    <h3 className="text-[20px] font-semibold">Recent Commits</h3>
+                    {repository.recentCommits.length === 0 ? (
+                      <p className="mt-3 text-[13px] text-textSecondary">
+                        No recent commits available.
+                      </p>
+                    ) : (
+                      <ul className="mt-3 space-y-3">
+                        {repository.recentCommits.slice(0, 5).map((commit) => (
+                          <li
+                            key={commit.sha}
+                            className="rounded-tokenMd border border-surface400 bg-surface300 px-3 py-3"
+                          >
+                            <Link
+                              href={commit.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="line-clamp-2 text-[13px] font-medium text-textPrimary hover:text-white"
+                            >
+                              {commit.message}
+                            </Link>
+                            <p className="mt-1 text-[11px] text-textSecondary">
+                              {commit.authorName ?? 'Unknown author'} ·{' '}
+                              {toReadableDate(commit.authoredAt)}
+                            </p>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  <div className="rounded-tokenLg border border-surface400 bg-surface200 px-4 py-4">
+                    <h3 className="text-[20px] font-semibold">Status</h3>
+                    <div className="mt-3 space-y-2 text-[14px]">
+                      <p className="flex items-center justify-between text-textSecondary">
+                        <span>Repository Health</span>
+                        <span className="font-medium text-white">
+                          {repository.isActive ? 'Healthy' : 'Analyzing'}
+                        </span>
+                      </p>
+                      <p className="flex items-center justify-between text-textSecondary">
+                        <span>Archived</span>
+                        <span className="font-medium text-white">
+                          {repository.archived ? 'Yes' : 'No'}
+                        </span>
+                      </p>
+                      <p className="flex items-center justify-between text-textSecondary">
+                        <span>Disabled</span>
+                        <span className="font-medium text-white">
+                          {repository.disabled ? 'Yes' : 'No'}
+                        </span>
+                      </p>
+                      <p className="flex items-center justify-between text-textSecondary">
+                        <span>Subscribers</span>
+                        <span className="font-medium text-white">
+                          {repository.subscribersCount.toLocaleString()}
+                        </span>
+                      </p>
                     </div>
                   </div>
 
                   <div className="rounded-tokenLg border border-surface400 bg-surface200 px-4 py-4">
-                    <h3 className="text-[22px] font-semibold">System Coverage</h3>
-                    <div className="mt-4 flex items-center justify-center">
-                      <div className="relative h-[120px] w-[120px] rounded-full border-[12px] border-white/20">
-                        <div className="absolute inset-0 rounded-full border-[12px] border-white border-r-transparent border-t-transparent" />
-                      </div>
-                    </div>
-                    <div className="mt-5 flex items-center justify-between">
+                    <h3 className="text-[20px] font-semibold">Timeline</h3>
+                    <div className="mt-3 space-y-3 text-[13px] text-textSecondary">
                       <div>
-                        <p className="text-[28px] font-bold">N/A</p>
-                        <p className="text-[12px] text-textMuted">Codebase mapped</p>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">
+                          Created
+                        </p>
+                        <p className="mt-1 text-textPrimary">
+                          {toReadableDate(repository.createdAt)}
+                        </p>
                       </div>
-                      <div className="text-right">
-                        <p className="text-[28px] font-bold">N/A</p>
-                        <p className="text-[12px] text-textMuted">Files tracked</p>
+                      <div>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">
+                          Updated
+                        </p>
+                        <p className="mt-1 text-textPrimary">
+                          {toReadableDate(repository.updatedAt)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">
+                          Last Push
+                        </p>
+                        <p className="mt-1 text-textPrimary">
+                          {toReadableDate(repository.pushedAt)}
+                        </p>
                       </div>
                     </div>
                   </div>
-                </div>
+                </aside>
               </section>
             </>
           )}

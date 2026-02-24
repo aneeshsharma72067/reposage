@@ -152,7 +152,7 @@ export async function generateInstallationAccessToken(
 
     if (response.status === 404) {
       throw new AppError(
-        'GitHub installation not found',
+        'GitHub installation not found for configured GitHub App',
         404,
         'GITHUB_INSTALLATION_NOT_FOUND',
       );
@@ -179,6 +179,70 @@ export async function generateInstallationAccessToken(
   });
 
   return token;
+}
+
+interface GithubRepositoryInstallationResponse {
+  id?: number;
+}
+
+export async function resolveRepositoryInstallationId(
+  owner: string,
+  repositoryName: string,
+): Promise<bigint> {
+  const appJwt = await generateAppJwt();
+  const response = await fetch(
+    `https://api.github.com/repos/${owner}/${repositoryName}/installation`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${appJwt}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+    },
+  );
+
+  let responseBody: Partial<GithubRepositoryInstallationResponse> | undefined;
+  try {
+    responseBody =
+      (await response.json()) as Partial<GithubRepositoryInstallationResponse>;
+  } catch {
+    responseBody = undefined;
+  }
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new AppError(
+        'Invalid GitHub App JWT',
+        401,
+        'GITHUB_APP_JWT_INVALID',
+      );
+    }
+
+    if (response.status === 404) {
+      throw new AppError(
+        'GitHub App is not installed on this repository',
+        404,
+        'GITHUB_REPOSITORY_INSTALLATION_NOT_FOUND',
+      );
+    }
+
+    throw new AppError(
+      'Failed to resolve repository installation from GitHub',
+      502,
+      'GITHUB_REPOSITORY_INSTALLATION_RESOLVE_FAILED',
+    );
+  }
+
+  if (typeof responseBody?.id !== 'number') {
+    throw new AppError(
+      'GitHub repository installation id missing in response',
+      502,
+      'GITHUB_REPOSITORY_INSTALLATION_ID_MISSING',
+    );
+  }
+
+  return BigInt(responseBody.id);
 }
 
 export async function syncInstallationRepositories(
