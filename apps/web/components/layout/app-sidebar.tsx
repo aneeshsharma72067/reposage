@@ -6,7 +6,7 @@ import { clearAccessToken } from '@/lib/auth';
 
 const navItems = [
   { label: 'Dashboard', href: '/dashboard' },
-  { label: 'Repositories', href: '/dashboard#repositories' },
+  { label: 'Repositories', href: '/repositories' },
   { label: 'Analysis Agents', href: '/dashboard#agents' },
   { label: 'Event Log', href: '/dashboard#events' },
 ];
@@ -35,16 +35,19 @@ export function AppSidebar() {
 
       <nav className="space-y-1">
         {navItems.map((item) => {
-          const isActive = pathname.startsWith('/dashboard') && item.label === 'Dashboard';
-          const isRepoDetail = pathname.startsWith('/repositories') && item.label === 'Repositories';
-          const active = isActive || isRepoDetail;
+          const isDashboardActive = pathname === '/dashboard' && item.label === 'Dashboard';
+          const isReposActive =
+            pathname.startsWith('/repositories') && item.label === 'Repositories';
+          const active = isDashboardActive || isReposActive;
 
           return (
             <Link
               key={item.label}
               href={item.href}
               className={`flex h-11 items-center rounded-tokenMd px-3 text-[15px] ${
-                active ? 'bg-surface300 text-white' : 'text-textSecondary hover:bg-white/5 hover:text-white'
+                active
+                  ? 'bg-surface300 text-white'
+                  : 'text-textSecondary hover:bg-white/5 hover:text-white'
               }`}
             >
               {item.label}
