@@ -1,4 +1,6 @@
 import type { FastifyBaseLogger } from 'fastify';
+import { triggerAnalysisFromPushEvent } from '../analysis/analysis.service';
+import type { GitHubPushPayload } from '../analysis/analysis.types';
 import type { GithubWebhookPayload } from './webhook.types';
 
 interface HandleGithubWebhookEventInput {
@@ -32,6 +34,14 @@ export async function handleGithubWebhookEvent({
   payload,
   logger,
 }: HandleGithubWebhookEventInput): Promise<void> {
+  if (event === 'push') {
+    await triggerAnalysisFromPushEvent({
+      payload: payload as unknown as GitHubPushPayload,
+      logger,
+    });
+    return;
+  }
+
   if (event !== 'installation') {
     return;
   }

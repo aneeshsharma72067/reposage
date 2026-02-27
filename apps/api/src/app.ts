@@ -10,6 +10,7 @@ import {
   generateInstallationAccessToken,
 } from './modules/githubApp/githubApp.service';
 import installationRoutes from './modules/installation/installation.routes';
+import analysisRoutes from './modules/analysis/analysis.routes';
 import repositoryRoutes from './modules/repository/repository.routes';
 import webhookRoutes from './modules/webhook/webhook.routes';
 import { jwtPlugin } from './plugins/jwt';
@@ -34,7 +35,8 @@ export async function buildApp() {
     try {
       const parsedOrigin = new URL(origin);
       const isLocalhost =
-        parsedOrigin.hostname === 'localhost' || parsedOrigin.hostname === '127.0.0.1';
+        parsedOrigin.hostname === 'localhost' ||
+        parsedOrigin.hostname === '127.0.0.1';
 
       if (isLocalhost) {
         return true;
@@ -135,6 +137,7 @@ export async function buildApp() {
   await app.register(authRoutes, { prefix: '/auth' });
   await app.register(installationRoutes, { prefix: '/install' });
   await app.register(repositoryRoutes, { prefix: '/repos' });
+  await app.register(analysisRoutes, { prefix: '/repos' });
   await app.register(webhookRoutes, { prefix: '/webhooks' });
 
   return app;
