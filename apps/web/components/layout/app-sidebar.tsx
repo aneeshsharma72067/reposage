@@ -7,8 +7,8 @@ import { clearAccessToken } from '@/lib/auth';
 const navItems = [
   { label: 'Dashboard', href: '/dashboard' },
   { label: 'Repositories', href: '/repositories' },
+  { label: 'Event Log', href: '/events' },
   { label: 'Analysis Agents', href: '/dashboard#agents' },
-  { label: 'Event Log', href: '/dashboard#events' },
 ];
 
 export function AppSidebar() {
@@ -38,7 +38,8 @@ export function AppSidebar() {
           const isDashboardActive = pathname === '/dashboard' && item.label === 'Dashboard';
           const isReposActive =
             pathname.startsWith('/repositories') && item.label === 'Repositories';
-          const active = isDashboardActive || isReposActive;
+          const isEventsActive = pathname.startsWith('/events') && item.label === 'Event Log';
+          const active = isDashboardActive || isReposActive || isEventsActive;
 
           return (
             <Link
