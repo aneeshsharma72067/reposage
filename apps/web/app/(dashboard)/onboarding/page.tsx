@@ -44,10 +44,13 @@ export default function OnboardingPage() {
     void loadRepositories();
   }, [router]);
 
-  const hasConnectedRepositories = useMemo(
-    () => repositories.length > 0,
-    [repositories],
-  );
+  const hasConnectedRepositories = useMemo(() => repositories.length > 0, [repositories]);
+
+  useEffect(() => {
+    if (!isLoading && hasConnectedRepositories) {
+      router.replace('/dashboard');
+    }
+  }, [isLoading, hasConnectedRepositories, router]);
 
   return (
     <main className="flex min-h-screen flex-col bg-black text-white">
@@ -59,8 +62,8 @@ export default function OnboardingPage() {
             Connect your Engineering Environment
           </h1>
           <p className="mt-5 max-w-[520px] text-[15px] leading-[1.6] text-textSecondary">
-            Agentic AI monitors your repository events in real-time to detect architectural drift and
-            API contract breaks.
+            Agentic AI monitors your repository events in real-time to detect architectural drift
+            and API contract breaks.
           </p>
 
           <FeatureList />
