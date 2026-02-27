@@ -7,16 +7,26 @@ import { DashboardHeader } from '@/components/layout/dashboard-header';
 import { getAccessToken, listRepositories } from '@/lib/auth';
 import type { RepositoryListItem } from '@/types/repository';
 
-function StatusBadge({ isActive }: { isActive: boolean }) {
+function StatusBadge({ status }: { status: string }) {
+  const isHealthy = status === 'healthy';
+  const isAnalyzing = status === 'analyzing';
+
+  let colorClasses = 'border-white/10 bg-white/10 text-white';
+  let label = status.charAt(0).toUpperCase() + status.slice(1);
+
+  if (isHealthy) {
+    colorClasses = 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300';
+    label = 'Healthy';
+  } else if (isAnalyzing) {
+    colorClasses = 'border-cyan-500/20 bg-cyan-500/10 text-cyan-300';
+    label = 'Analyzing';
+  }
+
   return (
     <span
-      className={`inline-flex h-6 items-center rounded-full border px-2 text-[10px] font-semibold uppercase tracking-[0.04em] ${
-        isActive
-          ? 'border-white/10 bg-white/10 text-white'
-          : 'border-cyan-500/20 bg-cyan-500/10 text-cyan-300'
-      }`}
+      className={`inline-flex h-6 items-center rounded-full border px-2 text-[10px] font-semibold uppercase tracking-[0.04em] ${colorClasses}`}
     >
-      {isActive ? 'Healthy' : 'Analyzing'}
+      {label}
     </span>
   );
 }
@@ -55,11 +65,11 @@ export default function DashboardPage() {
   const filteredRepositories = useMemo<RepositoryListItem[]>(() => {
     const filterMatched = repositories.filter((repository) => {
       if (activeFilter === 'healthy') {
-        return repository.isActive;
+        return repository.status === 'healthy';
       }
 
       if (activeFilter === 'analyzing') {
-        return !repository.isActive;
+        return repository.status === 'analyzing';
       }
 
       return true;
@@ -78,9 +88,13 @@ export default function DashboardPage() {
   }, [activeFilter, repositories, searchText]);
 
   const hasRepositories = repositories.length > 0;
-  const activeRepositoryCount = repositories.filter((repository) => repository.isActive).length;
+  const healthyRepositoryCount = repositories.filter(
+    (repository) => repository.status === 'healthy',
+  ).length;
   const privateRepositoryCount = repositories.filter((repository) => repository.private).length;
-  const analyzingRepositoryCount = repositories.length - activeRepositoryCount;
+  const analyzingRepositoryCount = repositories.filter(
+    (repository) => repository.status === 'analyzing',
+  ).length;
 
   return (
     <main className="flex h-screen overflow-hidden bg-black text-white">
@@ -92,16 +106,24 @@ export default function DashboardPage() {
         <div className="px-6 py-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="rounded-tokenLg border border-surface400 bg-surface200 px-6 py-6">
-              <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">Connected Repos</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">
+                Connected Repos
+              </p>
               <p className="mt-2 text-[40px] font-bold leading-none">{repositories.length}</p>
             </div>
             <div className="rounded-tokenLg border border-surface400 bg-surface200 px-6 py-6">
-              <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">Active Repos</p>
-              <p className="mt-2 text-[40px] font-bold leading-none">{activeRepositoryCount}</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">
+                Active Repos
+              </p>
+              <p className="mt-2 text-[40px] font-bold leading-none">{healthyRepositoryCount}</p>
             </div>
             <div className="rounded-tokenLg border border-surface400 bg-surface200 px-6 py-6">
-              <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">Private Repos</p>
-              <p className="mt-2 text-[40px] font-bold leading-none text-emerald-400">{privateRepositoryCount}</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">
+                Private Repos
+              </p>
+              <p className="mt-2 text-[40px] font-bold leading-none text-emerald-400">
+                {privateRepositoryCount}
+              </p>
             </div>
           </div>
 
@@ -131,8 +153,8 @@ export default function DashboardPage() {
               </div>
               <h2 className="mt-8 text-[36px] font-bold leading-tight">No repositories found</h2>
               <p className="mx-auto mt-4 max-w-[640px] text-[15px] leading-[1.65] text-textSecondary">
-                Your account is authenticated, but we did not receive any repositories yet.
-                Install the GitHub App or refresh after installation sync completes.
+                Your account is authenticated, but we did not receive any repositories yet. Install
+                the GitHub App or refresh after installation sync completes.
               </p>
 
               <div className="mt-8 rounded-tokenXl border border-surface400 bg-surface200 px-8 py-8 text-left">
@@ -152,7 +174,9 @@ export default function DashboardPage() {
                     </div>
                     <div>
                       <p className="text-[30px] font-semibold">Activate Agents</p>
-                      <p className="text-[13px] text-textSecondary">AI agents begin observing PRs and pushes.</p>
+                      <p className="text-[13px] text-textSecondary">
+                        AI agents begin observing PRs and pushes.
+                      </p>
                     </div>
                   </div>
 
@@ -213,7 +237,7 @@ export default function DashboardPage() {
                           : 'border-white/10 bg-transparent text-textSecondary'
                       }`}
                     >
-                      Healthy ({activeRepositoryCount})
+                      Healthy ({healthyRepositoryCount})
                     </button>
                   </div>
                 </div>
@@ -232,29 +256,44 @@ export default function DashboardPage() {
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <h3 className="text-[28px] font-semibold">{repository.name}</h3>
-                            <p className="mt-1 font-mono text-[13px] text-textSecondary">{repository.fullName}</p>
+                            <p className="mt-1 font-mono text-[13px] text-textSecondary">
+                              {repository.fullName}
+                            </p>
                           </div>
-                          <StatusBadge isActive={repository.isActive} />
+                          <StatusBadge status={repository.status} />
                         </div>
 
                         <div className="mt-4 grid grid-cols-3 gap-4 border-b border-surface400 pb-4">
                           <div>
-                            <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">Last Activity</p>
+                            <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">
+                              Last Activity
+                            </p>
                             <p className="mt-1 text-[13px]">Not Available</p>
                           </div>
                           <div>
-                            <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">Branches</p>
-                            <p className="mt-1 text-[13px]">{repository.defaultBranch || 'unknown'}</p>
+                            <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">
+                              Branches
+                            </p>
+                            <p className="mt-1 text-[13px]">
+                              {repository.defaultBranch || 'unknown'}
+                            </p>
                           </div>
                           <div>
-                            <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">Language</p>
-                            <p className="mt-1 text-[13px]">{repository.private ? 'Private Repo' : 'Public Repo'}</p>
+                            <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">
+                              Language
+                            </p>
+                            <p className="mt-1 text-[13px]">
+                              {repository.private ? 'Private Repo' : 'Public Repo'}
+                            </p>
                           </div>
                         </div>
 
                         <div className="mt-4 flex items-center justify-between text-[13px] text-textSecondary">
                           <span>◷ View history</span>
-                          <Link href={`/repositories/${repository.id}`} className="text-textPrimary hover:text-white">
+                          <Link
+                            href={`/repositories/${repository.id}`}
+                            className="text-textPrimary hover:text-white"
+                          >
                             Open Details →
                           </Link>
                         </div>
@@ -268,9 +307,13 @@ export default function DashboardPage() {
                 <div className="mb-6 flex items-center justify-between">
                   <div>
                     <h3 className="text-[22px] font-semibold">Agent Analysis Velocity</h3>
-                    <p className="text-[13px] text-textSecondary">Total events processed by AI agents across all repos</p>
+                    <p className="text-[13px] text-textSecondary">
+                      Total events processed by AI agents across all repos
+                    </p>
                   </div>
-                  <span className="rounded-full border border-white/10 bg-surface300 px-3 py-1 text-[12px] text-textPrimary">Last 7 Days</span>
+                  <span className="rounded-full border border-white/10 bg-surface300 px-3 py-1 text-[12px] text-textPrimary">
+                    Last 7 Days
+                  </span>
                 </div>
                 <div className="h-[180px] rounded-tokenMd border border-surface400 bg-black/20 p-3">
                   <svg viewBox="0 0 100 30" className="h-full w-full">

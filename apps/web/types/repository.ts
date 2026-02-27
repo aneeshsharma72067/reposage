@@ -7,6 +7,7 @@ export interface RepositoryListItem {
   defaultBranch: string;
   installationId: string;
   isActive: boolean;
+  status: string;
 }
 
 export interface RepositoryDetails {

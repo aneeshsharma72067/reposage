@@ -2,9 +2,85 @@ import type { FastifyBaseLogger } from 'fastify';
 import { prisma } from '../../lib/prisma';
 import type { AnalysisRunListItem, GitHubPushPayload } from './analysis.types';
 
+const ANALYSIS_SIMULATION_DELAY_MS = 5_000;
+
 interface TriggerAnalysisInput {
   payload: GitHubPushPayload;
   logger: FastifyBaseLogger;
+}
+
+/**
+ * Simulates async analysis completion after a short delay.
+ * Temporary — will be replaced by queue.publish() + worker.process().
+ *
+ * MUST NOT be awaited. Fire-and-forget by design.
+ */
+function scheduleAnalysisCompletion(
+  analysisRunId: string,
+  repositoryId: string,
+  logger: FastifyBaseLogger,
+): void {
+  setTimeout(async () => {
+    try {
+      await prisma.$transaction(async (tx) => {
+        await tx.analysisRun.update({
+          where: { id: analysisRunId },
+          data: {
+            status: 'COMPLETED',
+            completedAt: new Date(),
+          },
+        });
+
+        await tx.repository.update({
+          where: { id: repositoryId },
+          data: { status: 'healthy' },
+        });
+      });
+
+      logger.info(
+        {
+          event: 'analysis.run.completed',
+          analysisRunId,
+          repositoryId,
+          newStatus: 'completed',
+        },
+        'Analysis run completed (simulated)',
+      );
+    } catch (error) {
+      logger.error(
+        {
+          event: 'analysis.run.completion_failed',
+          analysisRunId,
+          repositoryId,
+          err: error,
+        },
+        'Failed to complete analysis run, marking as failed',
+      );
+
+      try {
+        await prisma.analysisRun.update({
+          where: { id: analysisRunId },
+          data: {
+            status: 'FAILED',
+            completedAt: new Date(),
+            errorMessage:
+              error instanceof Error
+                ? error.message
+                : 'Unknown error during analysis completion',
+          },
+        });
+      } catch (fallbackError) {
+        logger.error(
+          {
+            event: 'analysis.run.fallback_failed',
+            analysisRunId,
+            err: fallbackError,
+          },
+          'Failed to mark analysis run as failed',
+        );
+      }
+    }
+  }, ANALYSIS_SIMULATION_DELAY_MS);
 }
 
 export async function triggerAnalysisFromPushEvent({
@@ -68,8 +144,16 @@ export async function triggerAnalysisFromPushEvent({
       data: { processed: true },
     });
 
+    await tx.repository.update({
+      where: { id: repository.id },
+      data: { status: 'analyzing' },
+    });
+
     return { eventId: event.id, analysisRunId: analysisRun.id };
   });
+
+  // Fire-and-forget: simulate async completion (will be replaced by queue worker)
+  scheduleAnalysisCompletion(result.analysisRunId, repository.id, logger);
 
   logger.info(
     {

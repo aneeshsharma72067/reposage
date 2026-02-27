@@ -28,6 +28,7 @@ const repositoryRoutes: FastifyPluginAsync = async (app) => {
               'defaultBranch',
               'installationId',
               'isActive',
+              'status',
             ],
             properties: {
               id: { type: 'string' },
@@ -38,6 +39,7 @@ const repositoryRoutes: FastifyPluginAsync = async (app) => {
               defaultBranch: { type: 'string' },
               installationId: { type: 'string' },
               isActive: { type: 'boolean' },
+              status: { type: 'string' },
             },
           },
         },

@@ -44,6 +44,7 @@ export async function listRepositoriesForUser(
       defaultBranch: true,
       installationId: true,
       isActive: true,
+      status: true,
     },
   });
 
@@ -56,6 +57,7 @@ export async function listRepositoriesForUser(
     defaultBranch: repository.defaultBranch ?? '',
     installationId: repository.installationId,
     isActive: repository.isActive,
+    status: repository.status,
   }));
 }
 
