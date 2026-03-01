@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import { getInstallationUrl } from '@/lib/auth';
 import type { RepositoryListItem } from '@/types/repository';
 
@@ -34,9 +35,9 @@ export function InstallPanel({
   };
 
   return (
-    <div className="mx-auto mt-10 max-w-[640px]">
-      <div className="mb-8 flex items-center justify-center gap-6">
-        <div className="flex h-20 w-20 items-center justify-center rounded-token2xl border border-white/10 bg-[#1c1c1e] text-4xl">
+    <div className="mx-auto mt-6 max-w-[640px] sm:mt-10">
+      <div className="mb-6 flex items-center justify-center gap-3 sm:mb-8 sm:gap-6">
+        <div className="glass-panel-soft flex h-14 w-14 items-center justify-center rounded-tokenXl text-2xl sm:h-20 sm:w-20 sm:rounded-token2xl sm:text-4xl">
           ⌥
         </div>
 
@@ -46,17 +47,19 @@ export function InstallPanel({
             <span className="h-2 w-2 rounded-full bg-[rgba(34,197,94,0.35)]" />
             <span className="h-2 w-2 rounded-full bg-[rgba(34,197,94,0.35)]" />
           </div>
-          <p className="font-mono text-[10px] font-bold tracking-[0.1em] text-[#22c55e]">ENCRYPTED</p>
+          <p className="font-mono text-[10px] font-bold tracking-[0.1em] text-[#22c55e]">
+            ENCRYPTED
+          </p>
         </div>
 
-        <div className="flex h-20 w-20 items-center justify-center rounded-token2xl bg-white text-4xl text-black">
+        <div className="flex h-14 w-14 items-center justify-center rounded-tokenXl bg-white text-2xl text-black sm:h-20 sm:w-20 sm:rounded-token2xl sm:text-4xl">
           🤖
         </div>
       </div>
 
-      <div className="token-card px-10 py-10 text-center">
-        <h2 className="text-[22px] font-bold">Install Agentic AI GitHub App</h2>
-        <p className="mx-auto mt-2 max-w-[520px] text-[14px] leading-[1.6] text-textSecondary">
+      <div className="glass-panel rounded-tokenXl px-4 py-6 text-center sm:px-8 sm:py-8 lg:px-10 lg:py-10">
+        <h2 className="text-[20px] font-bold sm:text-[22px]">Install Agentic AI GitHub App</h2>
+        <p className="mx-auto mt-2 max-w-[520px] text-[13px] leading-[1.6] text-textSecondary sm:text-[14px]">
           Authorize our GitHub App to begin repository synchronization and system analysis.
         </p>
 
@@ -65,13 +68,11 @@ export function InstallPanel({
             <p className="text-base font-semibold text-[var(--success)]">Connected repositories</p>
             <ul className="mt-3 space-y-2">
               {repositories.map((repository) => (
-                <li
-                  key={repository.id}
-                  className="rounded-tokenMd border border-surface400 bg-surface300 px-4 py-3"
-                >
+                <li key={repository.id} className="glass-panel-soft rounded-tokenMd px-4 py-3">
                   <p className="text-base font-semibold text-white">{repository.fullName}</p>
                   <p className="text-sm text-textSecondary">
-                    {repository.private ? 'Private' : 'Public'} • Default branch: {repository.defaultBranch || 'N/A'}
+                    {repository.private ? 'Private' : 'Public'} • Default branch:{' '}
+                    {repository.defaultBranch || 'N/A'}
                   </p>
                 </li>
               ))}
@@ -85,26 +86,33 @@ export function InstallPanel({
                 event.preventDefault();
                 void onStartInstall();
               }}
-              className="mt-8 inline-flex h-14 items-center justify-center gap-2 rounded-full bg-white px-10 text-[15px] font-semibold text-black"
+              className="mt-8 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-white px-6 text-[14px] font-semibold text-black sm:h-14 sm:w-auto sm:px-10 sm:text-[15px]"
             >
               {isStartingInstall ? 'Starting...' : '↗ Install & Authorize on GitHub'}
             </a>
-            <p className="mt-3 text-xs text-textMuted">Secure OAuth2 Connection via GitHub Enterprise</p>
+            <p className="mt-3 text-xs text-textMuted">
+              Secure OAuth2 Connection via GitHub Enterprise
+            </p>
           </>
         )}
 
-        {isLoading ? <p className="mt-4 text-sm text-textSecondary">Loading repositories...</p> : null}
+        {isLoading ? (
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-3 py-1.5 text-xs text-white/70">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            <span>Syncing repositories</span>
+          </div>
+        ) : null}
         {errorMessage ? <p className="mt-4 text-sm text-red-300">{errorMessage}</p> : null}
         {installError ? <p className="mt-4 text-sm text-red-300">{installError}</p> : null}
       </div>
 
       <div className="mt-8 text-center">
         <p className="text-base text-textSecondary">Looking for other integrations?</p>
-        <div className="mt-4 flex items-center justify-center gap-3">
-          <span className="flex h-11 items-center rounded-tokenLg border border-surface400 bg-surface200 px-5 text-base text-textPrimary">
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+          <span className="glass-panel-soft flex h-11 items-center rounded-tokenLg px-5 text-base text-textPrimary">
             GitLab
           </span>
-          <span className="flex h-11 items-center rounded-tokenLg border border-surface400 bg-surface200 px-5 text-base text-textPrimary">
+          <span className="glass-panel-soft flex h-11 items-center rounded-tokenLg px-5 text-base text-textPrimary">
             Bitbucket
           </span>
         </div>

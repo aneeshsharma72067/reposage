@@ -53,12 +53,12 @@ export default function OnboardingPage() {
   }, [isLoading, hasConnectedRepositories, router]);
 
   return (
-    <main className="flex min-h-screen flex-col bg-black text-white">
+    <main className="page-shell flex min-h-screen flex-col text-white">
       <TopNav />
 
       <section className="mx-auto grid w-full max-w-[1280px] flex-1 grid-cols-1 lg:grid-cols-[38%_62%]">
-        <div className="border-r border-surface400 px-16 py-12">
-          <h1 className="text-[36px] font-bold leading-[1.2] tracking-[-0.02em]">
+        <div className="glass-panel border-r px-5 py-8 sm:px-8 sm:py-10 lg:px-16 lg:py-12">
+          <h1 className="text-[30px] font-bold leading-[1.2] tracking-[-0.02em] sm:text-[34px] lg:text-[36px]">
             Connect your Engineering Environment
           </h1>
           <p className="mt-5 max-w-[520px] text-[15px] leading-[1.6] text-textSecondary">
@@ -68,7 +68,7 @@ export default function OnboardingPage() {
 
           <FeatureList />
 
-          <div className="mt-9 rounded-tokenLg border border-[var(--info-border)] bg-[var(--info-bg)] px-5 py-4 text-[15px] leading-[1.6] text-[var(--info-text)]">
+          <div className="glass-panel-soft mt-9 rounded-tokenLg border-[var(--info-border)] bg-[var(--info-bg)] px-5 py-4 text-[15px] leading-[1.6] text-[var(--info-text)]">
             <p>
               You can granularly select which repositories the Agent has access to during the GitHub
               installation step.
@@ -76,7 +76,7 @@ export default function OnboardingPage() {
           </div>
         </div>
 
-        <div className="px-12 py-12">
+        <div className="glass-panel-soft px-4 py-6 sm:px-8 sm:py-10 lg:px-12 lg:py-12">
           <InstallPanel
             isLoading={isLoading}
             errorMessage={errorMessage}

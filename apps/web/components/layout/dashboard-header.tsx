@@ -22,26 +22,26 @@ export function DashboardHeader({ onSearchChange }: DashboardHeaderProps) {
   };
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-surface400 bg-surface100 px-6">
-      <div className="text-[13px] text-textMuted">
+    <header className="glass-header flex min-h-16 flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:py-0">
+      <div className="hidden text-[13px] text-textMuted md:block">
         <span>Organization</span>
         <span className="mx-2 text-white/25">›</span>
         <span className="font-semibold text-white">Engineering Team</span>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex w-full flex-wrap items-center gap-2 sm:gap-3 md:w-auto md:flex-nowrap">
         <input
           type="text"
           placeholder="Search repositories..."
           onChange={(event) => onSearchChange(event.target.value)}
-          className="h-10 w-[240px] rounded-tokenLg border border-surface400 bg-surface200 px-4 text-[14px] text-white placeholder:text-textMuted focus:border-white/20 focus:outline-none"
+          className="glass-input h-10 w-full rounded-tokenLg px-4 text-[14px] sm:w-[240px]"
         />
         <button
           type="button"
           onClick={() => {
             void onConnectRepository();
           }}
-          className="h-10 rounded-full bg-white px-5 text-[14px] font-semibold text-black"
+          className="h-10 w-full rounded-full bg-white px-5 text-[14px] font-semibold text-black transition hover:bg-white/90 sm:w-auto"
         >
           {isConnecting ? 'Connecting...' : '+ Connect Repository'}
         </button>

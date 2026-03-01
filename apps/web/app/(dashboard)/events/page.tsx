@@ -9,11 +9,9 @@ import {
   Clock,
   GitMerge,
   GitPullRequest,
-  Loader2,
   RefreshCw,
   Search,
   Upload,
-  XCircle,
 } from 'lucide-react';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import { getAccessToken, listEvents } from '@/lib/auth';
@@ -171,7 +169,7 @@ function StatCard({
   icon?: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="rounded-[14px] border border-white/[0.06] bg-[#141414] px-5 py-5">
+    <div className="glass-panel-soft rounded-[14px] px-5 py-5">
       <div className="flex items-center justify-between">
         <p className="text-[10px] font-medium uppercase tracking-widest text-white/25">{label}</p>
         {Icon && <Icon className={`h-4 w-4 ${color ?? 'text-white/20'}`} />}
@@ -191,7 +189,7 @@ function EventCard({ event }: { event: EventListItem }) {
   return (
     <Link
       href={`/events/${event.id}`}
-      className="group flex flex-col rounded-[14px] border border-white/[0.06] bg-[#141414] p-5 transition-all duration-200 hover:border-white/[0.12] hover:bg-[#171717]"
+      className="glass-panel-soft group flex flex-col rounded-[14px] p-5 transition-all duration-200 hover:border-white/[0.16] hover:bg-white/[0.06]"
     >
       {/* Top: icon + repo name + badges */}
       <div className="flex items-start justify-between gap-4">
@@ -256,7 +254,7 @@ function EventCard({ event }: { event: EventListItem }) {
 
 function SkeletonCard() {
   return (
-    <div className="animate-pulse rounded-[14px] border border-white/[0.06] bg-[#141414] p-5">
+    <div className="glass-panel-soft animate-pulse rounded-[14px] p-5">
       <div className="flex items-start gap-3">
         <div className="h-8 w-8 shrink-0 rounded-full bg-white/[0.06]" />
         <div className="flex-1 space-y-2">
@@ -340,43 +338,43 @@ export default function EventsPage() {
   }, [activeFilter, events, searchText]);
 
   return (
-    <main className="flex h-screen overflow-hidden bg-black text-white">
+    <main className="page-shell flex h-screen overflow-hidden text-white">
       <AppSidebar />
 
       <section className="flex h-screen flex-1 flex-col overflow-y-auto">
         {/* Header */}
-        <header className="flex h-14 shrink-0 items-center justify-between border-b border-white/[0.06] bg-[#0e0e0e] px-6">
-          <div className="text-[12px] text-white/30">
+        <header className="glass-header flex min-h-14 flex-wrap items-center justify-between gap-2 px-4 py-2 sm:px-6 sm:py-0">
+          <div className="hidden text-[12px] text-white/30 md:block">
             <span>Organization</span>
             <span className="mx-2 text-white/15">›</span>
             <span className="font-medium text-white/70">Event Log</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex w-full items-center gap-2 sm:w-auto">
             <button
               type="button"
               onClick={() => void loadEvents()}
               disabled={isLoading}
-              className="flex h-8 items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 text-[12px] text-white/50 transition-colors hover:border-white/[0.12] hover:text-white/80 disabled:opacity-40"
+              className="glass-input flex h-8 items-center gap-1.5 rounded-lg px-3 text-[12px] text-white/70 transition-colors hover:border-white/[0.2] hover:text-white/90 disabled:opacity-40"
             >
               <RefreshCw className={`h-3 w-3 ${isLoading ? 'animate-spin' : ''}`} />
               Refresh
             </button>
-            <div className="relative">
+            <div className="relative flex-1 sm:flex-none">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/20" />
               <input
                 type="text"
                 placeholder="Search events..."
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
-                className="h-8 w-[220px] rounded-lg border border-white/[0.06] bg-white/[0.03] pl-9 pr-3 text-[13px] text-white/80 placeholder:text-white/20 focus:border-white/[0.12] focus:outline-none"
+                className="glass-input h-8 w-full rounded-lg pl-9 pr-3 text-[13px] sm:w-[220px]"
               />
             </div>
           </div>
         </header>
 
-        <div className="space-y-6 px-6 py-6">
+        <div className="content-wrap space-y-6">
           {/* Summary cards */}
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard label="Total Events" value={events.length} icon={Activity} />
             <StatCard label="Pushes" value={pushCount} color="text-violet-400" icon={Upload} />
             <StatCard
@@ -394,11 +392,11 @@ export default function EventsPage() {
           </div>
 
           {/* Toolbar */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-[20px] font-semibold tracking-tight text-white/90">
               Recent Events
             </h2>
-            <div className="flex items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-1.5">
               <FilterPill
                 label="All"
                 isActive={activeFilter === 'all'}
@@ -453,7 +451,7 @@ export default function EventsPage() {
               </div>
             </div>
           ) : filteredEvents.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-[14px] border border-white/[0.06] bg-[#141414] px-6 py-16 text-center">
+            <div className="glass-panel-soft flex flex-col items-center justify-center rounded-[14px] px-6 py-16 text-center">
               <Activity className="mb-3 h-8 w-8 text-white/15" />
               <p className="text-[14px] font-medium text-white/40">
                 {events.length === 0

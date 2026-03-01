@@ -1,5 +1,6 @@
 import { apiRequest, getApiBaseUrl, getGithubApiBaseUrl, githubApiRequest } from '@/lib/api';
 import { ApiError } from '@/lib/api';
+import type { RepositoryAnalysisRun } from '@/types/analysis';
 import type { EventDetail, EventListItem } from '@/types/event';
 import type { RepositoryFinding } from '@/types/finding';
 import type { RepositoryCommit, RepositoryDetails, RepositoryListItem } from '@/types/repository';
@@ -213,6 +214,29 @@ export async function listRepositoryFindings(repositoryId: string): Promise<Repo
 
   try {
     return await apiRequest<RepositoryFinding[]>(`/repos/${repositoryId}/findings`, {
+      method: 'GET',
+      token,
+    });
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) {
+      clearAccessToken();
+    }
+
+    throw error;
+  }
+}
+
+export async function listRepositoryAnalysisRuns(
+  repositoryId: string,
+): Promise<RepositoryAnalysisRun[]> {
+  const token = getAccessToken();
+
+  if (!token) {
+    throw new Error('MISSING_ACCESS_TOKEN');
+  }
+
+  try {
+    return await apiRequest<RepositoryAnalysisRun[]>(`/repos/${repositoryId}/analysis-runs`, {
       method: 'GET',
       token,
     });

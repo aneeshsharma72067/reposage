@@ -11,5 +11,6 @@ secrets.txt
 secrets/
 keys/
 *.pem
-
+.agents/
 ngrok/
+skills-lock.json

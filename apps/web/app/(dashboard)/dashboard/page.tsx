@@ -2,52 +2,172 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { Activity, BarChart3, FolderGit2, Radar, ShieldAlert } from 'lucide-react';
+import { ActivityFeed, type ActivityFeedItem } from '@/components/dashboard/ActivityFeed';
+import {
+  AnalysisTrendChart,
+  type AnalysisTrendPoint,
+} from '@/components/dashboard/AnalysisTrendChart';
+import { FindingsDonutChart } from '@/components/dashboard/FindingsDonutChart';
+import { MetricCard } from '@/components/dashboard/MetricCard';
+import {
+  RepositoryTable,
+  type DashboardRepositoryRow,
+} from '@/components/dashboard/RepositoryTable';
+import { RepoHealthSummary } from '@/components/dashboard/RepoHealthSummary';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import { DashboardHeader } from '@/components/layout/dashboard-header';
-import { getAccessToken, listRepositories } from '@/lib/auth';
+import {
+  getAccessToken,
+  listRepositories,
+  listRepositoryAnalysisRuns,
+  listRepositoryFindings,
+} from '@/lib/auth';
+import type { RepositoryAnalysisRun } from '@/types/analysis';
+import type { RepositoryFinding } from '@/types/finding';
 import type { RepositoryListItem } from '@/types/repository';
 
-function StatusBadge({ status }: { status: string }) {
-  const isHealthy = status === 'healthy';
-  const isAnalyzing = status === 'analyzing';
+type RepositoryStatus = 'IDLE' | 'ANALYZING' | 'HEALTHY' | 'ISSUES_FOUND';
 
-  let colorClasses = 'border-white/10 bg-white/10 text-white';
-  let label = status.charAt(0).toUpperCase() + status.slice(1);
+interface DashboardDataset {
+  repository: RepositoryListItem;
+  runs: RepositoryAnalysisRun[];
+  findings: RepositoryFinding[];
+}
 
-  if (isHealthy) {
-    colorClasses = 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300';
-    label = 'Healthy';
-  } else if (isAnalyzing) {
-    colorClasses = 'border-cyan-500/20 bg-cyan-500/10 text-cyan-300';
-    label = 'Analyzing';
+interface HealthCounters {
+  healthy: number;
+  issuesFound: number;
+  analyzing: number;
+  idle: number;
+}
+
+function normalizeRepositoryStatus(status: string): RepositoryStatus {
+  const normalized = status.toUpperCase();
+
+  switch (normalized) {
+    case 'HEALTHY':
+      return 'HEALTHY';
+    case 'ISSUES_FOUND':
+      return 'ISSUES_FOUND';
+    case 'ANALYZING':
+      return 'ANALYZING';
+    default:
+      return 'IDLE';
+  }
+}
+
+function normalizeRunStatus(status: string): 'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED' {
+  const normalized = status.toUpperCase();
+
+  switch (normalized) {
+    case 'RUNNING':
+      return 'RUNNING';
+    case 'COMPLETED':
+      return 'COMPLETED';
+    case 'FAILED':
+      return 'FAILED';
+    default:
+      return 'PENDING';
+  }
+}
+
+function normalizeFindingSeverity(severity: string): 'INFO' | 'WARNING' | 'CRITICAL' {
+  const normalized = severity.toUpperCase();
+
+  switch (normalized) {
+    case 'CRITICAL':
+      return 'CRITICAL';
+    case 'WARNING':
+      return 'WARNING';
+    default:
+      return 'INFO';
+  }
+}
+
+function toStartOfDay(date: Date): Date {
+  const clone = new Date(date);
+  clone.setHours(0, 0, 0, 0);
+  return clone;
+}
+
+function toShortDate(date: Date): string {
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+function toTimestampLabel(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return 'Unknown time';
   }
 
+  return date.toLocaleString();
+}
+
+function toTrendPercentage(current: number, previous: number): number {
+  if (previous <= 0) {
+    return current > 0 ? 100 : 0;
+  }
+
+  return Math.round(((current - previous) / previous) * 100);
+}
+
+function DashboardLoadingSkeleton() {
   return (
-    <span
-      className={`inline-flex h-6 items-center rounded-full border px-2 text-[10px] font-semibold uppercase tracking-[0.04em] ${colorClasses}`}
-    >
-      {label}
-    </span>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="glass-panel h-[154px] animate-pulse rounded-2xl" />
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <div className="glass-panel h-[380px] animate-pulse rounded-2xl xl:col-span-2" />
+        <div className="glass-panel h-[380px] animate-pulse rounded-2xl" />
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <div className="glass-panel h-[320px] animate-pulse rounded-2xl xl:col-span-2" />
+        <div className="glass-panel h-[320px] animate-pulse rounded-2xl" />
+      </div>
+
+      <div className="glass-panel h-[420px] animate-pulse rounded-2xl" />
+    </div>
   );
 }
 
 export default function DashboardPage() {
-  const [repositories, setRepositories] = useState<RepositoryListItem[]>([]);
+  const [dataset, setDataset] = useState<DashboardDataset[]>([]);
   const [searchText, setSearchText] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [activeFilter, setActiveFilter] = useState<'all' | 'healthy' | 'analyzing'>('all');
 
-  const loadRepositories = async () => {
+  const loadDashboard = async () => {
     setIsLoading(true);
 
     try {
-      const data = await listRepositories();
-      setRepositories(data);
+      const repositories = await listRepositories();
+
+      const joinedData = await Promise.all(
+        repositories.map(async (repository): Promise<DashboardDataset> => {
+          const [runsResult, findingsResult] = await Promise.allSettled([
+            listRepositoryAnalysisRuns(repository.id),
+            listRepositoryFindings(repository.id),
+          ]);
+
+          return {
+            repository,
+            runs: runsResult.status === 'fulfilled' ? runsResult.value : [],
+            findings: findingsResult.status === 'fulfilled' ? findingsResult.value : [],
+          };
+        }),
+      );
+
+      setDataset(joinedData);
       setErrorMessage(null);
     } catch {
-      setRepositories([]);
-      setErrorMessage('Unable to load repositories. Please reconnect and try again.');
+      setDataset([]);
+      setErrorMessage('Unable to load dashboard analytics. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -59,86 +179,288 @@ export default function DashboardPage() {
       return;
     }
 
-    void loadRepositories();
+    void loadDashboard();
   }, []);
 
-  const filteredRepositories = useMemo<RepositoryListItem[]>(() => {
-    const filterMatched = repositories.filter((repository) => {
-      if (activeFilter === 'healthy') {
-        return repository.status === 'healthy';
-      }
+  const repositories = useMemo(() => dataset.map((item) => item.repository), [dataset]);
 
-      if (activeFilter === 'analyzing') {
-        return repository.status === 'analyzing';
-      }
+  const allRuns = useMemo(
+    () =>
+      dataset.flatMap((item) =>
+        item.runs.map((run) => ({
+          ...run,
+          repositoryId: item.repository.id,
+          repositoryName: item.repository.name,
+          repositoryFullName: item.repository.fullName,
+        })),
+      ),
+    [dataset],
+  );
 
-      return true;
-    });
+  const allFindings = useMemo(
+    () =>
+      dataset.flatMap((item) =>
+        item.findings.map((finding) => ({
+          ...finding,
+          repositoryId: item.repository.id,
+          repositoryName: item.repository.name,
+          repositoryFullName: item.repository.fullName,
+        })),
+      ),
+    [dataset],
+  );
 
-    if (!searchText.trim()) {
-      return filterMatched;
+  const now = useMemo(() => new Date(), []);
+  const sevenDaysAgo = useMemo(() => new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000), [now]);
+  const fourteenDaysAgo = useMemo(() => new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000), [now]);
+
+  const findingsLast7Days = useMemo(
+    () =>
+      allFindings.filter((finding) => {
+        const createdAt = new Date(finding.createdAt);
+        return !Number.isNaN(createdAt.getTime()) && createdAt >= sevenDaysAgo;
+      }),
+    [allFindings, sevenDaysAgo],
+  );
+
+  const findingsPrev7Days = useMemo(
+    () =>
+      allFindings.filter((finding) => {
+        const createdAt = new Date(finding.createdAt);
+        return (
+          !Number.isNaN(createdAt.getTime()) &&
+          createdAt >= fourteenDaysAgo &&
+          createdAt < sevenDaysAgo
+        );
+      }),
+    [allFindings, fourteenDaysAgo, sevenDaysAgo],
+  );
+
+  const runsLast7Days = useMemo(
+    () =>
+      allRuns.filter((run) => {
+        const createdAt = new Date(run.event.createdAt);
+        return !Number.isNaN(createdAt.getTime()) && createdAt >= sevenDaysAgo;
+      }),
+    [allRuns, sevenDaysAgo],
+  );
+
+  const runsPrev7Days = useMemo(
+    () =>
+      allRuns.filter((run) => {
+        const createdAt = new Date(run.event.createdAt);
+        return (
+          !Number.isNaN(createdAt.getTime()) &&
+          createdAt >= fourteenDaysAgo &&
+          createdAt < sevenDaysAgo
+        );
+      }),
+    [allRuns, fourteenDaysAgo, sevenDaysAgo],
+  );
+
+  const criticalCount = useMemo(
+    () =>
+      allFindings.filter((finding) => normalizeFindingSeverity(finding.severity) === 'CRITICAL')
+        .length,
+    [allFindings],
+  );
+
+  const warningCount = useMemo(
+    () =>
+      allFindings.filter((finding) => normalizeFindingSeverity(finding.severity) === 'WARNING')
+        .length,
+    [allFindings],
+  );
+
+  const infoCount = useMemo(
+    () =>
+      allFindings.filter((finding) => normalizeFindingSeverity(finding.severity) === 'INFO').length,
+    [allFindings],
+  );
+
+  const healthCounters = useMemo<HealthCounters>(() => {
+    return repositories.reduce<HealthCounters>(
+      (accumulator, repository) => {
+        const status = normalizeRepositoryStatus(repository.status);
+
+        if (status === 'HEALTHY') {
+          accumulator.healthy += 1;
+        } else if (status === 'ISSUES_FOUND') {
+          accumulator.issuesFound += 1;
+        } else if (status === 'ANALYZING') {
+          accumulator.analyzing += 1;
+        } else {
+          accumulator.idle += 1;
+        }
+
+        return accumulator;
+      },
+      {
+        healthy: 0,
+        issuesFound: 0,
+        analyzing: 0,
+        idle: 0,
+      },
+    );
+  }, [repositories]);
+
+  const trendData = useMemo<AnalysisTrendPoint[]>(() => {
+    const dayBuckets = new Map<string, AnalysisTrendPoint>();
+
+    for (let dayOffset = 6; dayOffset >= 0; dayOffset -= 1) {
+      const date = toStartOfDay(new Date(now));
+      date.setDate(date.getDate() - dayOffset);
+      const key = date.toISOString().slice(0, 10);
+
+      dayBuckets.set(key, {
+        label: toShortDate(date),
+        runs: 0,
+      });
     }
 
-    const query = searchText.toLowerCase();
-    return filterMatched.filter(
-      (repository) =>
-        repository.name.toLowerCase().includes(query) ||
-        repository.fullName.toLowerCase().includes(query),
+    runsLast7Days.forEach((run) => {
+      const runDate = toStartOfDay(new Date(run.event.createdAt));
+      const key = runDate.toISOString().slice(0, 10);
+      const bucket = dayBuckets.get(key);
+
+      if (bucket) {
+        bucket.runs += 1;
+      }
+    });
+
+    return Array.from(dayBuckets.values());
+  }, [now, runsLast7Days]);
+
+  const repositoryRows = useMemo<DashboardRepositoryRow[]>(() => {
+    const query = searchText.trim().toLowerCase();
+
+    const rows = dataset.map((item) => {
+      const lastAnalysis =
+        item.runs
+          .map((run) => run.completedAt ?? run.startedAt ?? run.event.createdAt)
+          .filter((value): value is string => Boolean(value))
+          .sort((left, right) => new Date(right).getTime() - new Date(left).getTime())[0] ?? null;
+
+      const status = normalizeRepositoryStatus(item.repository.status);
+
+      return {
+        id: item.repository.id,
+        name: item.repository.name,
+        fullName: item.repository.fullName,
+        visibility: item.repository.private ? 'Private' : 'Public',
+        status,
+        findingsCount: item.findings.length,
+        lastAnalysisAt: lastAnalysis,
+      } satisfies DashboardRepositoryRow;
+    });
+
+    if (!query) {
+      return rows;
+    }
+
+    return rows.filter(
+      (row) => row.name.toLowerCase().includes(query) || row.fullName.toLowerCase().includes(query),
     );
-  }, [activeFilter, repositories, searchText]);
+  }, [dataset, searchText]);
+
+  const activityFeedItems = useMemo<ActivityFeedItem[]>(() => {
+    const criticalEvents = allFindings
+      .filter((finding) => normalizeFindingSeverity(finding.severity) === 'CRITICAL')
+      .map((finding) => ({
+        id: `critical-${finding.id}`,
+        message: `Critical finding detected in ${finding.repositoryName}: ${finding.title}`,
+        timestamp: toTimestampLabel(finding.createdAt),
+        sortableTimestamp: new Date(finding.createdAt).getTime(),
+        kind: 'critical' as const,
+      }));
+
+    const runEvents = allRuns.map((run) => {
+      const runStatus = normalizeRunStatus(run.status);
+      const eventType = run.event.type.toUpperCase();
+      const timestampSource = run.completedAt ?? run.startedAt ?? run.event.createdAt;
+
+      let kind: ActivityFeedItem['kind'] = 'info';
+      let message = `Analysis ${runStatus.toLowerCase()} for ${run.repositoryName}`;
+
+      if (eventType === 'PUSH') {
+        kind = 'push';
+        message = `Push event received for ${run.repositoryName}`;
+      } else if (runStatus === 'COMPLETED') {
+        kind = 'analysis';
+        message = `Analysis completed for ${run.repositoryName}`;
+      }
+
+      return {
+        id: `run-${run.id}`,
+        message,
+        timestamp: toTimestampLabel(timestampSource),
+        sortableTimestamp: new Date(timestampSource).getTime(),
+        kind,
+      };
+    });
+
+    return [...criticalEvents, ...runEvents]
+      .filter((item) => Number.isFinite(item.sortableTimestamp))
+      .sort((left, right) => right.sortableTimestamp - left.sortableTimestamp)
+      .slice(0, 10)
+      .map((item) => ({
+        id: item.id,
+        message: item.message,
+        timestamp: item.timestamp,
+        kind: item.kind,
+      }));
+  }, [allFindings, allRuns]);
+
+  const topMetrics = useMemo(() => {
+    const totalRepositories = repositories.length;
+    const activeRepositories = repositories.filter((repository) => repository.isActive).length;
+    const repositoriesWithIssues = healthCounters.issuesFound;
+    const findingsSevenDays = findingsLast7Days.length;
+    const runningAnalyses = allRuns.filter(
+      (run) => normalizeRunStatus(run.status) === 'RUNNING',
+    ).length;
+
+    return {
+      totalRepositories,
+      activeRepositories,
+      repositoriesWithIssues,
+      findingsSevenDays,
+      runningAnalyses,
+      criticalFindings: criticalCount,
+      runTrend: toTrendPercentage(runsLast7Days.length, runsPrev7Days.length),
+      findingsTrend: toTrendPercentage(findingsLast7Days.length, findingsPrev7Days.length),
+    };
+  }, [
+    repositories,
+    healthCounters.issuesFound,
+    findingsLast7Days.length,
+    allRuns,
+    criticalCount,
+    runsLast7Days.length,
+    runsPrev7Days.length,
+    findingsPrev7Days.length,
+  ]);
 
   const hasRepositories = repositories.length > 0;
-  const healthyRepositoryCount = repositories.filter(
-    (repository) => repository.status === 'healthy',
-  ).length;
-  const privateRepositoryCount = repositories.filter((repository) => repository.private).length;
-  const analyzingRepositoryCount = repositories.filter(
-    (repository) => repository.status === 'analyzing',
-  ).length;
 
   return (
-    <main className="flex h-screen overflow-hidden bg-black text-white">
+    <main className="page-shell flex h-screen overflow-hidden text-white">
       <AppSidebar />
 
       <section className="flex h-screen flex-1 flex-col overflow-y-auto">
         <DashboardHeader onSearchChange={setSearchText} />
 
-        <div className="px-6 py-6">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div className="rounded-tokenLg border border-surface400 bg-surface200 px-6 py-6">
-              <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">
-                Connected Repos
-              </p>
-              <p className="mt-2 text-[40px] font-bold leading-none">{repositories.length}</p>
-            </div>
-            <div className="rounded-tokenLg border border-surface400 bg-surface200 px-6 py-6">
-              <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">
-                Active Repos
-              </p>
-              <p className="mt-2 text-[40px] font-bold leading-none">{healthyRepositoryCount}</p>
-            </div>
-            <div className="rounded-tokenLg border border-surface400 bg-surface200 px-6 py-6">
-              <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">
-                Private Repos
-              </p>
-              <p className="mt-2 text-[40px] font-bold leading-none text-emerald-400">
-                {privateRepositoryCount}
-              </p>
-            </div>
-          </div>
-
+        <div className="content-wrap">
           {isLoading ? (
-            <section className="mt-8 rounded-tokenLg border border-surface400 bg-surface200 px-6 py-8 text-[14px] text-textSecondary">
-              Loading repositories...
-            </section>
+            <DashboardLoadingSkeleton />
           ) : errorMessage ? (
-            <section className="mt-8 rounded-tokenLg border border-rose-500/30 bg-rose-500/10 px-6 py-6 text-[14px] text-rose-300">
-              <div className="flex items-center justify-between gap-3">
+            <section className="glass-panel rounded-2xl border border-rose-500/30 bg-rose-500/10 px-6 py-6 text-[14px] text-rose-300">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <span>{errorMessage}</span>
                 <button
                   type="button"
                   onClick={() => {
-                    void loadRepositories();
+                    void loadDashboard();
                   }}
                   className="rounded-full border border-rose-400/40 px-3 py-1 text-[12px]"
                 >
@@ -147,186 +469,110 @@ export default function DashboardPage() {
               </div>
             </section>
           ) : !hasRepositories ? (
-            <section className="mx-auto mt-10 max-w-[760px] text-center">
-              <div className="mx-auto flex h-[92px] w-[92px] items-center justify-center rounded-token2xl border border-white/10 bg-[#1c1c1e] text-4xl">
+            <section className="glass-panel mx-auto max-w-[860px] rounded-2xl p-8 text-center sm:p-10">
+              <div className="glass-panel-soft mx-auto flex h-[90px] w-[90px] items-center justify-center rounded-2xl text-4xl">
                 ⌥
               </div>
-              <h2 className="mt-8 text-[36px] font-bold leading-tight">No repositories found</h2>
-              <p className="mx-auto mt-4 max-w-[640px] text-[15px] leading-[1.65] text-textSecondary">
-                Your account is authenticated, but we did not receive any repositories yet. Install
-                the GitHub App or refresh after installation sync completes.
+              <h2 className="mt-7 text-[30px] font-bold leading-tight sm:text-[36px]">
+                No repositories found
+              </h2>
+              <p className="mx-auto mt-3 max-w-[620px] text-[14px] leading-[1.7] text-white/60 sm:text-[15px]">
+                Connect your GitHub App installation to start receiving repository analytics,
+                findings, and operational health insights.
               </p>
 
-              <div className="mt-8 rounded-tokenXl border border-surface400 bg-surface200 px-8 py-8 text-left">
-                <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-center">
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-[30px] font-semibold">Install GitHub App</p>
-                      <p className="text-[13px] text-textSecondary">
-                        Grant access to your organization or specific repos.
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[30px] font-semibold">Sync Metadata</p>
-                      <p className="text-[13px] text-textSecondary">
-                        We&apos;ll map your system boundaries and dependencies.
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[30px] font-semibold">Activate Agents</p>
-                      <p className="text-[13px] text-textSecondary">
-                        AI agents begin observing PRs and pushes.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        void loadRepositories();
-                      }}
-                      className="inline-flex h-14 items-center justify-center rounded-full border border-white/15 px-8 text-[14px] font-semibold text-white"
-                    >
-                      Refresh
-                    </button>
-                    <Link
-                      href="/onboarding"
-                      className="inline-flex h-14 items-center justify-center rounded-full bg-white px-8 text-[14px] font-semibold text-black"
-                    >
-                      + Install GitHub Extension
-                    </Link>
-                  </div>
-                </div>
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    void loadDashboard();
+                  }}
+                  className="inline-flex h-12 items-center justify-center rounded-full border border-white/15 px-6 text-[14px] font-semibold text-white"
+                >
+                  Refresh
+                </button>
+                <Link
+                  href="/onboarding"
+                  className="inline-flex h-12 items-center justify-center rounded-full bg-white px-6 text-[14px] font-semibold text-black"
+                >
+                  + Connect GitHub App
+                </Link>
               </div>
             </section>
           ) : (
-            <>
-              <section className="mt-8" id="repositories">
-                <div className="mb-4 flex items-center justify-between">
-                  <h2 className="text-[32px] font-semibold">Connected Repositories</h2>
-                  <div className="flex items-center gap-2 text-[13px]">
-                    <button
-                      type="button"
-                      onClick={() => setActiveFilter('all')}
-                      className={`rounded-full border px-3 py-1 ${
-                        activeFilter === 'all'
-                          ? 'border-white/10 bg-surface300 text-white'
-                          : 'border-white/10 bg-transparent text-textSecondary'
-                      }`}
-                    >
-                      ✓ All Repos
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveFilter('analyzing')}
-                      className={`rounded-full border px-3 py-1 ${
-                        activeFilter === 'analyzing'
-                          ? 'border-cyan-500/30 bg-cyan-500/15 text-cyan-300'
-                          : 'border-white/10 bg-transparent text-textSecondary'
-                      }`}
-                    >
-                      Analyzing ({analyzingRepositoryCount})
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveFilter('healthy')}
-                      className={`rounded-full border px-3 py-1 ${
-                        activeFilter === 'healthy'
-                          ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300'
-                          : 'border-white/10 bg-transparent text-textSecondary'
-                      }`}
-                    >
-                      Healthy ({healthyRepositoryCount})
-                    </button>
-                  </div>
-                </div>
-
-                {filteredRepositories.length === 0 ? (
-                  <div className="rounded-tokenLg border border-surface400 bg-surface200 px-6 py-8 text-[14px] text-textSecondary">
-                    No repositories matched the current search/filter.
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-                    {filteredRepositories.map((repository) => (
-                      <article
-                        key={repository.id}
-                        className="rounded-tokenLg border border-surface400 bg-surface200 px-5 py-4"
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <h3 className="text-[28px] font-semibold">{repository.name}</h3>
-                            <p className="mt-1 font-mono text-[13px] text-textSecondary">
-                              {repository.fullName}
-                            </p>
-                          </div>
-                          <StatusBadge status={repository.status} />
-                        </div>
-
-                        <div className="mt-4 grid grid-cols-3 gap-4 border-b border-surface400 pb-4">
-                          <div>
-                            <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">
-                              Last Activity
-                            </p>
-                            <p className="mt-1 text-[13px]">Not Available</p>
-                          </div>
-                          <div>
-                            <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">
-                              Branches
-                            </p>
-                            <p className="mt-1 text-[13px]">
-                              {repository.defaultBranch || 'unknown'}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="font-mono text-[10px] uppercase tracking-[0.04em] text-textMuted">
-                              Language
-                            </p>
-                            <p className="mt-1 text-[13px]">
-                              {repository.private ? 'Private Repo' : 'Public Repo'}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="mt-4 flex items-center justify-between text-[13px] text-textSecondary">
-                          <span>◷ View history</span>
-                          <Link
-                            href={`/repositories/${repository.id}`}
-                            className="text-textPrimary hover:text-white"
-                          >
-                            Open Details →
-                          </Link>
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-                )}
+            <div className="space-y-6">
+              <section className="flex gap-6 flex-wrap">
+                <MetricCard
+                  label="Total Repositories"
+                  value={topMetrics.totalRepositories.toLocaleString()}
+                  subtitle="Connected workspace repositories"
+                  icon={FolderGit2}
+                  iconClassName="text-violet-300"
+                />
+                <MetricCard
+                  label="Active Repositories"
+                  value={topMetrics.activeRepositories.toLocaleString()}
+                  subtitle="Marked as active"
+                  icon={Activity}
+                  iconClassName="text-emerald-300"
+                />
+                <MetricCard
+                  label="Repositories With Issues"
+                  value={topMetrics.repositoriesWithIssues.toLocaleString()}
+                  subtitle="Current risk exposure"
+                  icon={ShieldAlert}
+                  iconClassName="text-rose-300"
+                />
+                <MetricCard
+                  label="Total Findings (7d)"
+                  value={topMetrics.findingsSevenDays.toLocaleString()}
+                  subtitle="Last 7 days"
+                  icon={Radar}
+                  iconClassName="text-cyan-300"
+                  trend={topMetrics.findingsTrend}
+                />
+                {/* <MetricCard
+                  label="Critical Findings"
+                  value={topMetrics.criticalFindings.toLocaleString()}
+                  subtitle="Highest severity findings"
+                  icon={AlertTriangle}
+                  iconClassName="text-rose-300"
+                /> */}
+                <MetricCard
+                  label="Running Analyses"
+                  value={topMetrics.runningAnalyses.toLocaleString()}
+                  subtitle="In-flight analysis runs"
+                  icon={BarChart3}
+                  iconClassName="text-amber-300"
+                  trend={topMetrics.runTrend}
+                />
               </section>
 
-              <section className="mt-8 rounded-tokenLg border border-surface400 bg-surface200 px-6 py-5">
-                <div className="mb-6 flex items-center justify-between">
-                  <div>
-                    <h3 className="text-[22px] font-semibold">Agent Analysis Velocity</h3>
-                    <p className="text-[13px] text-textSecondary">
-                      Total events processed by AI agents across all repos
-                    </p>
-                  </div>
-                  <span className="rounded-full border border-white/10 bg-surface300 px-3 py-1 text-[12px] text-textPrimary">
-                    Last 7 Days
-                  </span>
+              <section className="flex gap-6">
+                <div className="flex-[2]">
+                  <AnalysisTrendChart data={trendData} />
                 </div>
-                <div className="h-[180px] rounded-tokenMd border border-surface400 bg-black/20 p-3">
-                  <svg viewBox="0 0 100 30" className="h-full w-full">
-                    <path
-                      d="M 0 22 C 10 21, 20 20, 30 21 C 40 22, 50 18, 60 15 C 70 12, 80 20, 90 18 C 95 17, 98 14, 100 12"
-                      fill="none"
-                      stroke="rgba(255,255,255,0.9)"
-                      strokeWidth="0.5"
-                    />
-                  </svg>
-                </div>
+                <FindingsDonutChart
+                  info={infoCount}
+                  warning={warningCount}
+                  critical={criticalCount}
+                />
               </section>
-            </>
+
+              <section className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+                <div className="xl:col-span-2">
+                  <RepoHealthSummary
+                    healthy={healthCounters.healthy}
+                    issuesFound={healthCounters.issuesFound}
+                    analyzing={healthCounters.analyzing}
+                    idle={healthCounters.idle}
+                  />
+                </div>
+                <ActivityFeed items={activityFeedItems} />
+              </section>
+
+              <RepositoryTable rows={repositoryRows} initialSearch={searchText} />
+            </div>
           )}
         </div>
       </section>

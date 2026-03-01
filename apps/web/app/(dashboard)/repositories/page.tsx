@@ -67,7 +67,7 @@ function RepositoryCard({ repository }: { repository: RepositoryListItem }) {
   const ownerName = repository.fullName.split('/')[0] ?? '';
 
   return (
-    <article className="group flex flex-col rounded-[14px] border border-white/[0.06] bg-[#141414] p-5 transition-all duration-200 hover:border-white/[0.12] hover:bg-[#171717]">
+    <article className="glass-panel-soft group flex flex-col rounded-[14px] p-5 transition-all duration-200 hover:border-white/[0.16] hover:bg-white/[0.06]">
       {/* Top: name + badge */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-start gap-3">
@@ -165,7 +165,7 @@ function FilterPill({
 
 function StatCard({ label, value, color }: { label: string; value: number; color?: string }) {
   return (
-    <div className="rounded-[14px] border border-white/[0.06] bg-[#141414] px-5 py-5">
+    <div className="glass-panel-soft rounded-[14px] px-5 py-5">
       <p className="text-[10px] font-medium uppercase tracking-widest text-white/25">{label}</p>
       <p
         className={`mt-2.5 text-[32px] font-bold leading-none tracking-tight ${color ?? 'text-white/90'}`}
@@ -236,18 +236,18 @@ export default function RepositoriesPage() {
   }, [activeFilter, repositories, searchText]);
 
   return (
-    <main className="flex h-screen overflow-hidden bg-black text-white">
+    <main className="page-shell flex h-screen overflow-hidden text-white">
       <AppSidebar />
 
       <section className="flex h-screen flex-1 flex-col overflow-y-auto">
         {/* Header */}
-        <header className="flex h-14 shrink-0 items-center justify-between border-b border-white/[0.06] bg-[#0e0e0e] px-6">
-          <div className="text-[12px] text-white/30">
+        <header className="glass-header flex min-h-14 flex-wrap items-center justify-between gap-2 px-4 py-2 sm:px-6 sm:py-0">
+          <div className="hidden text-[12px] text-white/30 md:block">
             <span>Organization</span>
             <span className="mx-2 text-white/15">›</span>
             <span className="font-medium text-white/70">Repositories</span>
           </div>
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <svg
               className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/20"
               fill="none"
@@ -266,12 +266,12 @@ export default function RepositoriesPage() {
               placeholder="Search..."
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              className="h-8 w-[220px] rounded-lg border border-white/[0.06] bg-white/[0.03] pl-9 pr-3 text-[13px] text-white/80 placeholder:text-white/20 focus:border-white/[0.12] focus:outline-none"
+              className="glass-input h-8 w-full rounded-lg pl-9 pr-3 text-[13px] sm:w-[220px]"
             />
           </div>
         </header>
 
-        <div className="px-6 py-6 space-y-6">
+        <div className="content-wrap space-y-6">
           {/* Summary cards */}
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <StatCard label="Total Repositories" value={repositories.length} />
@@ -280,11 +280,11 @@ export default function RepositoriesPage() {
           </div>
 
           {/* Toolbar */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-[20px] font-semibold tracking-tight text-white/90">
               Connected Repositories
             </h2>
-            <div className="flex items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-1.5">
               <FilterPill
                 label="All"
                 isActive={activeFilter === 'all'}
@@ -310,8 +310,21 @@ export default function RepositoriesPage() {
 
           {/* Content */}
           {isLoading ? (
-            <div className="rounded-[14px] border border-white/[0.06] bg-[#141414] px-6 py-12 text-center text-[13px] text-white/30">
-              Loading repositories...
+            <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="glass-panel-soft animate-pulse rounded-[14px] px-5 py-5"
+                >
+                  <div className="h-4 w-1/3 rounded bg-white/[0.1]" />
+                  <div className="mt-2 h-3 w-1/2 rounded bg-white/[0.06]" />
+                  <div className="mt-5 grid grid-cols-3 gap-3">
+                    <div className="h-10 rounded bg-white/[0.06]" />
+                    <div className="h-10 rounded bg-white/[0.06]" />
+                    <div className="h-10 rounded bg-white/[0.06]" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : errorMessage ? (
             <div className="rounded-[14px] border border-rose-500/20 bg-rose-500/[0.06] px-5 py-4 text-[13px] text-rose-300/80">
@@ -327,7 +340,7 @@ export default function RepositoriesPage() {
               </div>
             </div>
           ) : filteredRepositories.length === 0 ? (
-            <div className="rounded-[14px] border border-white/[0.06] bg-[#141414] px-6 py-12 text-center text-[13px] text-white/30">
+            <div className="glass-panel-soft rounded-[14px] px-6 py-12 text-center text-[13px] text-white/30">
               {repositories.length === 0
                 ? 'No repositories connected yet.'
                 : 'No repositories match the current filter.'}
