@@ -18,7 +18,8 @@
     "build:web": "npm run build --workspace=apps/web",
     "start:web": "npm run start --workspace=apps/web",
     "dev:analyzer": "npm run dev --workspace=workers/analyzer",
-    "build:analyzer": "npm run build --workspace=workers/analyzer"
+    "build:analyzer": "npm run build --workspace=workers/analyzer",
+    "dev:backend": "npm run dev --workspace=apps/api --workspace=workers/analyzer --if-present --parallel"
   },
   "devDependencies": {
     "typescript": "^5.0.0"

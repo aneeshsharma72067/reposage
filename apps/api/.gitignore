@@ -3,3 +3,9 @@ node_modules
 .env
 
 /src/generated/prisma
+
+# Generated build artifacts accidentally emitted into src/
+/src/**/*.js
+/src/**/*.js.map
+/src/**/*.d.ts
+/src/**/*.d.ts.map

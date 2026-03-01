@@ -1,5 +1,12 @@
 import type { FastifyBaseLogger } from 'fastify';
-import { AnalysisStatus, EventType, RepositoryStatus } from '@prisma/client';
+import {
+  AnalysisStatus,
+  EventType,
+  FindingType,
+  Prisma,
+  RepositoryStatus,
+  SeverityLevel,
+} from '@prisma/client';
 import { prisma } from '../../lib/prisma';
 import { analysisQueue } from '../../lib/queue';
 import type {
@@ -11,6 +18,202 @@ import type {
 interface TriggerAnalysisInput {
   payload: GitHubPushPayload;
   logger: FastifyBaseLogger;
+}
+
+function selectSimulatedSeverity(): SeverityLevel {
+  const severityIndex = Math.floor(Math.random() * 3);
+
+  if (severityIndex === 0) {
+    return SeverityLevel.INFO;
+  }
+
+  if (severityIndex === 1) {
+    return SeverityLevel.WARNING;
+  }
+
+  return SeverityLevel.CRITICAL;
+}
+
+async function evaluateRepositoryHealth(
+  runId: string,
+  tx: Prisma.TransactionClient = prisma,
+): Promise<RepositoryStatus> {
+  const criticalFindingsCount = await tx.finding.count({
+    where: {
+      analysisRunId: runId,
+      severity: SeverityLevel.CRITICAL,
+    },
+  });
+
+  if (criticalFindingsCount > 0) {
+    return RepositoryStatus.ISSUES_FOUND;
+  }
+
+  return RepositoryStatus.HEALTHY;
+}
+
+async function transitionAnalysisRunToRunning(
+  tx: Prisma.TransactionClient,
+  analysisRunId: string,
+  repositoryId: string,
+): Promise<void> {
+  const startedAt = new Date();
+
+  const updatedRun = await tx.analysisRun.updateMany({
+    where: {
+      id: analysisRunId,
+      status: AnalysisStatus.PENDING,
+      startedAt: null,
+      completedAt: null,
+    },
+    data: {
+      status: AnalysisStatus.RUNNING,
+      startedAt,
+      errorMessage: null,
+    },
+  });
+
+  if (updatedRun.count !== 1) {
+    throw new Error(
+      'Invalid lifecycle transition: expected PENDING analysis run',
+    );
+  }
+
+  await tx.repository.update({
+    where: { id: repositoryId },
+    data: { status: RepositoryStatus.ANALYZING },
+  });
+}
+
+async function transitionAnalysisRunToCompleted(
+  tx: Prisma.TransactionClient,
+  analysisRunId: string,
+  repositoryId: string,
+): Promise<void> {
+  const completedAt = new Date();
+
+  const updatedRun = await tx.analysisRun.updateMany({
+    where: {
+      id: analysisRunId,
+      status: AnalysisStatus.RUNNING,
+      startedAt: { not: null },
+      completedAt: null,
+    },
+    data: {
+      status: AnalysisStatus.COMPLETED,
+      completedAt,
+      errorMessage: null,
+    },
+  });
+
+  if (updatedRun.count !== 1) {
+    throw new Error(
+      'Invalid lifecycle transition: expected RUNNING analysis run',
+    );
+  }
+
+  await tx.finding.create({
+    data: {
+      analysisRunId,
+      repositoryId,
+      type: FindingType.API_BREAK,
+      severity: selectSimulatedSeverity(),
+      title: 'Simulated API contract change',
+      description:
+        'This is a simulated finding generated during analysis lifecycle testing.',
+      metadata: {
+        source: 'analysis-worker',
+        runId: analysisRunId,
+      },
+    },
+  });
+
+  const repositoryHealth = await evaluateRepositoryHealth(analysisRunId, tx);
+
+  await tx.repository.update({
+    where: { id: repositoryId },
+    data: { status: repositoryHealth },
+  });
+}
+
+async function transitionAnalysisRunToFailed(
+  tx: Prisma.TransactionClient,
+  analysisRunId: string,
+  repositoryId: string,
+  errorMessage: string,
+): Promise<void> {
+  const completedAt = new Date();
+
+  const updatedRun = await tx.analysisRun.updateMany({
+    where: {
+      id: analysisRunId,
+      status: AnalysisStatus.RUNNING,
+      startedAt: { not: null },
+      completedAt: null,
+    },
+    data: {
+      status: AnalysisStatus.FAILED,
+      completedAt,
+      errorMessage,
+    },
+  });
+
+  if (updatedRun.count !== 1) {
+    throw new Error(
+      'Invalid lifecycle transition: expected RUNNING analysis run',
+    );
+  }
+
+  await tx.repository.update({
+    where: { id: repositoryId },
+    data: { status: RepositoryStatus.IDLE },
+  });
+}
+
+export async function processAnalysisRun(analysisRunId: string): Promise<void> {
+  const run = await prisma.analysisRun.findUnique({
+    where: { id: analysisRunId },
+    select: {
+      id: true,
+      status: true,
+      event: {
+        select: {
+          repositoryId: true,
+        },
+      },
+    },
+  });
+
+  if (!run) {
+    throw new Error(`Analysis run not found: ${analysisRunId}`);
+  }
+
+  const repositoryId = run.event.repositoryId;
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      await transitionAnalysisRunToRunning(tx, analysisRunId, repositoryId);
+      await transitionAnalysisRunToCompleted(tx, analysisRunId, repositoryId);
+    });
+  } catch (error) {
+    const lifecycleErrorMessage =
+      error instanceof Error
+        ? error.message
+        : 'Unknown error during analysis processing';
+
+    try {
+      await prisma.$transaction(async (tx) => {
+        await transitionAnalysisRunToFailed(
+          tx,
+          analysisRunId,
+          repositoryId,
+          lifecycleErrorMessage,
+        );
+      });
+    } catch {}
+
+    throw error;
+  }
 }
 
 export async function triggerAnalysisFromPushEvent({
