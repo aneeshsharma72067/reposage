@@ -2,17 +2,55 @@ import type { FastifyBaseLogger } from 'fastify';
 import {
   AnalysisStatus,
   EventType,
+  FindingType,
   Prisma,
   RepositoryStatus,
+  SeverityLevel,
 } from '@prisma/client';
 import { prisma } from '../../lib/prisma';
-import type { AnalysisRunListItem, GitHubPushPayload } from './analysis.types';
+import type {
+  AnalysisFindingListItem,
+  AnalysisRunListItem,
+  GitHubPushPayload,
+} from './analysis.types';
 
 const ANALYSIS_SIMULATION_DELAY_MS = 5_000;
 
 interface TriggerAnalysisInput {
   payload: GitHubPushPayload;
   logger: FastifyBaseLogger;
+}
+
+function selectSimulatedSeverity(): SeverityLevel {
+  const severityIndex = Math.floor(Math.random() * 3);
+
+  if (severityIndex === 0) {
+    return SeverityLevel.INFO;
+  }
+
+  if (severityIndex === 1) {
+    return SeverityLevel.WARNING;
+  }
+
+  return SeverityLevel.CRITICAL;
+}
+
+async function evaluateRepositoryHealth(
+  runId: string,
+  tx: Prisma.TransactionClient = prisma,
+): Promise<RepositoryStatus> {
+  const criticalFindingsCount = await tx.finding.count({
+    where: {
+      analysisRunId: runId,
+      severity: SeverityLevel.CRITICAL,
+    },
+  });
+
+  if (criticalFindingsCount > 0) {
+    return RepositoryStatus.ISSUES_FOUND;
+  }
+
+  return RepositoryStatus.HEALTHY;
 }
 
 async function transitionAnalysisRunToRunning(
@@ -75,9 +113,27 @@ async function transitionAnalysisRunToCompleted(
     );
   }
 
+  await tx.finding.create({
+    data: {
+      analysisRunId,
+      repositoryId,
+      type: FindingType.API_BREAK,
+      severity: selectSimulatedSeverity(),
+      title: 'Simulated API contract change',
+      description:
+        'This is a simulated finding generated during analysis lifecycle testing.',
+      metadata: {
+        source: 'analysis-simulation',
+        runId: analysisRunId,
+      },
+    },
+  });
+
+  const repositoryHealth = await evaluateRepositoryHealth(analysisRunId, tx);
+
   await tx.repository.update({
     where: { id: repositoryId },
-    data: { status: RepositoryStatus.HEALTHY },
+    data: { status: repositoryHealth },
   });
 }
 
@@ -327,6 +383,66 @@ export async function listAnalysisRunsForRepository(
       type: run.event.type,
       githubEventId: run.event.githubEventId,
       createdAt: run.event.createdAt.toISOString(),
+    },
+  }));
+}
+
+export async function listFindingsForRepository(
+  repositoryId: string,
+  userId: string,
+): Promise<AnalysisFindingListItem[]> {
+  const repository = await prisma.repository.findFirst({
+    where: {
+      id: repositoryId,
+      installation: {
+        installedByUserId: userId,
+      },
+    },
+    select: { id: true },
+  });
+
+  if (!repository) {
+    return [];
+  }
+
+  const findings = await prisma.finding.findMany({
+    where: {
+      repositoryId: repository.id,
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 20,
+    select: {
+      id: true,
+      type: true,
+      severity: true,
+      title: true,
+      description: true,
+      metadata: true,
+      createdAt: true,
+      analysisRun: {
+        select: {
+          id: true,
+          status: true,
+          startedAt: true,
+          completedAt: true,
+        },
+      },
+    },
+  });
+
+  return findings.map((finding) => ({
+    id: finding.id,
+    type: finding.type,
+    severity: finding.severity,
+    title: finding.title,
+    description: finding.description,
+    metadata: finding.metadata,
+    createdAt: finding.createdAt.toISOString(),
+    analysisRun: {
+      id: finding.analysisRun.id,
+      status: finding.analysisRun.status,
+      startedAt: finding.analysisRun.startedAt?.toISOString() ?? null,
+      completedAt: finding.analysisRun.completedAt?.toISOString() ?? null,
     },
   }));
 }
