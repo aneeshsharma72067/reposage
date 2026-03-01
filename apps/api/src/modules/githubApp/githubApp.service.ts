@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises';
+import { basename } from 'node:path';
 import { createPrivateKey } from 'node:crypto';
 import { SignJWT, importPKCS8 } from 'jose';
 import { env } from '../../config/env';
@@ -10,6 +11,58 @@ import type {
   GithubInstallationAccessTokenResponse,
   GithubInstallationRepositoriesResponse,
 } from './githubApp.types';
+
+interface GithubErrorResponse {
+  message?: string;
+  documentation_url?: string;
+}
+
+function parseGithubDateHeader(dateHeader: string | null): Date | null {
+  if (!dateHeader) {
+    return null;
+  }
+
+  const parsed = new Date(dateHeader);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function logGithubClockSkew(context: {
+  event: string;
+  githubDateHeader: string | null;
+}): void {
+  const githubDate = parseGithubDateHeader(context.githubDateHeader);
+
+  if (!githubDate) {
+    return;
+  }
+
+  const localNow = new Date();
+  const skewMs = localNow.getTime() - githubDate.getTime();
+
+  console.warn({
+    event: `${context.event}.clock_skew_check`,
+    localTime: localNow.toISOString(),
+    githubTime: githubDate.toISOString(),
+    localMinusGithubMs: skewMs,
+    localMinusGithubMinutes: Math.round(skewMs / 60000),
+  });
+}
+
+function readGithubError(responseBody: unknown): GithubErrorResponse {
+  if (!responseBody || typeof responseBody !== 'object') {
+    return {};
+  }
+
+  const body = responseBody as Record<string, unknown>;
+
+  return {
+    message: typeof body.message === 'string' ? body.message : undefined,
+    documentation_url:
+      typeof body.documentation_url === 'string'
+        ? body.documentation_url
+        : undefined,
+  };
+}
 
 function getGenerateJwtConfig(): GenerateAppJwtConfig {
   const appId = env.GITHUB_APP_ID?.trim();
@@ -84,6 +137,13 @@ async function readPrivateKeyFromPath(privateKeyPath: string): Promise<string> {
 
 export async function generateAppJwt(): Promise<string> {
   const { appId, privateKeyPath } = getGenerateJwtConfig();
+
+  console.info({
+    event: 'github.app.jwt.generate.start',
+    appId,
+    privateKeyFile: basename(privateKeyPath),
+  });
+
   const pem = await readPrivateKeyFromPath(privateKeyPath);
   const pkcs8Pem = toPkcs8Pem(pem);
 
@@ -106,11 +166,20 @@ export async function generateAppJwt(): Promise<string> {
     iss: appId,
   };
 
-  const jwt = await new SignJWT(payload)
+  const jwt = await new SignJWT({})
     .setProtectedHeader({ alg: 'RS256', typ: 'JWT' })
+    .setIssuedAt(payload.iat)
+    .setExpirationTime(payload.exp)
+    .setIssuer(payload.iss)
     .sign(privateKey);
 
-  console.debug('GitHub App JWT generated');
+  console.info({
+    event: 'github.app.jwt.generate.success',
+    appId,
+    issuedAt: new Date(iat * 1000).toISOString(),
+    expiresAt: new Date(exp * 1000).toISOString(),
+    ttlSeconds: exp - iat,
+  });
 
   return jwt;
 }
@@ -132,6 +201,10 @@ export async function generateInstallationAccessToken(
       },
     },
   );
+  console.debug('GitHub installation access token response received', {
+    installationId: installationIdString,
+    status: response.status,
+  });
 
   let responseBody: Partial<GithubInstallationAccessTokenResponse> | undefined;
   try {
@@ -141,7 +214,25 @@ export async function generateInstallationAccessToken(
     responseBody = undefined;
   }
 
+  const githubError = readGithubError(responseBody);
+
   if (!response.ok) {
+    const githubDateHeader = response.headers.get('date');
+
+    console.error({
+      event: 'github.installation.token.exchange.failed',
+      installationId: installationIdString,
+      status: response.status,
+      githubMessage: githubError.message,
+      githubDocumentationUrl: githubError.documentation_url,
+      githubDateHeader,
+    });
+
+    logGithubClockSkew({
+      event: 'github.installation.token.exchange.failed',
+      githubDateHeader,
+    });
+
     if (response.status === 401) {
       throw new AppError(
         'Invalid GitHub App JWT',
@@ -189,6 +280,12 @@ export async function resolveRepositoryInstallationId(
   owner: string,
   repositoryName: string,
 ): Promise<bigint> {
+  console.info({
+    event: 'github.repository.installation.resolve.start',
+    owner,
+    repositoryName,
+  });
+
   const appJwt = await generateAppJwt();
   const response = await fetch(
     `https://api.github.com/repos/${owner}/${repositoryName}/installation`,
@@ -210,7 +307,26 @@ export async function resolveRepositoryInstallationId(
     responseBody = undefined;
   }
 
+  const githubError = readGithubError(responseBody);
+
   if (!response.ok) {
+    const githubDateHeader = response.headers.get('date');
+
+    console.error({
+      event: 'github.repository.installation.resolve.failed',
+      owner,
+      repositoryName,
+      status: response.status,
+      githubMessage: githubError.message,
+      githubDocumentationUrl: githubError.documentation_url,
+      githubDateHeader,
+    });
+
+    logGithubClockSkew({
+      event: 'github.repository.installation.resolve.failed',
+      githubDateHeader,
+    });
+
     if (response.status === 401) {
       throw new AppError(
         'Invalid GitHub App JWT',
@@ -235,12 +351,26 @@ export async function resolveRepositoryInstallationId(
   }
 
   if (typeof responseBody?.id !== 'number') {
+    console.error({
+      event: 'github.repository.installation.resolve.invalid_payload',
+      owner,
+      repositoryName,
+      status: response.status,
+    });
+
     throw new AppError(
       'GitHub repository installation id missing in response',
       502,
       'GITHUB_REPOSITORY_INSTALLATION_ID_MISSING',
     );
   }
+
+  console.info({
+    event: 'github.repository.installation.resolve.success',
+    owner,
+    repositoryName,
+    installationId: responseBody.id,
+  });
 
   return BigInt(responseBody.id);
 }

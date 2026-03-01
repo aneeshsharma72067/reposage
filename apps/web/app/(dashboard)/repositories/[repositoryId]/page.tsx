@@ -1,11 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import { RepositoryHeader } from '@/components/layout/repository-header';
-import { getAccessToken, getRepositoryDetails } from '@/lib/auth';
+import { getAccessToken, getRepositoryDetails, listRepositoryFindings } from '@/lib/auth';
+import type { RepositoryFinding } from '@/types/finding';
 import type { RepositoryDetails } from '@/types/repository';
 
 function toReadableDate(value: string | null): string {
@@ -35,11 +36,89 @@ function StatCard({ icon, label, value }: { icon: string; label: string; value: 
   );
 }
 
+function findingSeverityStyle(severity: string): { badge: string; dot: string; label: string } {
+  switch (severity) {
+    case 'CRITICAL':
+      return {
+        badge: 'border-rose-500/20 bg-rose-500/10 text-rose-300',
+        dot: 'bg-rose-400',
+        label: 'Critical',
+      };
+    case 'WARNING':
+      return {
+        badge: 'border-amber-500/20 bg-amber-500/10 text-amber-300',
+        dot: 'bg-amber-400',
+        label: 'Warning',
+      };
+    case 'INFO':
+    default:
+      return {
+        badge: 'border-cyan-500/20 bg-cyan-500/10 text-cyan-300',
+        dot: 'bg-cyan-400',
+        label: 'Info',
+      };
+  }
+}
+
+function toRunStatusLabel(status: string): string {
+  switch (status) {
+    case 'COMPLETED':
+      return 'Completed';
+    case 'RUNNING':
+      return 'Running';
+    case 'FAILED':
+      return 'Failed';
+    case 'PENDING':
+      return 'Pending';
+    default:
+      return status;
+  }
+}
+
+function renderFindingMetadata(metadata: unknown): string {
+  if (!metadata) {
+    return 'No metadata';
+  }
+
+  if (typeof metadata === 'string') {
+    return metadata;
+  }
+
+  if (typeof metadata === 'number' || typeof metadata === 'boolean') {
+    return String(metadata);
+  }
+
+  try {
+    return JSON.stringify(metadata);
+  } catch {
+    return 'Metadata unavailable';
+  }
+}
+
 export default function RepositoryDetailPage() {
   const params = useParams<{ repositoryId: string }>();
   const [repository, setRepository] = useState<RepositoryDetails | null>(null);
+  const [findings, setFindings] = useState<RepositoryFinding[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const findingsSummary = useMemo(() => {
+    const critical = findings.filter((finding) => finding.severity === 'CRITICAL').length;
+    const warning = findings.filter((finding) => finding.severity === 'WARNING').length;
+    const info = findings.filter((finding) => finding.severity === 'INFO').length;
+
+    return {
+      critical,
+      warning,
+      info,
+      total: findings.length,
+      healthLabel: critical > 0 ? 'Issues Found' : 'Healthy',
+      healthStyle:
+        critical > 0
+          ? 'border-rose-500/20 bg-rose-500/10 text-rose-300'
+          : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300',
+    };
+  }, [findings]);
 
   useEffect(() => {
     if (!getAccessToken()) {
@@ -53,9 +132,18 @@ export default function RepositoryDetailPage() {
       try {
         const data = await getRepositoryDetails(params.repositoryId);
         setRepository(data);
+
+        try {
+          const findingsData = await listRepositoryFindings(params.repositoryId);
+          setFindings(findingsData);
+        } catch {
+          setFindings([]);
+        }
+
         setErrorMessage(null);
       } catch {
         setRepository(null);
+        setFindings([]);
         setErrorMessage('Unable to load repository data.');
       } finally {
         setIsLoading(false);
@@ -239,8 +327,22 @@ export default function RepositoryDetailPage() {
                     <div className="mt-3 space-y-2 text-[14px]">
                       <p className="flex items-center justify-between text-textSecondary">
                         <span>Repository Health</span>
+                        <span
+                          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[12px] font-medium ${findingsSummary.healthStyle}`}
+                        >
+                          {findingsSummary.healthLabel}
+                        </span>
+                      </p>
+                      <p className="flex items-center justify-between text-textSecondary">
+                        <span>Critical Findings</span>
                         <span className="font-medium text-white">
-                          {repository.isActive ? 'Healthy' : 'Analyzing'}
+                          {findingsSummary.critical.toLocaleString()}
+                        </span>
+                      </p>
+                      <p className="flex items-center justify-between text-textSecondary">
+                        <span>Total Findings</span>
+                        <span className="font-medium text-white">
+                          {findingsSummary.total.toLocaleString()}
                         </span>
                       </p>
                       <p className="flex items-center justify-between text-textSecondary">
@@ -262,6 +364,68 @@ export default function RepositoryDetailPage() {
                         </span>
                       </p>
                     </div>
+                  </div>
+
+                  <div className="rounded-tokenLg border border-surface400 bg-surface200 px-4 py-4">
+                    <h3 className="text-[20px] font-semibold">Latest Findings</h3>
+                    {findings.length === 0 ? (
+                      <p className="mt-3 text-[13px] text-textSecondary">
+                        No findings from recent analysis runs.
+                      </p>
+                    ) : (
+                      <>
+                        <div className="mt-3 grid grid-cols-3 gap-2 text-[11px]">
+                          <div className="rounded-tokenMd border border-rose-500/20 bg-rose-500/10 px-2 py-2 text-center text-rose-300">
+                            CRIT {findingsSummary.critical}
+                          </div>
+                          <div className="rounded-tokenMd border border-amber-500/20 bg-amber-500/10 px-2 py-2 text-center text-amber-300">
+                            WARN {findingsSummary.warning}
+                          </div>
+                          <div className="rounded-tokenMd border border-cyan-500/20 bg-cyan-500/10 px-2 py-2 text-center text-cyan-300">
+                            INFO {findingsSummary.info}
+                          </div>
+                        </div>
+
+                        <ul className="mt-3 space-y-2">
+                          {findings.slice(0, 6).map((finding) => {
+                            const style = findingSeverityStyle(finding.severity);
+
+                            return (
+                              <li
+                                key={finding.id}
+                                className="rounded-tokenMd border border-surface400 bg-surface300 px-3 py-3"
+                              >
+                                <div className="flex items-start justify-between gap-2">
+                                  <p className="line-clamp-2 text-[13px] font-medium text-textPrimary">
+                                    {finding.title}
+                                  </p>
+                                  <span
+                                    className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${style.badge}`}
+                                  >
+                                    <span className={`h-1.5 w-1.5 rounded-full ${style.dot}`} />
+                                    {style.label}
+                                  </span>
+                                </div>
+
+                                <p className="mt-1 line-clamp-2 text-[12px] text-textSecondary">
+                                  {finding.description}
+                                </p>
+
+                                <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-textMuted">
+                                  <span>Run: {finding.analysisRun.id.slice(0, 12)}…</span>
+                                  <span>{toRunStatusLabel(finding.analysisRun.status)}</span>
+                                  <span>{toReadableDate(finding.createdAt)}</span>
+                                </div>
+
+                                <p className="mt-1 line-clamp-1 text-[10px] text-textMuted">
+                                  {renderFindingMetadata(finding.metadata)}
+                                </p>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </>
+                    )}
                   </div>
 
                   <div className="rounded-tokenLg border border-surface400 bg-surface200 px-4 py-4">

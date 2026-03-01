@@ -102,6 +102,12 @@ export async function getRepositoryDetailsForUser(
   userId: string,
   repositoryId: string,
 ): Promise<RepositoryDetails> {
+  console.info({
+    event: 'repository.details.request.start',
+    userId,
+    repositoryId,
+  });
+
   const repository = await prisma.repository.findFirst({
     where: {
       id: repositoryId,
@@ -121,12 +127,24 @@ export async function getRepositoryDetailsForUser(
   });
 
   if (!repository) {
+    console.warn({
+      event: 'repository.details.request.not_found',
+      userId,
+      repositoryId,
+    });
+
     throw new AppError('Repository not found', 404, 'REPOSITORY_NOT_FOUND');
   }
 
   const [owner, repo] = repository.fullName.split('/');
 
   if (!owner || !repo) {
+    console.error({
+      event: 'repository.details.request.invalid_full_name',
+      repositoryId,
+      fullName: repository.fullName,
+    });
+
     throw new AppError(
       'Invalid repository full name',
       500,
@@ -134,9 +152,30 @@ export async function getRepositoryDetailsForUser(
     );
   }
 
+  console.info({
+    event: 'repository.details.github.flow.start',
+    repositoryId,
+    fullName: repository.fullName,
+    owner,
+    repo,
+  });
+
   const installationId = await resolveRepositoryInstallationId(owner, repo);
+
+  console.info({
+    event: 'repository.details.github.installation.resolved',
+    repositoryId,
+    installationId: installationId.toString(),
+  });
+
   const installationToken =
     await generateInstallationAccessToken(installationId);
+
+  console.info({
+    event: 'repository.details.github.installation.token.ready',
+    repositoryId,
+    installationId: installationId.toString(),
+  });
 
   const [detailsResponse, commitsResponse] = await Promise.all([
     fetch(`https://api.github.com/repos/${owner}/${repo}`, {
@@ -158,6 +197,13 @@ export async function getRepositoryDetailsForUser(
   ]);
 
   if (!detailsResponse.ok) {
+    console.error({
+      event: 'repository.details.github.fetch.failed',
+      repositoryId,
+      fullName: repository.fullName,
+      status: detailsResponse.status,
+    });
+
     if (detailsResponse.status === 404) {
       throw new AppError(
         'Repository not found on GitHub',
@@ -174,6 +220,13 @@ export async function getRepositoryDetailsForUser(
   }
 
   if (!commitsResponse.ok) {
+    console.error({
+      event: 'repository.details.github.commits.fetch.failed',
+      repositoryId,
+      fullName: repository.fullName,
+      status: commitsResponse.status,
+    });
+
     throw new AppError(
       'Failed to fetch repository commits from GitHub',
       502,
@@ -199,6 +252,13 @@ export async function getRepositoryDetailsForUser(
             `https://github.com/${repository.fullName}/commit/${commit.sha}`,
         }))
     : [];
+
+  console.info({
+    event: 'repository.details.request.success',
+    repositoryId,
+    fullName: repository.fullName,
+    commitCount: recentCommits.length,
+  });
 
   return {
     id: repository.id,
