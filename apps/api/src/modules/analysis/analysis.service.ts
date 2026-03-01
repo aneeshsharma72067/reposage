@@ -1,4 +1,10 @@
 import type { FastifyBaseLogger } from 'fastify';
+import {
+  AnalysisStatus,
+  EventType,
+  Prisma,
+  RepositoryStatus,
+} from '@prisma/client';
 import { prisma } from '../../lib/prisma';
 import type { AnalysisRunListItem, GitHubPushPayload } from './analysis.types';
 
@@ -7,6 +13,106 @@ const ANALYSIS_SIMULATION_DELAY_MS = 5_000;
 interface TriggerAnalysisInput {
   payload: GitHubPushPayload;
   logger: FastifyBaseLogger;
+}
+
+async function transitionAnalysisRunToRunning(
+  tx: Prisma.TransactionClient,
+  analysisRunId: string,
+  repositoryId: string,
+): Promise<void> {
+  const startedAt = new Date();
+
+  const updatedRun = await tx.analysisRun.updateMany({
+    where: {
+      id: analysisRunId,
+      status: AnalysisStatus.PENDING,
+      startedAt: null,
+      completedAt: null,
+    },
+    data: {
+      status: AnalysisStatus.RUNNING,
+      startedAt,
+      errorMessage: null,
+    },
+  });
+
+  if (updatedRun.count !== 1) {
+    throw new Error(
+      'Invalid lifecycle transition: expected PENDING analysis run',
+    );
+  }
+
+  await tx.repository.update({
+    where: { id: repositoryId },
+    data: { status: RepositoryStatus.ANALYZING },
+  });
+}
+
+async function transitionAnalysisRunToCompleted(
+  tx: Prisma.TransactionClient,
+  analysisRunId: string,
+  repositoryId: string,
+): Promise<void> {
+  const completedAt = new Date();
+
+  const updatedRun = await tx.analysisRun.updateMany({
+    where: {
+      id: analysisRunId,
+      status: AnalysisStatus.RUNNING,
+      startedAt: { not: null },
+      completedAt: null,
+    },
+    data: {
+      status: AnalysisStatus.COMPLETED,
+      completedAt,
+      errorMessage: null,
+    },
+  });
+
+  if (updatedRun.count !== 1) {
+    throw new Error(
+      'Invalid lifecycle transition: expected RUNNING analysis run',
+    );
+  }
+
+  await tx.repository.update({
+    where: { id: repositoryId },
+    data: { status: RepositoryStatus.HEALTHY },
+  });
+}
+
+async function transitionAnalysisRunToFailed(
+  tx: Prisma.TransactionClient,
+  analysisRunId: string,
+  repositoryId: string,
+  errorMessage: string,
+): Promise<void> {
+  const completedAt = new Date();
+
+  const updatedRun = await tx.analysisRun.updateMany({
+    where: {
+      id: analysisRunId,
+      status: AnalysisStatus.RUNNING,
+      startedAt: { not: null },
+      completedAt: null,
+    },
+    data: {
+      status: AnalysisStatus.FAILED,
+      completedAt,
+      errorMessage,
+    },
+  });
+
+  if (updatedRun.count !== 1) {
+    throw new Error(
+      'Invalid lifecycle transition: expected RUNNING analysis run',
+    );
+  }
+
+  await tx.repository.update({
+    where: { id: repositoryId },
+    data: { status: RepositoryStatus.IDLE },
+  });
 }
 
 /**
@@ -23,18 +129,7 @@ function scheduleAnalysisCompletion(
   setTimeout(async () => {
     try {
       await prisma.$transaction(async (tx) => {
-        await tx.analysisRun.update({
-          where: { id: analysisRunId },
-          data: {
-            status: 'COMPLETED',
-            completedAt: new Date(),
-          },
-        });
-
-        await tx.repository.update({
-          where: { id: repositoryId },
-          data: { status: 'healthy' },
-        });
+        await transitionAnalysisRunToCompleted(tx, analysisRunId, repositoryId);
       });
 
       logger.info(
@@ -42,7 +137,7 @@ function scheduleAnalysisCompletion(
           event: 'analysis.run.completed',
           analysisRunId,
           repositoryId,
-          newStatus: 'completed',
+          newStatus: AnalysisStatus.COMPLETED,
         },
         'Analysis run completed (simulated)',
       );
@@ -58,22 +153,35 @@ function scheduleAnalysisCompletion(
       );
 
       try {
-        await prisma.analysisRun.update({
-          where: { id: analysisRunId },
-          data: {
-            status: 'FAILED',
-            completedAt: new Date(),
-            errorMessage:
-              error instanceof Error
-                ? error.message
-                : 'Unknown error during analysis completion',
-          },
+        const lifecycleErrorMessage =
+          error instanceof Error
+            ? error.message
+            : 'Unknown error during analysis completion';
+
+        await prisma.$transaction(async (tx) => {
+          await transitionAnalysisRunToFailed(
+            tx,
+            analysisRunId,
+            repositoryId,
+            lifecycleErrorMessage,
+          );
         });
+
+        logger.info(
+          {
+            event: 'analysis.run.failed',
+            analysisRunId,
+            repositoryId,
+            newStatus: AnalysisStatus.FAILED,
+          },
+          'Analysis run marked as failed',
+        );
       } catch (fallbackError) {
         logger.error(
           {
             event: 'analysis.run.fallback_failed',
             analysisRunId,
+            repositoryId,
             err: fallbackError,
           },
           'Failed to mark analysis run as failed',
@@ -88,7 +196,6 @@ export async function triggerAnalysisFromPushEvent({
   logger,
 }: TriggerAnalysisInput): Promise<void> {
   const githubRepoId = payload.repository?.id;
-  console.log('payload -> ', payload);
 
   if (typeof githubRepoId !== 'number') {
     logger.warn(
@@ -119,7 +226,7 @@ export async function triggerAnalysisFromPushEvent({
     const event = await tx.event.create({
       data: {
         repositoryId: repository.id,
-        type: 'PUSH',
+        type: EventType.PUSH,
         githubEventId: payload.after ?? null,
         payload: {
           ref: payload.ref ?? null,
@@ -134,8 +241,9 @@ export async function triggerAnalysisFromPushEvent({
     const analysisRun = await tx.analysisRun.create({
       data: {
         eventId: event.id,
-        status: 'RUNNING',
-        startedAt: new Date(),
+        status: AnalysisStatus.PENDING,
+        startedAt: null,
+        completedAt: null,
       },
     });
 
@@ -144,10 +252,7 @@ export async function triggerAnalysisFromPushEvent({
       data: { processed: true },
     });
 
-    await tx.repository.update({
-      where: { id: repository.id },
-      data: { status: 'analyzing' },
-    });
+    await transitionAnalysisRunToRunning(tx, analysisRun.id, repository.id);
 
     return { eventId: event.id, analysisRunId: analysisRun.id };
   });
