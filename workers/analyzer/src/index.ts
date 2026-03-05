@@ -48,9 +48,7 @@ const worker = new Worker<AnalysisJobPayload>(
     console.log(
       JSON.stringify({
         level: 'info',
-        event: 'analysis.job.received',
-        queue: 'analysis-jobs',
-        jobName: job.name,
+        message: 'Processing analysis job',
         jobId: job.id,
         analysisRunId,
       }),
@@ -62,22 +60,18 @@ const worker = new Worker<AnalysisJobPayload>(
       console.log(
         JSON.stringify({
           level: 'info',
-          event: 'analysis.job.completed',
-          queue: 'analysis-jobs',
-          jobName: job.name,
+          message: 'Analysis job completed',
           jobId: job.id,
-          analysisRunId,
         }),
       );
     } catch (error) {
       console.error(
         JSON.stringify({
           level: 'error',
-          event: 'analysis.job.failed',
-          queue: 'analysis-jobs',
-          jobName: job.name,
+          message: 'Analysis job failed',
           jobId: job.id,
           analysisRunId,
+          attemptsMade: job.attemptsMade,
           error: error instanceof Error ? error.message : 'Unknown error',
         }),
       );
@@ -85,7 +79,10 @@ const worker = new Worker<AnalysisJobPayload>(
       throw error;
     }
   },
-  { connection: redisConnectionOptions },
+  {
+    connection: redisConnectionOptions,
+    concurrency: 5,
+  },
 );
 
 worker.on('error', (error) => {
@@ -103,10 +100,9 @@ worker.on('failed', (job, error) => {
   console.error(
     JSON.stringify({
       level: 'error',
-      event: 'worker.job.failed',
-      queue: 'analysis-jobs',
-      jobName: job?.name ?? 'process-analysis',
+      message: 'Analysis job failed',
       jobId: job?.id ?? null,
+      attemptsMade: job?.attemptsMade ?? null,
       analysisRunId: job?.data.analysisRunId ?? null,
       error: error.message,
     }),

@@ -286,11 +286,21 @@ export async function triggerAnalysisFromPushEvent({
   });
 
   try {
-    await analysisQueue.add('process-analysis', {
-      analysisRunId: result.analysisRunId,
-      eventId: result.eventId,
-      repositoryId: repository.id,
-    });
+    await analysisQueue.add(
+      'process-analysis',
+      {
+        analysisRunId: result.analysisRunId,
+        eventId: result.eventId,
+        repositoryId: repository.id,
+      },
+      {
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 5000,
+        },
+      },
+    );
   } catch (error) {
     logger.error(
       {
