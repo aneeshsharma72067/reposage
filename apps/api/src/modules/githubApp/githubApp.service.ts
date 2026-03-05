@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
-import { basename } from 'node:path';
+import { existsSync } from 'node:fs';
+import { basename, isAbsolute, resolve } from 'node:path';
 import { createPrivateKey } from 'node:crypto';
 import { SignJWT, importPKCS8 } from 'jose';
 import { env } from '../../config/env';
@@ -114,14 +115,37 @@ function toPkcs8Pem(pem: string): string {
   }
 }
 
+function resolvePrivateKeyPath(privateKeyPath: string): string {
+  if (isAbsolute(privateKeyPath)) {
+    return privateKeyPath;
+  }
+
+  const candidates = [
+    resolve(process.cwd(), privateKeyPath),
+    resolve(process.cwd(), 'apps/api', privateKeyPath),
+    resolve(process.cwd(), '..', 'apps/api', privateKeyPath),
+    resolve(process.cwd(), '..', '..', 'apps/api', privateKeyPath),
+  ];
+
+  for (const candidate of new Set(candidates)) {
+    if (existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  return candidates[0];
+}
+
 async function readPrivateKeyFromPath(privateKeyPath: string): Promise<string> {
+  const resolvedPath = resolvePrivateKeyPath(privateKeyPath);
+
   try {
-    const rawPem = await readFile(privateKeyPath, 'utf8');
+    const rawPem = await readFile(resolvedPath, 'utf8');
     return normalizePem(rawPem);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       throw new AppError(
-        'GitHub App private key file not found',
+        `GitHub App private key file not found (path: ${resolvedPath})`,
         500,
         'GITHUB_APP_PRIVATE_KEY_NOT_FOUND',
       );

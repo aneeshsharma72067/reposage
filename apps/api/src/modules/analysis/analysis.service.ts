@@ -9,6 +9,7 @@ import {
 } from '@prisma/client';
 import { prisma } from '../../lib/prisma';
 import { analysisQueue } from '../../lib/queue';
+import { generateInstallationAccessToken } from '../githubApp/githubApp.service';
 import type {
   AnalysisFindingListItem,
   AnalysisRunListItem,
@@ -20,32 +21,328 @@ interface TriggerAnalysisInput {
   logger: FastifyBaseLogger;
 }
 
-function selectSimulatedSeverity(): SeverityLevel {
-  const severityIndex = Math.floor(Math.random() * 3);
-
-  if (severityIndex === 0) {
-    return SeverityLevel.INFO;
-  }
-
-  if (severityIndex === 1) {
-    return SeverityLevel.WARNING;
-  }
-
-  return SeverityLevel.CRITICAL;
+interface PushEventContext {
+  sha: string;
+  owner: string;
+  repositoryName: string;
 }
 
-async function evaluateRepositoryHealth(
-  runId: string,
-  tx: Prisma.TransactionClient = prisma,
-): Promise<RepositoryStatus> {
-  const criticalFindingsCount = await tx.finding.count({
-    where: {
-      analysisRunId: runId,
-      severity: SeverityLevel.CRITICAL,
+interface AnalysisExecutionContext {
+  analysisRunId: string;
+  repositoryId: string;
+  installationId: bigint;
+  pushEvent: PushEventContext;
+}
+
+interface CommitFileData {
+  filename: string;
+  additions: number;
+  deletions: number;
+  changes: number;
+  patch: string | null;
+}
+
+interface CommitAnalysisInput {
+  sha: string;
+  message: string;
+  files: CommitFileData[];
+  totalLinesChanged: number;
+}
+
+interface GithubCommitResponseFile {
+  filename?: string;
+  additions?: number;
+  deletions?: number;
+  changes?: number;
+  patch?: string;
+}
+
+interface GithubCommitResponse {
+  sha?: string;
+  commit?: {
+    message?: string;
+  };
+  files?: GithubCommitResponseFile[];
+  message?: string;
+}
+
+interface FindingDraft {
+  type: FindingType;
+  severity: SeverityLevel;
+  title: string;
+  description: string;
+  metadata: Prisma.InputJsonObject;
+}
+
+const SENSITIVE_FILE_KEYWORDS = ['config', 'env', 'schema', 'routes'] as const;
+
+function isJsonObject(
+  value: Prisma.JsonValue | undefined,
+): value is Prisma.JsonObject {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function getJsonString(
+  payload: Prisma.JsonObject,
+  key: string,
+): string | undefined {
+  const value = payload[key];
+
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function parseRepositoryFullName(repoFullName: string): {
+  owner: string;
+  repositoryName: string;
+} {
+  const parts = repoFullName.split('/');
+
+  if (parts.length !== 2 || !parts[0] || !parts[1]) {
+    throw new Error('Invalid repository full name in event payload');
+  }
+
+  return {
+    owner: parts[0],
+    repositoryName: parts[1],
+  };
+}
+
+function extractPushEventContext(payload: Prisma.JsonValue): PushEventContext {
+  if (!isJsonObject(payload)) {
+    throw new Error('Event payload is not a JSON object');
+  }
+
+  const sha = getJsonString(payload, 'after');
+
+  if (!sha) {
+    throw new Error('Missing commit SHA in push event payload');
+  }
+
+  const repoFullNameFromTopLevel = getJsonString(payload, 'repoFullName');
+
+  if (repoFullNameFromTopLevel) {
+    const { owner, repositoryName } = parseRepositoryFullName(
+      repoFullNameFromTopLevel,
+    );
+
+    return {
+      sha,
+      owner,
+      repositoryName,
+    };
+  }
+
+  const repositoryValue = payload.repository;
+
+  if (!isJsonObject(repositoryValue)) {
+    throw new Error('Missing repository data in push event payload');
+  }
+
+  const repoFullNameFromNested = getJsonString(repositoryValue, 'full_name');
+
+  if (repoFullNameFromNested) {
+    const { owner, repositoryName } = parseRepositoryFullName(
+      repoFullNameFromNested,
+    );
+
+    return {
+      sha,
+      owner,
+      repositoryName,
+    };
+  }
+
+  const repositoryName = getJsonString(repositoryValue, 'name');
+  const ownerValue = repositoryValue.owner;
+
+  if (!repositoryName || !isJsonObject(ownerValue)) {
+    throw new Error('Missing repository owner/name in push event payload');
+  }
+
+  const owner = getJsonString(ownerValue, 'login');
+
+  if (!owner) {
+    throw new Error('Missing repository owner in push event payload');
+  }
+
+  return {
+    sha,
+    owner,
+    repositoryName,
+  };
+}
+
+async function loadAnalysisExecutionContext(
+  analysisRunId: string,
+): Promise<AnalysisExecutionContext> {
+  const run = await prisma.analysisRun.findUnique({
+    where: { id: analysisRunId },
+    select: {
+      id: true,
+      event: {
+        select: {
+          payload: true,
+          repository: {
+            select: {
+              id: true,
+              installation: {
+                select: {
+                  installationId: true,
+                },
+              },
+            },
+          },
+        },
+      },
     },
   });
 
-  if (criticalFindingsCount > 0) {
+  if (!run) {
+    throw new Error(`Analysis run not found: ${analysisRunId}`);
+  }
+
+  return {
+    analysisRunId: run.id,
+    repositoryId: run.event.repository.id,
+    installationId: run.event.repository.installation.installationId,
+    pushEvent: extractPushEventContext(run.event.payload),
+  };
+}
+
+async function fetchCommitDataFromGithub(params: {
+  owner: string;
+  repositoryName: string;
+  sha: string;
+  installationToken: string;
+}): Promise<CommitAnalysisInput> {
+  const response = await fetch(
+    `https://api.github.com/repos/${params.owner}/${params.repositoryName}/commits/${params.sha}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${params.installationToken}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+    },
+  );
+
+  let responseBody: GithubCommitResponse | undefined;
+
+  try {
+    responseBody = (await response.json()) as GithubCommitResponse;
+  } catch {
+    responseBody = undefined;
+  }
+
+  if (!response.ok) {
+    const githubMessage = responseBody?.message ?? 'Unknown GitHub API error';
+
+    throw new Error(
+      `Failed to fetch commit ${params.sha} (${response.status}): ${githubMessage}`,
+    );
+  }
+
+  const files = (responseBody?.files ?? [])
+    .filter((file): file is GithubCommitResponseFile => {
+      return (
+        typeof file.filename === 'string' && file.filename.trim().length > 0
+      );
+    })
+    .map(
+      (file): CommitFileData => ({
+        filename: file.filename as string,
+        additions: typeof file.additions === 'number' ? file.additions : 0,
+        deletions: typeof file.deletions === 'number' ? file.deletions : 0,
+        changes: typeof file.changes === 'number' ? file.changes : 0,
+        patch: typeof file.patch === 'string' ? file.patch : null,
+      }),
+    );
+
+  const totalLinesChanged = files.reduce((sum, file) => sum + file.changes, 0);
+
+  return {
+    sha: typeof responseBody?.sha === 'string' ? responseBody.sha : params.sha,
+    message:
+      typeof responseBody?.commit?.message === 'string' &&
+      responseBody.commit.message.trim().length > 0
+        ? responseBody.commit.message
+        : 'No commit message provided',
+    files,
+    totalLinesChanged,
+  };
+}
+
+function buildDeterministicFindings(
+  commitData: CommitAnalysisInput,
+): FindingDraft[] {
+  const findings: FindingDraft[] = [];
+  const baseMetadata: Prisma.InputJsonObject = {
+    sha: commitData.sha,
+    filesChanged: commitData.files.length,
+  };
+
+  if (commitData.files.length > 15) {
+    findings.push({
+      type: FindingType.ARCH_VIOLATION,
+      severity: SeverityLevel.WARNING,
+      title: 'Large commit touched many files',
+      description:
+        'This commit modifies more than 15 files and may be harder to validate safely.',
+      metadata: {
+        ...baseMetadata,
+        threshold: 15,
+      },
+    });
+  }
+
+  const sensitiveFiles = commitData.files.filter((file) => {
+    const normalizedFilename = file.filename.toLowerCase();
+
+    return SENSITIVE_FILE_KEYWORDS.some((keyword) =>
+      normalizedFilename.includes(keyword),
+    );
+  });
+
+  for (const file of sensitiveFiles) {
+    findings.push({
+      type: FindingType.REFACTOR_SUGGESTION,
+      severity: SeverityLevel.INFO,
+      title: `Sensitive path modified: ${file.filename}`,
+      description:
+        'Commit includes a file with config/env/schema/routes in its path. Review for runtime and contract impact.',
+      metadata: {
+        ...baseMetadata,
+        filename: file.filename,
+      },
+    });
+  }
+
+  if (commitData.totalLinesChanged > 500) {
+    findings.push({
+      type: FindingType.API_BREAK,
+      severity: SeverityLevel.CRITICAL,
+      title: 'High-change commit detected',
+      description:
+        'This commit changes more than 500 lines and carries elevated regression risk.',
+      metadata: {
+        ...baseMetadata,
+        totalLinesChanged: commitData.totalLinesChanged,
+        threshold: 500,
+      },
+    });
+  }
+
+  return findings;
+}
+
+function resolveRepositoryHealth(findings: FindingDraft[]): RepositoryStatus {
+  if (findings.some((finding) => finding.severity === SeverityLevel.CRITICAL)) {
     return RepositoryStatus.ISSUES_FOUND;
   }
 
@@ -62,13 +359,14 @@ async function transitionAnalysisRunToRunning(
   const updatedRun = await tx.analysisRun.updateMany({
     where: {
       id: analysisRunId,
-      status: AnalysisStatus.PENDING,
-      startedAt: null,
-      completedAt: null,
+      status: {
+        in: [AnalysisStatus.PENDING, AnalysisStatus.FAILED],
+      },
     },
     data: {
       status: AnalysisStatus.RUNNING,
       startedAt,
+      completedAt: null,
       errorMessage: null,
     },
   });
@@ -89,6 +387,7 @@ async function transitionAnalysisRunToCompleted(
   tx: Prisma.TransactionClient,
   analysisRunId: string,
   repositoryId: string,
+  findings: FindingDraft[],
 ): Promise<void> {
   const completedAt = new Date();
 
@@ -112,23 +411,21 @@ async function transitionAnalysisRunToCompleted(
     );
   }
 
-  await tx.finding.create({
-    data: {
-      analysisRunId,
-      repositoryId,
-      type: FindingType.API_BREAK,
-      severity: selectSimulatedSeverity(),
-      title: 'Simulated API contract change',
-      description:
-        'This is a simulated finding generated during analysis lifecycle testing.',
-      metadata: {
-        source: 'analysis-worker',
-        runId: analysisRunId,
-      },
-    },
-  });
+  if (findings.length > 0) {
+    await tx.finding.createMany({
+      data: findings.map((finding) => ({
+        analysisRunId,
+        repositoryId,
+        type: finding.type,
+        severity: finding.severity,
+        title: finding.title,
+        description: finding.description,
+        metadata: finding.metadata,
+      })),
+    });
+  }
 
-  const repositoryHealth = await evaluateRepositoryHealth(analysisRunId, tx);
+  const repositoryHealth = resolveRepositoryHealth(findings);
 
   await tx.repository.update({
     where: { id: repositoryId },
@@ -171,29 +468,40 @@ async function transitionAnalysisRunToFailed(
 }
 
 export async function processAnalysisRun(analysisRunId: string): Promise<void> {
-  const run = await prisma.analysisRun.findUnique({
-    where: { id: analysisRunId },
-    select: {
-      id: true,
-      status: true,
-      event: {
-        select: {
-          repositoryId: true,
-        },
-      },
-    },
-  });
-
-  if (!run) {
-    throw new Error(`Analysis run not found: ${analysisRunId}`);
-  }
-
-  const repositoryId = run.event.repositoryId;
+  const context = await loadAnalysisExecutionContext(analysisRunId);
 
   try {
     await prisma.$transaction(async (tx) => {
-      await transitionAnalysisRunToRunning(tx, analysisRunId, repositoryId);
-      await transitionAnalysisRunToCompleted(tx, analysisRunId, repositoryId);
+      await transitionAnalysisRunToRunning(
+        tx,
+        context.analysisRunId,
+        context.repositoryId,
+      );
+    });
+
+    const installationToken = await generateInstallationAccessToken(
+      context.installationId,
+    );
+
+    const commitData = await fetchCommitDataFromGithub({
+      owner: context.pushEvent.owner,
+      repositoryName: context.pushEvent.repositoryName,
+      sha: context.pushEvent.sha,
+      installationToken,
+    });
+
+    const findings = buildDeterministicFindings(commitData);
+    console.log('calculated findings', {
+      analysisRunId: context.analysisRunId,
+      findings,
+    });
+    await prisma.$transaction(async (tx) => {
+      await transitionAnalysisRunToCompleted(
+        tx,
+        context.analysisRunId,
+        context.repositoryId,
+        findings,
+      );
     });
   } catch (error) {
     const lifecycleErrorMessage =
@@ -205,8 +513,8 @@ export async function processAnalysisRun(analysisRunId: string): Promise<void> {
       await prisma.$transaction(async (tx) => {
         await transitionAnalysisRunToFailed(
           tx,
-          analysisRunId,
-          repositoryId,
+          context.analysisRunId,
+          context.repositoryId,
           lifecycleErrorMessage,
         );
       });
