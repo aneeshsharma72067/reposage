@@ -2,7 +2,6 @@ import type { FastifyBaseLogger } from 'fastify';
 import {
   AnalysisStatus,
   EventType,
-  FindingType,
   Prisma,
   RepositoryStatus,
   SeverityLevel,
@@ -10,6 +9,8 @@ import {
 import { prisma } from '../../lib/prisma';
 import { analysisQueue } from '../../lib/queue';
 import { generateInstallationAccessToken } from '../githubApp/githubApp.service';
+import { analysisRules } from './rules';
+import type { AnalysisContext, RuleFinding } from './rules/rule.types';
 import type {
   AnalysisFindingListItem,
   AnalysisRunListItem,
@@ -46,7 +47,8 @@ interface CommitAnalysisInput {
   sha: string;
   message: string;
   files: CommitFileData[];
-  totalLinesChanged: number;
+  additions: number;
+  deletions: number;
 }
 
 interface GithubCommitResponseFile {
@@ -66,15 +68,7 @@ interface GithubCommitResponse {
   message?: string;
 }
 
-interface FindingDraft {
-  type: FindingType;
-  severity: SeverityLevel;
-  title: string;
-  description: string;
-  metadata: Prisma.InputJsonObject;
-}
-
-const SENSITIVE_FILE_KEYWORDS = ['config', 'env', 'schema', 'routes'] as const;
+type FindingDraft = RuleFinding;
 
 function isJsonObject(
   value: Prisma.JsonValue | undefined,
@@ -264,7 +258,8 @@ async function fetchCommitDataFromGithub(params: {
       }),
     );
 
-  const totalLinesChanged = files.reduce((sum, file) => sum + file.changes, 0);
+  const additions = files.reduce((sum, file) => sum + file.additions, 0);
+  const deletions = files.reduce((sum, file) => sum + file.deletions, 0);
 
   return {
     sha: typeof responseBody?.sha === 'string' ? responseBody.sha : params.sha,
@@ -274,67 +269,58 @@ async function fetchCommitDataFromGithub(params: {
         ? responseBody.commit.message
         : 'No commit message provided',
     files,
-    totalLinesChanged,
+    additions,
+    deletions,
   };
 }
 
-function buildDeterministicFindings(
+function buildAnalysisContext(
+  executionContext: AnalysisExecutionContext,
   commitData: CommitAnalysisInput,
-): FindingDraft[] {
-  const findings: FindingDraft[] = [];
-  const baseMetadata: Prisma.InputJsonObject = {
-    sha: commitData.sha,
-    filesChanged: commitData.files.length,
+): AnalysisContext {
+  return {
+    repository: {
+      id: executionContext.repositoryId,
+      fullName: `${executionContext.pushEvent.owner}/${executionContext.pushEvent.repositoryName}`,
+      owner: executionContext.pushEvent.owner,
+      name: executionContext.pushEvent.repositoryName,
+    },
+    commitSha: commitData.sha,
+    commitMessage: commitData.message,
+    files: commitData.files,
+    additions: commitData.additions,
+    deletions: commitData.deletions,
+    changedFilesCount: commitData.files.length,
   };
+}
 
-  if (commitData.files.length > 15) {
-    findings.push({
-      type: FindingType.ARCH_VIOLATION,
-      severity: SeverityLevel.WARNING,
-      title: 'Large commit touched many files',
-      description:
-        'This commit modifies more than 15 files and may be harder to validate safely.',
-      metadata: {
-        ...baseMetadata,
-        threshold: 15,
-      },
-    });
-  }
+async function runAnalysisRules(
+  analysisRunId: string,
+  context: AnalysisContext,
+): Promise<FindingDraft[]> {
+  const results = await Promise.allSettled(
+    analysisRules.map((rule) => rule.run(context)),
+  );
 
-  const sensitiveFiles = commitData.files.filter((file) => {
-    const normalizedFilename = file.filename.toLowerCase();
+  const findings: FindingDraft[] = [];
 
-    return SENSITIVE_FILE_KEYWORDS.some((keyword) =>
-      normalizedFilename.includes(keyword),
-    );
-  });
+  for (const [index, result] of results.entries()) {
+    const rule = analysisRules[index];
 
-  for (const file of sensitiveFiles) {
-    findings.push({
-      type: FindingType.REFACTOR_SUGGESTION,
-      severity: SeverityLevel.INFO,
-      title: `Sensitive path modified: ${file.filename}`,
-      description:
-        'Commit includes a file with config/env/schema/routes in its path. Review for runtime and contract impact.',
-      metadata: {
-        ...baseMetadata,
-        filename: file.filename,
-      },
-    });
-  }
+    if (result.status === 'fulfilled') {
+      findings.push(...result.value);
+      continue;
+    }
 
-  if (commitData.totalLinesChanged > 500) {
-    findings.push({
-      type: FindingType.API_BREAK,
-      severity: SeverityLevel.CRITICAL,
-      title: 'High-change commit detected',
-      description:
-        'This commit changes more than 500 lines and carries elevated regression risk.',
-      metadata: {
-        ...baseMetadata,
-        totalLinesChanged: commitData.totalLinesChanged,
-        threshold: 500,
-      },
+    const errorMessage =
+      result.reason instanceof Error
+        ? result.reason.message
+        : 'Unknown rule execution error';
+
+    console.error('analysis rule execution failed', {
+      analysisRunId,
+      ruleId: rule?.id ?? 'unknown',
+      error: errorMessage,
     });
   }
 
@@ -489,11 +475,18 @@ export async function processAnalysisRun(analysisRunId: string): Promise<void> {
       sha: context.pushEvent.sha,
       installationToken,
     });
+
     console.log('fetched commit data', {
       analysisRunId: context.analysisRunId,
       commitData,
     });
-    const findings = buildDeterministicFindings(commitData);
+
+    const analysisContext = buildAnalysisContext(context, commitData);
+    const findings = await runAnalysisRules(
+      context.analysisRunId,
+      analysisContext,
+    );
+
     console.log('calculated findings', {
       analysisRunId: context.analysisRunId,
       findings,
