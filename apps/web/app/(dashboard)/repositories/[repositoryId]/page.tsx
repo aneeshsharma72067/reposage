@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Activity, AlertTriangle, CheckCircle2, Clock3, Loader2, XCircle } from 'lucide-react';
+import { FindingsList } from '@/components/dashboard/FindingsList';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import { RepositoryHeader } from '@/components/layout/repository-header';
 import {
@@ -41,65 +42,6 @@ function StatCard({ icon, label, value }: { icon: string; label: string; value: 
       <p className="mt-3 text-[24px] font-bold text-white">{value}</p>
     </div>
   );
-}
-
-function findingSeverityStyle(severity: string): { badge: string; dot: string; label: string } {
-  switch (severity) {
-    case 'CRITICAL':
-      return {
-        badge: 'border-rose-500/20 bg-rose-500/10 text-rose-300',
-        dot: 'bg-rose-400',
-        label: 'Critical',
-      };
-    case 'WARNING':
-      return {
-        badge: 'border-amber-500/20 bg-amber-500/10 text-amber-300',
-        dot: 'bg-amber-400',
-        label: 'Warning',
-      };
-    case 'INFO':
-    default:
-      return {
-        badge: 'border-cyan-500/20 bg-cyan-500/10 text-cyan-300',
-        dot: 'bg-cyan-400',
-        label: 'Info',
-      };
-  }
-}
-
-function toRunStatusLabel(status: string): string {
-  switch (status) {
-    case 'COMPLETED':
-      return 'Completed';
-    case 'RUNNING':
-      return 'Running';
-    case 'FAILED':
-      return 'Failed';
-    case 'PENDING':
-      return 'Pending';
-    default:
-      return status;
-  }
-}
-
-function renderFindingMetadata(metadata: unknown): string {
-  if (!metadata) {
-    return 'No metadata';
-  }
-
-  if (typeof metadata === 'string') {
-    return metadata;
-  }
-
-  if (typeof metadata === 'number' || typeof metadata === 'boolean') {
-    return String(metadata);
-  }
-
-  try {
-    return JSON.stringify(metadata);
-  } catch {
-    return 'Metadata unavailable';
-  }
 }
 
 function analysisRunStatusStyle(status: string): {
@@ -194,6 +136,14 @@ export default function RepositoryDetailPage() {
           : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300',
     };
   }, [findings]);
+
+  const sortedFindings = useMemo(
+    () =>
+      [...findings].sort(
+        (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
+      ),
+    [findings],
+  );
 
   useEffect(() => {
     if (!getAccessToken()) {
@@ -609,68 +559,6 @@ export default function RepositoryDetailPage() {
                     </div>
                   </div>
 
-                  <div className="glass-panel rounded-tokenLg px-4 py-4">
-                    <h3 className="text-[20px] font-semibold">Latest Findings</h3>
-                    {findings.length === 0 ? (
-                      <p className="mt-3 text-[13px] text-textSecondary">
-                        No findings from recent analysis runs.
-                      </p>
-                    ) : (
-                      <>
-                        <div className="mt-3 grid grid-cols-3 gap-2 text-[11px]">
-                          <div className="rounded-tokenMd border border-rose-500/20 bg-rose-500/10 px-2 py-2 text-center text-rose-300">
-                            CRIT {findingsSummary.critical}
-                          </div>
-                          <div className="rounded-tokenMd border border-amber-500/20 bg-amber-500/10 px-2 py-2 text-center text-amber-300">
-                            WARN {findingsSummary.warning}
-                          </div>
-                          <div className="rounded-tokenMd border border-cyan-500/20 bg-cyan-500/10 px-2 py-2 text-center text-cyan-300">
-                            INFO {findingsSummary.info}
-                          </div>
-                        </div>
-
-                        <ul className="mt-3 space-y-2">
-                          {findings.slice(0, 6).map((finding) => {
-                            const style = findingSeverityStyle(finding.severity);
-
-                            return (
-                              <li
-                                key={finding.id}
-                                className="glass-panel-soft rounded-tokenMd px-3 py-3"
-                              >
-                                <div className="flex items-start justify-between gap-2">
-                                  <p className="line-clamp-2 text-[13px] font-medium text-textPrimary">
-                                    {finding.title}
-                                  </p>
-                                  <span
-                                    className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${style.badge}`}
-                                  >
-                                    <span className={`h-1.5 w-1.5 rounded-full ${style.dot}`} />
-                                    {style.label}
-                                  </span>
-                                </div>
-
-                                <p className="mt-1 line-clamp-2 text-[12px] text-textSecondary">
-                                  {finding.description}
-                                </p>
-
-                                <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-textMuted">
-                                  <span>Run: {finding.analysisRun.id.slice(0, 12)}…</span>
-                                  <span>{toRunStatusLabel(finding.analysisRun.status)}</span>
-                                  <span>{toReadableDate(finding.createdAt)}</span>
-                                </div>
-
-                                <p className="mt-1 line-clamp-1 text-[10px] text-textMuted">
-                                  {renderFindingMetadata(finding.metadata)}
-                                </p>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </>
-                    )}
-                  </div>
-
                   <div className="rounded-tokenLg border border-surface400 bg-surface200 px-4 py-4">
                     <h3 className="text-[20px] font-semibold">Timeline</h3>
                     <div className="mt-3 space-y-3 text-[13px] text-textSecondary">
@@ -701,6 +589,30 @@ export default function RepositoryDetailPage() {
                     </div>
                   </div>
                 </aside>
+              </section>
+
+              <section className="glass-panel mt-6 rounded-tokenLg p-5">
+                <div>
+                  <h2 className="text-[20px] font-semibold tracking-tight text-white/90 sm:text-[22px]">
+                    Findings
+                  </h2>
+                  <p className="mt-1 text-[13px] text-white/45">
+                    Issues detected from recent repository analyses
+                  </p>
+                </div>
+
+                <div className="mt-4">
+                  {sortedFindings.length === 0 ? (
+                    <div className="glass-panel-soft rounded-2xl border border-white/10 px-6 py-10 text-center shadow-sm">
+                      <AlertTriangle className="mx-auto h-7 w-7 text-white/35" />
+                      <p className="mt-3 text-[14px] text-textSecondary">
+                        No issues detected in recent analyses.
+                      </p>
+                    </div>
+                  ) : (
+                    <FindingsList findings={sortedFindings} />
+                  )}
+                </div>
               </section>
             </>
           )}

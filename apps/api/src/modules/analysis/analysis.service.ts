@@ -489,7 +489,10 @@ export async function processAnalysisRun(analysisRunId: string): Promise<void> {
       sha: context.pushEvent.sha,
       installationToken,
     });
-
+    console.log('fetched commit data', {
+      analysisRunId: context.analysisRunId,
+      commitData,
+    });
     const findings = buildDeterministicFindings(commitData);
     console.log('calculated findings', {
       analysisRunId: context.analysisRunId,

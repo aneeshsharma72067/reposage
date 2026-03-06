@@ -2,13 +2,20 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { AlertTriangle, type LucideIcon } from 'lucide-react';
 import { clearAccessToken } from '@/lib/auth';
 
-const navItems = [
+const navItems: Array<{
+  label: string;
+  shortLabel: string;
+  href: string;
+  icon?: LucideIcon;
+}> = [
   { label: 'Dashboard', shortLabel: 'Home', href: '/dashboard' },
   { label: 'Repositories', shortLabel: 'Repos', href: '/repositories' },
-  { label: 'Event Log', shortLabel: 'Events', href: '/events' },
+  { label: 'Findings', shortLabel: 'Find', href: '/findings', icon: AlertTriangle },
   { label: 'Analysis Agent', shortLabel: 'Agent', href: '/analytics' },
+  { label: 'Event Log', shortLabel: 'Events', href: '/events' },
 ];
 
 export function AppSidebar() {
@@ -33,26 +40,35 @@ export function AppSidebar() {
         Workspace
       </p>
 
-      <nav className="grid h-full grid-cols-4 gap-1 lg:block lg:h-auto lg:space-y-1">
+      <nav className="grid h-full grid-cols-5 gap-1 lg:block lg:h-auto lg:space-y-1">
         {navItems.map((item) => {
           const isDashboardActive = pathname === '/dashboard' && item.label === 'Dashboard';
           const isReposActive =
             pathname.startsWith('/repositories') && item.label === 'Repositories';
+          const isFindingsActive = pathname.startsWith('/findings') && item.label === 'Findings';
           const isEventsActive = pathname.startsWith('/events') && item.label === 'Event Log';
           const isAnalysisActive =
             pathname.startsWith('/analytics') && item.label === 'Analysis Agent';
-          const active = isDashboardActive || isReposActive || isEventsActive || isAnalysisActive;
+          const active =
+            isDashboardActive ||
+            isReposActive ||
+            isFindingsActive ||
+            isEventsActive ||
+            isAnalysisActive;
+
+          const Icon = item.icon;
 
           return (
             <Link
               key={item.label}
               href={item.href}
-              className={`flex h-full items-center justify-center rounded-tokenMd px-2 text-center text-[10px] font-medium leading-tight lg:h-11 lg:justify-start lg:px-3 lg:text-left lg:text-[15px] ${
+              className={`flex h-full items-center justify-center gap-1 rounded-tokenMd px-2 text-center text-[10px] font-medium leading-tight lg:h-11 lg:justify-start lg:gap-2 lg:px-3 lg:text-left lg:text-[15px] ${
                 active
                   ? 'glass-pill text-white'
                   : 'text-textSecondary hover:bg-white/[0.06] hover:text-white'
               }`}
             >
+              {Icon ? <Icon className="h-3.5 w-3.5 shrink-0" /> : null}
               <span className="lg:hidden">{item.shortLabel}</span>
               <span className="hidden lg:inline">{item.label}</span>
             </Link>

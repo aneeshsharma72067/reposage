@@ -2,7 +2,7 @@ import { apiRequest, getApiBaseUrl, getGithubApiBaseUrl, githubApiRequest } from
 import { ApiError } from '@/lib/api';
 import type { RepositoryAnalysisRun } from '@/types/analysis';
 import type { EventDetail, EventListItem } from '@/types/event';
-import type { RepositoryFinding } from '@/types/finding';
+import type { Finding, RepositoryFinding } from '@/types/finding';
 import type { RepositoryCommit, RepositoryDetails, RepositoryListItem } from '@/types/repository';
 
 const ACCESS_TOKEN_STORAGE_KEY = 'ae_access_token';
@@ -214,6 +214,27 @@ export async function listRepositoryFindings(repositoryId: string): Promise<Repo
 
   try {
     return await apiRequest<RepositoryFinding[]>(`/repos/${repositoryId}/findings`, {
+      method: 'GET',
+      token,
+    });
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) {
+      clearAccessToken();
+    }
+
+    throw error;
+  }
+}
+
+export async function listFindings(): Promise<Finding[]> {
+  const token = getAccessToken();
+
+  if (!token) {
+    throw new Error('MISSING_ACCESS_TOKEN');
+  }
+
+  try {
+    return await apiRequest<Finding[]>('/findings', {
       method: 'GET',
       token,
     });

@@ -12,6 +12,7 @@ import {
 import installationRoutes from './modules/installation/installation.routes';
 import analysisRoutes from './modules/analysis/analysis.routes';
 import eventRoutes from './modules/event/event.routes';
+import findingsRoutes from './modules/findings/findings.routes';
 import repositoryRoutes from './modules/repository/repository.routes';
 import webhookRoutes from './modules/webhook/webhook.routes';
 import { jwtPlugin } from './plugins/jwt';
@@ -139,6 +140,7 @@ export async function buildApp() {
   await app.register(installationRoutes, { prefix: '/install' });
   await app.register(repositoryRoutes, { prefix: '/repos' });
   await app.register(analysisRoutes, { prefix: '/repos' });
+  await app.register(findingsRoutes, { prefix: '/findings' });
   await app.register(eventRoutes, { prefix: '/events' });
   await app.register(webhookRoutes, { prefix: '/webhooks' });
 
