@@ -6,6 +6,8 @@
     },
     "include": [
         "src/**/*",
-        "../../apps/api/src/**/*"
+        "../../apps/api/src/**/*",
+        "../../packages/ai/**/*.ts",
+        "../../packages/shared/src/**/*.ts"
     ]
 }

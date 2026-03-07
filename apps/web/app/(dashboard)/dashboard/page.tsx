@@ -330,6 +330,16 @@ export default function DashboardPage() {
     return Array.from(dayBuckets.values());
   }, [now, runsLast7Days]);
 
+  const latestRunDetailHref = useMemo(() => {
+    const latestRun = [...allRuns].sort((left, right) => {
+      const leftTime = new Date(left.event.createdAt).getTime();
+      const rightTime = new Date(right.event.createdAt).getTime();
+      return rightTime - leftTime;
+    })[0];
+
+    return latestRun ? `/analysis/${latestRun.id}` : null;
+  }, [allRuns]);
+
   const repositoryRows = useMemo<DashboardRepositoryRow[]>(() => {
     const query = searchText.trim().toLowerCase();
 
@@ -555,7 +565,11 @@ export default function DashboardPage() {
 
               <section className="flex gap-6">
                 <div className="flex-[2]">
-                  <AnalysisTrendChart data={trendData} />
+                  <AnalysisTrendChart
+                    data={trendData}
+                    viewAllHref="/analysis"
+                    latestRunHref={latestRunDetailHref ?? undefined}
+                  />
                 </div>
                 <FindingsDonutChart
                   info={infoCount}

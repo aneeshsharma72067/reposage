@@ -1,6 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { AppError } from '../../utils/errors';
 import {
+  getAnalysisRunByIdForUser,
   listAnalysisRunsForRepository,
   listFindingsForRepository,
 } from './analysis.service';
@@ -35,5 +36,21 @@ export async function getRepositoryFindings(
   );
 
   reply.send(findings);
+}
+
+export async function getAnalysisRunById(
+  request: FastifyRequest<{ Params: { analysisRunId: string } }>,
+  reply: FastifyReply,
+): Promise<void> {
+  if (!request.currentUser) {
+    throw new AppError('Unauthorized', 401, 'UNAUTHORIZED');
+  }
+
+  const run = await getAnalysisRunByIdForUser(
+    request.currentUser.id,
+    request.params.analysisRunId,
+  );
+
+  reply.send(run);
 }
 

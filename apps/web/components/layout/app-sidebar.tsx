@@ -14,7 +14,7 @@ const navItems: Array<{
   { label: 'Dashboard', shortLabel: 'Home', href: '/dashboard' },
   { label: 'Repositories', shortLabel: 'Repos', href: '/repositories' },
   { label: 'Findings', shortLabel: 'Find', href: '/findings', icon: AlertTriangle },
-  { label: 'Analysis Agent', shortLabel: 'Agent', href: '/analytics' },
+  { label: 'Analysis Agent', shortLabel: 'Agent', href: '/analysis' },
   { label: 'Event Log', shortLabel: 'Events', href: '/events' },
 ];
 
@@ -48,7 +48,7 @@ export function AppSidebar() {
           const isFindingsActive = pathname.startsWith('/findings') && item.label === 'Findings';
           const isEventsActive = pathname.startsWith('/events') && item.label === 'Event Log';
           const isAnalysisActive =
-            pathname.startsWith('/analytics') && item.label === 'Analysis Agent';
+            pathname.startsWith('/analysis') && item.label === 'Analysis Agent';
           const active =
             isDashboardActive ||
             isReposActive ||

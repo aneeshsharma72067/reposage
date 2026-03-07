@@ -1,8 +1,8 @@
 import { apiRequest, getApiBaseUrl, getGithubApiBaseUrl, githubApiRequest } from '@/lib/api';
 import { ApiError } from '@/lib/api';
-import type { RepositoryAnalysisRun } from '@/types/analysis';
+import type { AnalysisRunDetail, RepositoryAnalysisRun } from '@/types/analysis';
 import type { EventDetail, EventListItem } from '@/types/event';
-import type { Finding, RepositoryFinding } from '@/types/finding';
+import type { Finding, FindingDetail, RepositoryFinding } from '@/types/finding';
 import type { RepositoryCommit, RepositoryDetails, RepositoryListItem } from '@/types/repository';
 
 const ACCESS_TOKEN_STORAGE_KEY = 'ae_access_token';
@@ -342,6 +342,48 @@ export async function getEventById(eventId: string): Promise<EventDetail> {
 
   try {
     return await apiRequest<EventDetail>(`/events/${eventId}`, {
+      method: 'GET',
+      token,
+    });
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) {
+      clearAccessToken();
+    }
+
+    throw error;
+  }
+}
+
+export async function getFindingById(findingId: string): Promise<FindingDetail> {
+  const token = getAccessToken();
+
+  if (!token) {
+    throw new Error('MISSING_ACCESS_TOKEN');
+  }
+
+  try {
+    return await apiRequest<FindingDetail>(`/findings/${findingId}`, {
+      method: 'GET',
+      token,
+    });
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) {
+      clearAccessToken();
+    }
+
+    throw error;
+  }
+}
+
+export async function getAnalysisRunById(analysisRunId: string): Promise<AnalysisRunDetail> {
+  const token = getAccessToken();
+
+  if (!token) {
+    throw new Error('MISSING_ACCESS_TOKEN');
+  }
+
+  try {
+    return await apiRequest<AnalysisRunDetail>(`/repos/analysis-runs/${analysisRunId}`, {
       method: 'GET',
       token,
     });

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { AlertCircle, AlertTriangle, Info, ShieldAlert } from 'lucide-react';
 import type { Finding, FindingSeverity, FindingType } from '@/types/finding';
 
@@ -132,6 +133,12 @@ export function FindingsList({ findings }: FindingsListProps) {
                   <span className="inline-flex rounded-full border border-white/15 bg-white/[0.05] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.04em] text-white/80">
                     {typeLabel(finding.type)}
                   </span>
+                  <Link
+                    href={`/findings/${finding.id}`}
+                    className="inline-flex rounded-full border border-white/15 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.04em] text-white/80 transition hover:border-white/30 hover:text-white"
+                  >
+                    View Details
+                  </Link>
                 </div>
               </div>
             </div>

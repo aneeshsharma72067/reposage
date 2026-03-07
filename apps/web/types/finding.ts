@@ -22,4 +22,32 @@ export interface Finding {
   } | null;
 }
 
+export interface FindingDetail extends Finding {
+  repository: {
+    id: string;
+    name: string;
+    fullName: string;
+    status: string;
+    isActive: boolean;
+    defaultBranch: string | null;
+    private: boolean;
+  };
+  analysisRun: {
+    id: string;
+    status: string;
+    createdAt: string;
+    startedAt: string | null;
+    completedAt: string | null;
+    errorMessage: string | null;
+    event: {
+      id: string;
+      type: string;
+      githubEventId: string | null;
+      processed: boolean;
+      createdAt: string;
+      payload: unknown;
+    };
+  };
+}
+
 export type RepositoryFinding = Finding;

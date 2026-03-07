@@ -8,10 +8,12 @@ import {
 } from '@prisma/client';
 import { prisma } from '../../lib/prisma';
 import { analysisQueue } from '../../lib/queue';
+import { AppError } from '../../utils/errors';
 import { generateInstallationAccessToken } from '../githubApp/githubApp.service';
 import { analysisRules } from './rules';
 import type { AnalysisContext, RuleFinding } from './rules/rule.types';
 import type {
+  AnalysisRunDetail,
   AnalysisFindingListItem,
   AnalysisRunListItem,
   GitHubPushPayload,
@@ -41,6 +43,21 @@ interface CommitFileData {
   deletions: number;
   changes: number;
   patch: string | null;
+}
+
+export interface AdditionalAnalysisFindingContext {
+  analysisRunId: string;
+  repositoryId: string;
+  repositoryFullName: string;
+  commitSha: string;
+  commitMessage: string;
+  files: CommitFileData[];
+}
+
+export interface ProcessAnalysisRunOptions {
+  collectAdditionalFindings?: (
+    context: AdditionalAnalysisFindingContext,
+  ) => Promise<RuleFinding[]>;
 }
 
 interface CommitAnalysisInput {
@@ -453,7 +470,10 @@ async function transitionAnalysisRunToFailed(
   });
 }
 
-export async function processAnalysisRun(analysisRunId: string): Promise<void> {
+export async function processAnalysisRun(
+  analysisRunId: string,
+  options?: ProcessAnalysisRunOptions,
+): Promise<void> {
   const context = await loadAnalysisExecutionContext(analysisRunId);
 
   try {
@@ -482,10 +502,32 @@ export async function processAnalysisRun(analysisRunId: string): Promise<void> {
     });
 
     const analysisContext = buildAnalysisContext(context, commitData);
-    const findings = await runAnalysisRules(
+    const ruleFindings = await runAnalysisRules(
       context.analysisRunId,
       analysisContext,
     );
+
+    let additionalFindings: FindingDraft[] = [];
+
+    if (options?.collectAdditionalFindings) {
+      try {
+        additionalFindings = await options.collectAdditionalFindings({
+          analysisRunId: context.analysisRunId,
+          repositoryId: context.repositoryId,
+          repositoryFullName: `${context.pushEvent.owner}/${context.pushEvent.repositoryName}`,
+          commitSha: commitData.sha,
+          commitMessage: commitData.message,
+          files: commitData.files,
+        });
+      } catch (error) {
+        console.error('additional analysis findings collection failed', {
+          analysisRunId: context.analysisRunId,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
+      }
+    }
+
+    const findings = [...ruleFindings, ...additionalFindings];
 
     console.log('calculated findings', {
       analysisRunId: context.analysisRunId,
@@ -749,5 +791,105 @@ export async function listFindingsForRepository(
       completedAt: finding.analysisRun.completedAt?.toISOString() ?? null,
     },
   }));
+}
+
+export async function getAnalysisRunByIdForUser(
+  userId: string,
+  analysisRunId: string,
+): Promise<AnalysisRunDetail> {
+  const run = await prisma.analysisRun.findFirst({
+    where: {
+      id: analysisRunId,
+      event: {
+        repository: {
+          installation: {
+            installedByUserId: userId,
+          },
+        },
+      },
+    },
+    select: {
+      id: true,
+      status: true,
+      createdAt: true,
+      startedAt: true,
+      completedAt: true,
+      errorMessage: true,
+      event: {
+        select: {
+          id: true,
+          type: true,
+          githubEventId: true,
+          processed: true,
+          payload: true,
+          createdAt: true,
+          repository: {
+            select: {
+              id: true,
+              name: true,
+              fullName: true,
+              status: true,
+              isActive: true,
+              defaultBranch: true,
+              private: true,
+            },
+          },
+        },
+      },
+      findings: {
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          repositoryId: true,
+          type: true,
+          severity: true,
+          title: true,
+          description: true,
+          metadata: true,
+          createdAt: true,
+        },
+      },
+    },
+  });
+
+  if (!run) {
+    throw new AppError('Analysis run not found', 404, 'ANALYSIS_RUN_NOT_FOUND');
+  }
+
+  return {
+    id: run.id,
+    status: run.status,
+    createdAt: run.createdAt.toISOString(),
+    startedAt: run.startedAt?.toISOString() ?? null,
+    completedAt: run.completedAt?.toISOString() ?? null,
+    errorMessage: run.errorMessage,
+    repository: {
+      id: run.event.repository.id,
+      name: run.event.repository.name,
+      fullName: run.event.repository.fullName,
+      status: run.event.repository.status,
+      isActive: run.event.repository.isActive,
+      defaultBranch: run.event.repository.defaultBranch,
+      private: run.event.repository.private,
+    },
+    event: {
+      id: run.event.id,
+      type: run.event.type,
+      githubEventId: run.event.githubEventId,
+      processed: run.event.processed,
+      payload: run.event.payload,
+      createdAt: run.event.createdAt.toISOString(),
+    },
+    findings: run.findings.map((finding) => ({
+      id: finding.id,
+      repositoryId: finding.repositoryId,
+      type: finding.type,
+      severity: finding.severity,
+      title: finding.title,
+      description: finding.description,
+      metadata: finding.metadata,
+      createdAt: finding.createdAt.toISOString(),
+    })),
+  };
 }
 

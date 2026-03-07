@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import {
   CartesianGrid,
   Line,
@@ -17,15 +18,37 @@ export interface AnalysisTrendPoint {
 
 interface AnalysisTrendChartProps {
   data: AnalysisTrendPoint[];
+  viewAllHref?: string;
+  latestRunHref?: string;
 }
 
-export function AnalysisTrendChart({ data }: AnalysisTrendChartProps) {
+export function AnalysisTrendChart({ data, viewAllHref, latestRunHref }: AnalysisTrendChartProps) {
   return (
     <section className="glass-panel rounded-2xl p-6">
       <div className="mb-5 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-[20px] font-semibold text-white/90">Analysis Trends</h2>
           <p className="text-[12px] text-white/45">Runs over the last 7 days</p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {viewAllHref ? (
+            <Link
+              href={viewAllHref}
+              className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-medium text-white/80 transition hover:border-white/30 hover:text-white"
+            >
+              View All Runs
+            </Link>
+          ) : null}
+
+          {latestRunHref ? (
+            <Link
+              href={latestRunHref}
+              className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-[11px] font-medium text-cyan-200 transition hover:border-cyan-400/40 hover:text-cyan-100"
+            >
+              Latest Run Details
+            </Link>
+          ) : null}
         </div>
       </div>
 
