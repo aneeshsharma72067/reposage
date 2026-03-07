@@ -14,7 +14,8 @@ import {
   Upload,
 } from 'lucide-react';
 import { AppSidebar } from '@/components/layout/app-sidebar';
-import { getAccessToken, listEvents } from '@/lib/auth';
+import { getAccessToken } from '@/lib/auth';
+import { useEventsQuery } from '@/lib/queries';
 import type { EventListItem } from '@/types/event';
 
 /* ─── Helpers ─── */
@@ -277,34 +278,15 @@ function SkeletonCard() {
 /* ─── Main page ─── */
 
 export default function EventsPage() {
-  const [events, setEvents] = useState<EventListItem[]>([]);
+  const { data: events = [], isLoading, error, refetch } = useEventsQuery();
   const [searchText, setSearchText] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<EventTypeFilter>('all');
-
-  const loadEvents = async () => {
-    setIsLoading(true);
-
-    try {
-      const data = await listEvents();
-      setEvents(data);
-      setErrorMessage(null);
-    } catch {
-      setEvents([]);
-      setErrorMessage('Unable to load events. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const errorMessage = error ? 'Unable to load events. Please try again.' : null;
 
   useEffect(() => {
     if (!getAccessToken()) {
       window.location.href = '/login';
-      return;
     }
-
-    void loadEvents();
   }, []);
 
   const pushCount = useMemo(() => events.filter((e) => e.type === 'PUSH').length, [events]);
@@ -352,7 +334,7 @@ export default function EventsPage() {
           <div className="flex w-full items-center gap-2 sm:w-auto">
             <button
               type="button"
-              onClick={() => void loadEvents()}
+              onClick={() => void refetch()}
               disabled={isLoading}
               className="glass-input flex h-8 items-center gap-1.5 rounded-lg px-3 text-[12px] text-white/70 transition-colors hover:border-white/[0.2] hover:text-white/90 disabled:opacity-40"
             >
@@ -443,7 +425,7 @@ export default function EventsPage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => void loadEvents()}
+                  onClick={() => void refetch()}
                   className="shrink-0 rounded-full border border-rose-400/30 px-3 py-0.5 text-[11px] font-medium transition-colors hover:bg-rose-500/10"
                 >
                   Retry

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { useQueries, useQueryClient } from '@tanstack/react-query';
 import { Activity, BarChart3, FolderGit2, Radar, ShieldAlert } from 'lucide-react';
 import { ActivityFeed, type ActivityFeedItem } from '@/components/dashboard/ActivityFeed';
 import {
@@ -17,12 +18,8 @@ import {
 import { RepoHealthSummary } from '@/components/dashboard/RepoHealthSummary';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import { DashboardHeader } from '@/components/layout/dashboard-header';
-import {
-  getAccessToken,
-  listRepositories,
-  listRepositoryAnalysisRuns,
-  listRepositoryFindings,
-} from '@/lib/auth';
+import { getAccessToken, listRepositoryAnalysisRuns, listRepositoryFindings } from '@/lib/auth';
+import { useRepositoriesQuery } from '@/lib/queries';
 import type { RepositoryAnalysisRun } from '@/types/analysis';
 import type { RepositoryFinding } from '@/types/finding';
 import type { RepositoryListItem } from '@/types/repository';
@@ -137,50 +134,52 @@ function DashboardLoadingSkeleton() {
 }
 
 export default function DashboardPage() {
-  const [dataset, setDataset] = useState<DashboardDataset[]>([]);
   const [searchText, setSearchText] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const dashboardQueryClient = useQueryClient();
 
-  const loadDashboard = async () => {
-    setIsLoading(true);
+  const {
+    data: repositoriesData = [],
+    isLoading: reposLoading,
+    error: reposError,
+  } = useRepositoriesQuery();
 
-    try {
-      const repositories = await listRepositories();
+  const perRepoQueries = useQueries({
+    queries: repositoriesData.map((repository: RepositoryListItem) => ({
+      queryKey: ['dashboard', 'repoData', repository.id],
+      queryFn: async (): Promise<DashboardDataset> => {
+        const [runsResult, findingsResult] = await Promise.allSettled([
+          listRepositoryAnalysisRuns(repository.id),
+          listRepositoryFindings(repository.id),
+        ]);
 
-      const joinedData = await Promise.all(
-        repositories.map(async (repository): Promise<DashboardDataset> => {
-          const [runsResult, findingsResult] = await Promise.allSettled([
-            listRepositoryAnalysisRuns(repository.id),
-            listRepositoryFindings(repository.id),
-          ]);
+        return {
+          repository,
+          runs: runsResult.status === 'fulfilled' ? runsResult.value : [],
+          findings: findingsResult.status === 'fulfilled' ? findingsResult.value : [],
+        };
+      },
+      enabled: repositoriesData.length > 0,
+    })),
+  });
 
-          return {
-            repository,
-            runs: runsResult.status === 'fulfilled' ? runsResult.value : [],
-            findings: findingsResult.status === 'fulfilled' ? findingsResult.value : [],
-          };
-        }),
-      );
+  const isLoading = reposLoading || perRepoQueries.some((q) => q.isLoading);
+  const errorMessage = reposError ? 'Unable to load dashboard analytics. Please try again.' : null;
 
-      setDataset(joinedData);
-      setErrorMessage(null);
-    } catch {
-      setDataset([]);
-      setErrorMessage('Unable to load dashboard analytics. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const dataset = useMemo(
+    () => perRepoQueries.map((q) => q.data).filter((d): d is DashboardDataset => d !== undefined),
+    [perRepoQueries],
+  );
 
   useEffect(() => {
     if (!getAccessToken()) {
       window.location.href = '/login';
-      return;
     }
-
-    void loadDashboard();
   }, []);
+
+  const refetchDashboard = () => {
+    void dashboardQueryClient.invalidateQueries({ queryKey: ['repositories'] });
+    void dashboardQueryClient.invalidateQueries({ queryKey: ['dashboard'] });
+  };
 
   const repositories = useMemo(() => dataset.map((item) => item.repository), [dataset]);
 
@@ -363,6 +362,16 @@ export default function DashboardPage() {
     );
   }, [dataset, searchText]);
 
+  const latestRepositoryRows = useMemo<DashboardRepositoryRow[]>(() => {
+    return [...repositoryRows]
+      .sort((left, right) => {
+        const leftTime = left.lastAnalysisAt ? new Date(left.lastAnalysisAt).getTime() : 0;
+        const rightTime = right.lastAnalysisAt ? new Date(right.lastAnalysisAt).getTime() : 0;
+        return rightTime - leftTime;
+      })
+      .slice(0, 5);
+  }, [repositoryRows]);
+
   const activityFeedItems = useMemo<ActivityFeedItem[]>(() => {
     const criticalEvents = allFindings
       .filter((finding) => normalizeFindingSeverity(finding.severity) === 'CRITICAL')
@@ -402,7 +411,7 @@ export default function DashboardPage() {
     return [...criticalEvents, ...runEvents]
       .filter((item) => Number.isFinite(item.sortableTimestamp))
       .sort((left, right) => right.sortableTimestamp - left.sortableTimestamp)
-      .slice(0, 10)
+      .slice(0, 5)
       .map((item) => ({
         id: item.id,
         message: item.message,
@@ -459,9 +468,7 @@ export default function DashboardPage() {
                 <span>{errorMessage}</span>
                 <button
                   type="button"
-                  onClick={() => {
-                    void loadDashboard();
-                  }}
+                  onClick={refetchDashboard}
                   className="rounded-full border border-rose-400/40 px-3 py-1 text-[12px]"
                 >
                   Retry
@@ -484,9 +491,7 @@ export default function DashboardPage() {
               <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
                 <button
                   type="button"
-                  onClick={() => {
-                    void loadDashboard();
-                  }}
+                  onClick={refetchDashboard}
                   className="inline-flex h-12 items-center justify-center rounded-full border border-white/15 px-6 text-[14px] font-semibold text-white"
                 >
                   Refresh
@@ -568,10 +573,14 @@ export default function DashboardPage() {
                     idle={healthCounters.idle}
                   />
                 </div>
-                <ActivityFeed items={activityFeedItems} />
+                <ActivityFeed items={activityFeedItems} viewAllHref="/events" />
               </section>
 
-              <RepositoryTable rows={repositoryRows} initialSearch={searchText} />
+              <RepositoryTable
+                rows={latestRepositoryRows}
+                initialSearch={searchText}
+                viewAllHref="/repositories"
+              />
             </div>
           )}
         </div>

@@ -17,6 +17,8 @@ export interface DashboardRepositoryRow {
 interface RepositoryTableProps {
   rows: DashboardRepositoryRow[];
   initialSearch?: string;
+  viewAllHref?: string;
+  viewAllLabel?: string;
 }
 
 function statusStyle(status: DashboardRepositoryRow['status']): {
@@ -60,7 +62,12 @@ function toReadableDate(date: string | null): string {
   return parsed.toLocaleString();
 }
 
-export function RepositoryTable({ rows, initialSearch = '' }: RepositoryTableProps) {
+export function RepositoryTable({
+  rows,
+  initialSearch = '',
+  viewAllHref,
+  viewAllLabel = 'View all',
+}: RepositoryTableProps) {
   const [searchText, setSearchText] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState<'ALL' | DashboardRepositoryRow['status']>('ALL');
 
@@ -91,6 +98,14 @@ export function RepositoryTable({ rows, initialSearch = '' }: RepositoryTablePro
         </div>
 
         <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
+          {viewAllHref ? (
+            <Link
+              href={viewAllHref}
+              className="shrink-0 rounded-full border border-white/15 px-3 py-1 text-[11px] font-medium text-white/80 transition hover:border-white/30 hover:text-white"
+            >
+              {viewAllLabel}
+            </Link>
+          ) : null}
           <div className="relative flex-1 sm:w-[250px] sm:flex-none">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/35" />
             <input

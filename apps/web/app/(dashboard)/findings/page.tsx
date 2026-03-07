@@ -1,60 +1,47 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { FindingsList } from '@/components/dashboard/FindingsList';
 import { AppSidebar } from '@/components/layout/app-sidebar';
-import { getAccessToken, listFindings, listRepositories } from '@/lib/auth';
-import type { Finding } from '@/types/finding';
+import { getAccessToken } from '@/lib/auth';
+import { useFindingsQuery, useRepositoriesQuery } from '@/lib/queries';
 
 export default function FindingsPage() {
-  const [findings, setFindings] = useState<Finding[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const {
+    data: findingsData = [],
+    isLoading: findingsLoading,
+    error: findingsError,
+    refetch: refetchFindings,
+  } = useFindingsQuery();
+  const { data: repositories = [], isLoading: reposLoading } = useRepositoriesQuery();
 
-  const loadFindings = async () => {
-    setIsLoading(true);
-
-    try {
-      const [findingsData, repositories] = await Promise.all([listFindings(), listRepositories()]);
-      const repositoryMap = new Map(
-        repositories.map((repository) => [
-          repository.id,
-          {
-            name: repository.name,
-            fullName: repository.fullName,
-          },
-        ]),
-      );
-
-      const withRepositoryLabels = findingsData.map((finding) => {
-        const repository = repositoryMap.get(finding.repositoryId);
-
-        return {
-          ...finding,
-          repositoryName: repository?.name,
-          repositoryFullName: repository?.fullName,
-        };
-      });
-
-      setFindings(withRepositoryLabels);
-      setErrorMessage(null);
-    } catch {
-      setFindings([]);
-      setErrorMessage('Unable to load findings. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const isLoading = findingsLoading || reposLoading;
+  const errorMessage = findingsError ? 'Unable to load findings. Please try again.' : null;
 
   useEffect(() => {
     if (!getAccessToken()) {
       window.location.href = '/login';
-      return;
     }
-
-    void loadFindings();
   }, []);
+
+  const findings = useMemo(() => {
+    const repositoryMap = new Map(
+      repositories.map((repository) => [
+        repository.id,
+        { name: repository.name, fullName: repository.fullName },
+      ]),
+    );
+
+    return findingsData.map((finding) => {
+      const repository = repositoryMap.get(finding.repositoryId);
+      return {
+        ...finding,
+        repositoryName: repository?.name,
+        repositoryFullName: repository?.fullName,
+      };
+    });
+  }, [findingsData, repositories]);
 
   const sortedFindings = useMemo(
     () =>
@@ -77,7 +64,7 @@ export default function FindingsPage() {
 
           <button
             type="button"
-            onClick={() => void loadFindings()}
+            onClick={() => void refetchFindings()}
             className="glass-input inline-flex h-9 items-center gap-2 rounded-full px-4 text-[12px] font-medium text-white/80 transition hover:bg-white/[0.08]"
           >
             <RefreshCw className="h-3.5 w-3.5" />

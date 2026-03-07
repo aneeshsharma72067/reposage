@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { AppSidebar } from '@/components/layout/app-sidebar';
-import { getAccessToken, listRepositories } from '@/lib/auth';
+import { getAccessToken } from '@/lib/auth';
+import { useRepositoriesQuery } from '@/lib/queries';
 import type { RepositoryListItem } from '@/types/repository';
 
 type StatusFilter = 'all' | 'healthy' | 'analyzing';
@@ -177,34 +178,15 @@ function StatCard({ label, value, color }: { label: string; value: number; color
 }
 
 export default function RepositoriesPage() {
-  const [repositories, setRepositories] = useState<RepositoryListItem[]>([]);
+  const { data: repositories = [], isLoading, error, refetch } = useRepositoriesQuery();
   const [searchText, setSearchText] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<StatusFilter>('all');
-
-  const loadRepositories = async () => {
-    setIsLoading(true);
-
-    try {
-      const data = await listRepositories();
-      setRepositories(data);
-      setErrorMessage(null);
-    } catch {
-      setRepositories([]);
-      setErrorMessage('Unable to load repositories. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const errorMessage = error ? 'Unable to load repositories. Please try again.' : null;
 
   useEffect(() => {
     if (!getAccessToken()) {
       window.location.href = '/login';
-      return;
     }
-
-    void loadRepositories();
   }, []);
 
   const healthyCount = useMemo(
@@ -332,7 +314,7 @@ export default function RepositoriesPage() {
                 <span>{errorMessage}</span>
                 <button
                   type="button"
-                  onClick={() => void loadRepositories()}
+                  onClick={() => void refetch()}
                   className="shrink-0 rounded-full border border-rose-400/30 px-3 py-0.5 text-[11px] font-medium transition-colors hover:bg-rose-500/10"
                 >
                   Retry

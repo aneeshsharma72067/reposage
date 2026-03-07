@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Activity, AlertTriangle, CheckCircle2, GitCommitHorizontal } from 'lucide-react';
 
 export interface ActivityFeedItem {
@@ -9,6 +10,8 @@ export interface ActivityFeedItem {
 
 interface ActivityFeedProps {
   items: ActivityFeedItem[];
+  viewAllHref?: string;
+  viewAllLabel?: string;
 }
 
 function kindConfig(kind: ActivityFeedItem['kind']) {
@@ -44,12 +47,22 @@ function kindConfig(kind: ActivityFeedItem['kind']) {
   }
 }
 
-export function ActivityFeed({ items }: ActivityFeedProps) {
+export function ActivityFeed({ items, viewAllHref, viewAllLabel = 'View all' }: ActivityFeedProps) {
   return (
     <section className="glass-panel rounded-2xl p-6">
-      <div className="mb-5">
-        <h2 className="text-[20px] font-semibold text-white/90">Recent Activity Feed</h2>
-        <p className="text-[12px] text-white/45">Latest analysis and event updates</p>
+      <div className="mb-5 flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-[20px] font-semibold text-white/90">Recent Activity Feed</h2>
+          <p className="text-[12px] text-white/45">Latest analysis and event updates</p>
+        </div>
+        {viewAllHref ? (
+          <Link
+            href={viewAllHref}
+            className="shrink-0 rounded-full border border-white/15 px-3 py-1 text-[11px] font-medium text-white/80 transition hover:border-white/30 hover:text-white"
+          >
+            {viewAllLabel}
+          </Link>
+        ) : null}
       </div>
 
       {items.length === 0 ? (
