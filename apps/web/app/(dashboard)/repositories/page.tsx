@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { AppSidebar } from '@/components/layout/app-sidebar';
+import { PageHeader } from '@/components/layout/page-header';
+import { SectionHeaderContent } from '@/components/layout/section-header-content';
 import { getAccessToken } from '@/lib/auth';
 import { useRepositoriesQuery } from '@/lib/queries';
 import type { RepositoryListItem } from '@/types/repository';
@@ -223,35 +225,39 @@ export default function RepositoriesPage() {
 
       <section className="flex h-screen flex-1 flex-col overflow-y-auto">
         {/* Header */}
-        <header className="glass-header flex min-h-14 flex-wrap items-center justify-between gap-2 px-4 py-2 sm:px-6 sm:py-0">
-          <div className="hidden text-[12px] text-white/30 md:block">
-            <span>Organization</span>
-            <span className="mx-2 text-white/15">›</span>
-            <span className="font-medium text-white/70">Repositories</span>
-          </div>
-          <div className="relative w-full sm:w-auto">
-            <svg
-              className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/20"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              className="glass-input h-8 w-full rounded-lg pl-9 pr-3 text-[13px] sm:w-[220px]"
+        <PageHeader
+          leftContent={
+            <SectionHeaderContent
+              sectionLabel="Repositories"
+              title="Repositories"
+              subtitle="Connected repositories and current analysis status."
             />
-          </div>
-        </header>
+          }
+          actions={
+            <div className="relative w-full sm:w-auto">
+              <svg
+                className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/20"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="glass-input h-10 w-full rounded-tokenLg pl-9 pr-3 text-[13px] sm:w-[240px]"
+              />
+            </div>
+          }
+        />
 
         <div className="content-wrap space-y-6">
           {/* Summary cards */}

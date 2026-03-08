@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { AlertCircle, ArrowLeft, CheckCircle2, Clock, Loader2, XCircle } from 'lucide-react';
 import { AppSidebar } from '@/components/layout/app-sidebar';
+import { PageHeader } from '@/components/layout/page-header';
 import { getAccessToken } from '@/lib/auth';
 import { useFindingDetailQuery } from '@/lib/queries';
 
@@ -123,19 +124,21 @@ export default function FindingDetailPage() {
       <AppSidebar />
 
       <section className="flex h-screen flex-1 flex-col overflow-y-auto">
-        <header className="glass-header flex min-h-14 shrink-0 items-center justify-between px-4 py-2 sm:px-6 sm:py-0">
-          <div className="flex items-center gap-3 text-[12px] text-white/30">
-            <Link
-              href="/findings"
-              className="flex items-center gap-1.5 text-white/50 transition-colors hover:text-white/80"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              Back to Findings
-            </Link>
-            <span className="text-white/15">›</span>
-            <span className="font-medium text-white/70">Finding Details</span>
-          </div>
-        </header>
+        <PageHeader
+          leftContent={
+            <div className="flex items-center gap-3 text-[12px] text-white/30">
+              <Link
+                href="/findings"
+                className="flex items-center gap-1.5 text-white/50 transition-colors hover:text-white/80"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                Back to Findings
+              </Link>
+              <span className="text-white/15">›</span>
+              <span className="font-medium text-white/70">Finding Details</span>
+            </div>
+          }
+        />
 
         <div className="content-wrap space-y-6">
           {isLoading ? (

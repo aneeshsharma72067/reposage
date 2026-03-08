@@ -4,7 +4,9 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { queryClient } from '@/lib/queryClient';
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export type ProvidersChildren = React.ComponentProps<typeof QueryClientProvider>['children'];
+
+export function Providers({ children }: { children: ProvidersChildren }): React.JSX.Element {
   return (
     <QueryClientProvider client={queryClient}>
       {children}

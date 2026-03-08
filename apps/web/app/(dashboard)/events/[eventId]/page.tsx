@@ -16,6 +16,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { AppSidebar } from '@/components/layout/app-sidebar';
+import { PageHeader } from '@/components/layout/page-header';
 import { getAccessToken, getEventById } from '@/lib/auth';
 import type { EventDetail } from '@/types/event';
 
@@ -157,19 +158,21 @@ export default function EventDetailPage() {
 
       <section className="flex h-screen flex-1 flex-col overflow-y-auto">
         {/* Header */}
-        <header className="glass-header flex min-h-14 shrink-0 items-center justify-between px-4 py-2 sm:px-6 sm:py-0">
-          <div className="flex items-center gap-3 text-[12px] text-white/30">
-            <Link
-              href="/events"
-              className="flex items-center gap-1.5 text-white/50 transition-colors hover:text-white/80"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              Back to Events
-            </Link>
-            <span className="text-white/15">›</span>
-            <span className="font-medium text-white/70">Event Details</span>
-          </div>
-        </header>
+        <PageHeader
+          leftContent={
+            <div className="flex items-center gap-3 text-[12px] text-white/30">
+              <Link
+                href="/events"
+                className="flex items-center gap-1.5 text-white/50 transition-colors hover:text-white/80"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                Back to Events
+              </Link>
+              <span className="text-white/15">›</span>
+              <span className="font-medium text-white/70">Event Details</span>
+            </div>
+          }
+        />
 
         <div className="content-wrap space-y-6">
           {isLoading ? (

@@ -22,6 +22,8 @@ import {
   YAxis,
 } from 'recharts';
 import { AppSidebar } from '@/components/layout/app-sidebar';
+import { PageHeader } from '@/components/layout/page-header';
+import { SectionHeaderContent } from '@/components/layout/section-header-content';
 import { getAccessToken, listRepositories, listRepositoryAnalysisRuns } from '@/lib/auth';
 import type { RepositoryAnalysisRun } from '@/types/analysis';
 import type { RepositoryListItem } from '@/types/repository';
@@ -348,30 +350,31 @@ export default function AnalysisPage() {
   }, [trendData]);
 
   return (
-    <main className="relative flex h-screen overflow-hidden bg-[#050507] text-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(56,189,248,0.16),transparent_40%),radial-gradient(circle_at_85%_18%,rgba(168,85,247,0.14),transparent_42%),radial-gradient(circle_at_50%_85%,rgba(16,185,129,0.12),transparent_46%)]" />
+    <main className="page-shell flex h-screen overflow-hidden text-white">
       <AppSidebar />
 
-      <section className="relative z-10 flex h-screen flex-1 flex-col overflow-y-auto">
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-white/10 bg-black/20 px-6 backdrop-blur-md">
-          <div>
-            <h1 className="text-[20px] font-semibold tracking-tight text-white/95">Analytics</h1>
-            <p className="text-[12px] text-white/50">
-              Analysis Intelligence • Cross-repository metrics
-            </p>
-          </div>
+      <section className="flex h-screen flex-1 flex-col overflow-y-auto">
+        <PageHeader
+          leftContent={
+            <SectionHeaderContent
+              sectionLabel="Analysis"
+              title="Analysis"
+              subtitle="Cross-repository run metrics and performance trends."
+            />
+          }
+          actions={
+            <button
+              type="button"
+              onClick={() => void loadAnalysisRuns()}
+              className="glass-input inline-flex h-10 items-center gap-2 rounded-full px-4 text-[12px] font-medium text-white/80 transition hover:bg-white/[0.08]"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              Refresh Data
+            </button>
+          }
+        />
 
-          <button
-            type="button"
-            onClick={() => void loadAnalysisRuns()}
-            className="inline-flex h-10 items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 text-[12px] font-medium text-white/80 backdrop-blur-md transition hover:border-cyan-300/30 hover:bg-cyan-400/10"
-          >
-            <RefreshCw className="h-3.5 w-3.5" />
-            Refresh Data
-          </button>
-        </header>
-
-        <div className="px-6 py-6">
+        <div className="content-wrap">
           {isLoading ? (
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
               <div className="glass-panel animate-pulse rounded-2xl p-6 xl:col-span-6">

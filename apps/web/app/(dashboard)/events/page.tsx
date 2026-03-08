@@ -14,6 +14,8 @@ import {
   Upload,
 } from 'lucide-react';
 import { AppSidebar } from '@/components/layout/app-sidebar';
+import { PageHeader } from '@/components/layout/page-header';
+import { SectionHeaderContent } from '@/components/layout/section-header-content';
 import { getAccessToken } from '@/lib/auth';
 import { useEventsQuery } from '@/lib/queries';
 import type { EventListItem } from '@/types/event';
@@ -325,34 +327,39 @@ export default function EventsPage() {
 
       <section className="flex h-screen flex-1 flex-col overflow-y-auto">
         {/* Header */}
-        <header className="glass-header flex min-h-14 flex-wrap items-center justify-between gap-2 px-4 py-2 sm:px-6 sm:py-0">
-          <div className="hidden text-[12px] text-white/30 md:block">
-            <span>Organization</span>
-            <span className="mx-2 text-white/15">›</span>
-            <span className="font-medium text-white/70">Event Log</span>
-          </div>
-          <div className="flex w-full items-center gap-2 sm:w-auto">
-            <button
-              type="button"
-              onClick={() => void refetch()}
-              disabled={isLoading}
-              className="glass-input flex h-8 items-center gap-1.5 rounded-lg px-3 text-[12px] text-white/70 transition-colors hover:border-white/[0.2] hover:text-white/90 disabled:opacity-40"
-            >
-              <RefreshCw className={`h-3 w-3 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh
-            </button>
-            <div className="relative flex-1 sm:flex-none">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/20" />
-              <input
-                type="text"
-                placeholder="Search events..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                className="glass-input h-8 w-full rounded-lg pl-9 pr-3 text-[13px] sm:w-[220px]"
-              />
-            </div>
-          </div>
-        </header>
+        <PageHeader
+          leftContent={
+            <SectionHeaderContent
+              sectionLabel="Event Log"
+              title="Event Log"
+              subtitle="Recent GitHub webhook activity across repositories."
+            />
+          }
+          actionsClassName="sm:flex-nowrap"
+          actions={
+            <>
+              <button
+                type="button"
+                onClick={() => void refetch()}
+                disabled={isLoading}
+                className="glass-input flex h-10 items-center gap-1.5 rounded-full px-4 text-[12px] text-white/70 transition-colors hover:border-white/[0.2] hover:text-white/90 disabled:opacity-40"
+              >
+                <RefreshCw className={`h-3 w-3 ${isLoading ? 'animate-spin' : ''}`} />
+                Refresh
+              </button>
+              <div className="relative flex-1 sm:flex-none">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/20" />
+                <input
+                  type="text"
+                  placeholder="Search events..."
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  className="glass-input h-10 w-full rounded-tokenLg pl-9 pr-3 text-[13px] sm:w-[240px]"
+                />
+              </div>
+            </>
+          }
+        />
 
         <div className="content-wrap space-y-6">
           {/* Summary cards */}

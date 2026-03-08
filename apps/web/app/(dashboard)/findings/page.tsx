@@ -5,6 +5,8 @@ import { AlertCircle, AlertTriangle, FolderGit2, Info, RefreshCw } from 'lucide-
 import type { LucideIcon } from 'lucide-react';
 import { FindingsList } from '@/components/dashboard/FindingsList';
 import { AppSidebar } from '@/components/layout/app-sidebar';
+import { PageHeader } from '@/components/layout/page-header';
+import { SectionHeaderContent } from '@/components/layout/section-header-content';
 import { getAccessToken } from '@/lib/auth';
 import { useFindingsQuery, useRepositoriesQuery } from '@/lib/queries';
 
@@ -154,21 +156,25 @@ export default function FindingsPage() {
       <AppSidebar />
 
       <section className="flex h-screen flex-1 flex-col overflow-y-auto">
-        <header className="glass-header flex min-h-14 flex-wrap items-center justify-between gap-2 px-4 py-2 sm:px-6 sm:py-0">
-          <div>
-            <h1 className="text-[18px] font-semibold tracking-tight text-white/90">Findings</h1>
-            <p className="text-[11px] text-white/35">Issues detected across your repositories.</p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => void refetchFindings()}
-            className="glass-input inline-flex h-9 items-center gap-2 rounded-full px-4 text-[12px] font-medium text-white/80 transition hover:bg-white/[0.08]"
-          >
-            <RefreshCw className="h-3.5 w-3.5" />
-            Refresh
-          </button>
-        </header>
+        <PageHeader
+          leftContent={
+            <SectionHeaderContent
+              sectionLabel="Findings"
+              title="Findings"
+              subtitle="Issues detected across your repositories."
+            />
+          }
+          actions={
+            <button
+              type="button"
+              onClick={() => void refetchFindings()}
+              className="glass-input inline-flex h-10 items-center gap-2 rounded-full px-4 text-[12px] font-medium text-white/80 transition hover:bg-white/[0.08]"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              Refresh
+            </button>
+          }
+        />
 
         <div className="content-wrap">
           <section className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
