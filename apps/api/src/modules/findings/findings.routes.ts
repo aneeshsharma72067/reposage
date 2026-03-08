@@ -34,16 +34,7 @@ const findingsRoutes: FastifyPluginAsync = async (app) => {
               severity: { type: 'string' },
               title: { type: 'string' },
               description: { type: 'string' },
-              metadata: {
-                type: [
-                  'object',
-                  'array',
-                  'string',
-                  'number',
-                  'boolean',
-                  'null',
-                ],
-              },
+              metadata: {},
               createdAt: { type: 'string' },
             },
           },
@@ -100,9 +91,7 @@ const findingsRoutes: FastifyPluginAsync = async (app) => {
             severity: { type: 'string' },
             title: { type: 'string' },
             description: { type: 'string' },
-            metadata: {
-              type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
-            },
+            metadata: {},
             createdAt: { type: 'string' },
             repository: {
               type: 'object',
