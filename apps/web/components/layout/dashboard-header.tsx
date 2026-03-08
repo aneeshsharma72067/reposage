@@ -24,12 +24,12 @@ export function DashboardHeader({ onSearchChange }: DashboardHeaderProps) {
       actionsClassName="sm:gap-3 md:flex-nowrap"
       actions={
         <>
-          <input
+          {/* <input
             type="text"
             placeholder="Search repositories..."
             onChange={(event) => onSearchChange(event.target.value)}
             className="glass-input h-10 w-full rounded-tokenLg px-4 text-[13px] sm:w-[240px]"
-          />
+          /> */}
           <button
             type="button"
             onClick={() => {
