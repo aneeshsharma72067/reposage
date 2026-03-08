@@ -16,7 +16,26 @@ function toReadableDate(value: string): string {
 }
 
 function metadataSummary(metadata: Finding['metadata']): string {
-  if (!metadata || Object.keys(metadata).length === 0) {
+  if (metadata === null || metadata === undefined) {
+    return 'No metadata available';
+  }
+
+  if (Array.isArray(metadata)) {
+    if (metadata.length === 0) {
+      return 'No metadata available';
+    }
+
+    return metadata
+      .slice(0, 3)
+      .map((entry) => String(entry))
+      .join(' • ');
+  }
+
+  if (typeof metadata !== 'object') {
+    return String(metadata);
+  }
+
+  if (Object.keys(metadata).length === 0) {
     return 'No metadata available';
   }
 
@@ -32,6 +51,17 @@ function metadataSummary(metadata: Finding['metadata']): string {
     });
 
   return pairs.join(' • ');
+}
+
+function descriptionPreview(description: string): string {
+  const normalized = description.replace(/\s+/g, ' ').trim();
+  const maxLength = 260;
+
+  if (normalized.length <= maxLength) {
+    return normalized;
+  }
+
+  return `${normalized.slice(0, maxLength)}...`;
 }
 
 function typeLabel(type: FindingType): string {
@@ -109,13 +139,17 @@ export function FindingsList({ findings }: FindingsListProps) {
 
                 <div className="min-w-0 flex-1">
                   <h3 className="text-[15px] font-semibold text-white/90">{finding.title}</h3>
-                  <p className="mt-1 text-[13px] leading-relaxed text-white/65">
-                    {finding.description}
+                  <p className="mt-1 text-[13px] leading-relaxed text-white/65 [overflow-wrap:anywhere]">
+                    {descriptionPreview(finding.description)}
                   </p>
 
                   <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-white/45">
-                    {repositoryLabel ? <span>{repositoryLabel}</span> : null}
-                    <span>{metadataSummary(finding.metadata)}</span>
+                    {repositoryLabel ? (
+                      <span className="max-w-full [overflow-wrap:anywhere]">{repositoryLabel}</span>
+                    ) : null}
+                    <span className="max-w-full [overflow-wrap:anywhere]">
+                      {metadataSummary(finding.metadata)}
+                    </span>
                   </div>
                 </div>
               </div>
