@@ -357,7 +357,6 @@ export default function AnalysisPage() {
         <PageHeader
           leftContent={
             <SectionHeaderContent
-              sectionLabel="Analysis"
               title="Analysis"
               subtitle="Cross-repository run metrics and performance trends."
             />

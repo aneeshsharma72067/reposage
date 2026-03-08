@@ -330,7 +330,6 @@ export default function EventsPage() {
         <PageHeader
           leftContent={
             <SectionHeaderContent
-              sectionLabel="Event Log"
               title="Event Log"
               subtitle="Recent GitHub webhook activity across repositories."
             />

@@ -228,7 +228,6 @@ export default function RepositoriesPage() {
         <PageHeader
           leftContent={
             <SectionHeaderContent
-              sectionLabel="Repositories"
               title="Repositories"
               subtitle="Connected repositories and current analysis status."
             />

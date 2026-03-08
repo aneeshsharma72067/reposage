@@ -17,7 +17,6 @@ export function DashboardHeader({ onSearchChange }: DashboardHeaderProps) {
     <PageHeader
       leftContent={
         <SectionHeaderContent
-          sectionLabel="Dashboard"
           title="Dashboard"
           subtitle="Cross-repository health, findings, and analysis activity."
         />

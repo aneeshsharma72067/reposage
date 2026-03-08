@@ -159,7 +159,6 @@ export default function FindingsPage() {
         <PageHeader
           leftContent={
             <SectionHeaderContent
-              sectionLabel="Findings"
               title="Findings"
               subtitle="Issues detected across your repositories."
             />
