@@ -1,4 +1,13 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
+
+const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash';
+
+function resolveGeminiModel(): string {
+  const configuredModel = process.env.GEMINI_MODEL?.trim();
+  return configuredModel && configuredModel.length > 0
+    ? configuredModel
+    : DEFAULT_GEMINI_MODEL;
+}
 
 export async function callGemini(prompt: string): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -6,12 +15,19 @@ export async function callGemini(prompt: string): Promise<string> {
   if (!apiKey) {
     throw new Error('Missing required environment variable: GEMINI_API_KEY');
   }
+  console.log('calling gemini with prompt :', prompt);
+  const client = new GoogleGenAI({ apiKey });
+  const response = await client.models.generateContent({
+    model: resolveGeminiModel(),
+    contents: prompt,
+  });
 
-  const client = new GoogleGenerativeAI(apiKey);
-  const model = client.getGenerativeModel({ model: 'gemini-1.5-flash' });
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
+  const responseText = response.text;
 
-  return response.text();
+  if (!responseText || responseText.trim().length === 0) {
+    throw new Error('Gemini returned an empty response');
+  }
+
+  return responseText;
 }
 

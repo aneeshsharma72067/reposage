@@ -6,7 +6,12 @@ import { z } from 'zod';
 const envCandidates = [
   resolve(process.cwd(), '.env'),
   resolve(process.cwd(), 'apps/api/.env'),
+  resolve(process.cwd(), '../apps/api/.env'),
+  resolve(process.cwd(), '../../apps/api/.env'),
+  resolve(process.cwd(), '../../../apps/api/.env'),
+  resolve(process.cwd(), '../.env'),
   resolve(process.cwd(), '../../.env'),
+  resolve(process.cwd(), '../../../.env'),
 ];
 
 for (const envPath of new Set(envCandidates)) {
