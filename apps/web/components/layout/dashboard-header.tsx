@@ -1,25 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import { getInstallationUrl } from '@/lib/auth';
+import { RefreshCw } from 'lucide-react';
+import { useResyncRepositoriesMutation } from '@/lib/queries';
 
 interface DashboardHeaderProps {
   onSearchChange: (value: string) => void;
 }
 
 export function DashboardHeader({ onSearchChange }: DashboardHeaderProps) {
-  const [isConnecting, setIsConnecting] = useState(false);
-
-  const onConnectRepository = async () => {
-    setIsConnecting(true);
-
-    try {
-      const url = await getInstallationUrl();
-      window.location.href = url;
-    } catch {
-      setIsConnecting(false);
-    }
-  };
+  const resyncMutation = useResyncRepositoriesMutation();
+  const isSyncing = resyncMutation.isPending;
 
   return (
     <header className="glass-header flex min-h-16 flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:py-0">
@@ -39,11 +29,13 @@ export function DashboardHeader({ onSearchChange }: DashboardHeaderProps) {
         <button
           type="button"
           onClick={() => {
-            void onConnectRepository();
+            resyncMutation.mutate();
           }}
-          className="h-10 w-full rounded-full bg-white px-5 text-[14px] font-semibold text-black transition hover:bg-white/90 sm:w-auto"
+          disabled={isSyncing}
+          className="inline-flex h-10 w-full items-center justify-center rounded-full bg-white px-5 text-[14px] font-semibold text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:bg-white/80 disabled:text-black/75 sm:w-auto"
         >
-          {isConnecting ? 'Connecting...' : '+ Connect Repository'}
+          <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+          {isSyncing ? 'Syncing...' : 'Sync Repositories'}
         </button>
       </div>
     </header>

@@ -1,4 +1,5 @@
 export { useRepositoriesQuery } from './useRepositoriesQuery';
+export { useResyncRepositoriesMutation } from './useResyncRepositoriesMutation';
 export { useRepositoryDetailsQuery } from './useRepositoryDetailsQuery';
 export { useRepositoryFindingsQuery } from './useRepositoryFindingsQuery';
 export { useRepositoryAnalysisRunsQuery } from './useRepositoryAnalysisRunsQuery';

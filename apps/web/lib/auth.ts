@@ -12,6 +12,10 @@ export interface SessionState {
   hasConnectedRepositories: boolean;
 }
 
+export interface ResyncRepositoriesResponse {
+  synced: number;
+}
+
 interface GithubRepositoryDetailsResponse {
   html_url?: string;
   description?: string | null;
@@ -116,6 +120,27 @@ export async function listRepositories(): Promise<RepositoryListItem[]> {
   try {
     return await apiRequest<RepositoryListItem[]>('/repos', {
       method: 'GET',
+      token,
+    });
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) {
+      clearAccessToken();
+    }
+
+    throw error;
+  }
+}
+
+export async function resyncRepositories(): Promise<ResyncRepositoriesResponse> {
+  const token = getAccessToken();
+
+  if (!token) {
+    throw new Error('MISSING_ACCESS_TOKEN');
+  }
+
+  try {
+    return await apiRequest<ResyncRepositoriesResponse>('/repos/resync', {
+      method: 'POST',
       token,
     });
   } catch (error) {

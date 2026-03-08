@@ -1,5 +1,6 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { requireAuth } from '../../middleware/requireAuth';
+import { registerResyncRepositoryRoute } from '../../routes/repos/resync';
 import {
   getRepositoryDetails,
   listRepositories,
@@ -160,6 +161,8 @@ const repositoryRoutes: FastifyPluginAsync = async (app) => {
     },
     handler: getRepositoryDetails,
   });
+
+  registerResyncRepositoryRoute(app);
 };
 
 export default repositoryRoutes;

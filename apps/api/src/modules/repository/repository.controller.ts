@@ -1,5 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { AppError } from '../../utils/errors';
+import { syncRepositories } from '../../services/github/syncRepositories';
 import {
   getRepositoryDetailsForUser,
   listRepositoriesForUser,
@@ -32,5 +33,20 @@ export async function getRepositoryDetails(
   );
 
   reply.send(details);
+}
+
+export async function resyncRepositories(
+  request: FastifyRequest,
+  reply: FastifyReply,
+): Promise<void> {
+  if (!request.currentUser) {
+    throw new AppError('Unauthorized', 401, 'UNAUTHORIZED');
+  }
+
+  const result = await syncRepositories(request.currentUser.id);
+
+  reply.send({
+    synced: result.created,
+  });
 }
 

@@ -16,6 +16,7 @@
         "@fastify/jwt": "latest",
         "@fastify/swagger": "latest",
         "@fastify/swagger-ui": "latest",
+        "@octokit/rest": "^22.0.1",
         "@prisma/client": "^6.19.2",
         "bullmq": "latest",
         "dotenv": "latest",
