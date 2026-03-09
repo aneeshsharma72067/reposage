@@ -15,7 +15,6 @@ export async function callGemini(prompt: string): Promise<string> {
   if (!apiKey) {
     throw new Error('Missing required environment variable: GEMINI_API_KEY');
   }
-  console.log('calling gemini with prompt :', prompt);
   const client = new GoogleGenAI({ apiKey });
   const response = await client.models.generateContent({
     model: resolveGeminiModel(),

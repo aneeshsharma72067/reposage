@@ -9,7 +9,7 @@ interface DashboardHeaderProps {
   onSearchChange: (value: string) => void;
 }
 
-export function DashboardHeader({ onSearchChange }: DashboardHeaderProps) {
+export function DashboardHeader({}: DashboardHeaderProps) {
   const resyncMutation = useResyncRepositoriesMutation();
   const isSyncing = resyncMutation.isPending;
 
