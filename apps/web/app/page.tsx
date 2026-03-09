@@ -8,7 +8,12 @@ import logoImage from '@/assets/logo.png';
 const headingFont = Space_Grotesk({ subsets: ['latin'], weight: ['500', '700'] });
 const bodyFont = Manrope({ subsets: ['latin'], weight: ['400', '500', '600', '700'] });
 
-const navItems = ['Home', 'Platform', 'Features', 'FAQ'];
+const navItems = [
+  { label: 'Home', href: '/' },
+  { label: 'Platform', href: '/platform' },
+  { label: 'Features', href: '/features' },
+  { label: 'FAQ', href: '/faq' },
+];
 
 const threatFeed = [
   { label: 'Live Threat Leg', age: '23m ago' },
@@ -118,11 +123,11 @@ export default function HomePage() {
           >
             {navItems.map((item) => (
               <Link
-                key={item}
-                href="/login"
+                key={item.label}
+                href={item.href}
                 className="rounded-full px-3 py-[0.42rem] text-[0.74rem] text-white/75 transition-colors duration-200 hover:bg-white/10 hover:text-white/95"
               >
-                {item}
+                {item.label}
               </Link>
             ))}
             <button
