@@ -129,12 +129,6 @@ export default function PlatformPage() {
                 {item.label}
               </Link>
             ))}
-            <button
-              type="button"
-              className="inline-flex items-center gap-1 rounded-full bg-white/10 px-[0.7rem] py-[0.42rem] text-[0.72rem] text-white/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
-            >
-              Live <ArrowUpRight size={13} />
-            </button>
           </nav>
 
           <Link

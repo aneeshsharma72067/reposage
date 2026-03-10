@@ -130,12 +130,6 @@ export default function HomePage() {
                 {item.label}
               </Link>
             ))}
-            <button
-              type="button"
-              className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-[0.7rem] py-[0.42rem] text-[0.72rem] text-white/90"
-            >
-              Protection <ArrowUpRight size={13} />
-            </button>
           </nav>
 
           <Link
