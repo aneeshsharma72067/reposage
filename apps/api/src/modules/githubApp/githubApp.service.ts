@@ -1,17 +1,16 @@
 import { readFile } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
-import { basename, isAbsolute, resolve } from 'node:path';
+import { basename } from 'node:path';
 import { createPrivateKey } from 'node:crypto';
 import { SignJWT, importPKCS8 } from 'jose';
-import { env } from '../../config/env';
-import { prisma } from '../../lib/prisma';
-import { AppError } from '../../utils/errors';
+import { env } from '../../config/env.js';
+import { prisma } from '../../lib/prisma.js';
+import { AppError } from '../../utils/errors.js';
 import type {
   GenerateAppJwtConfig,
   GithubAppJwtPayload,
   GithubInstallationAccessTokenResponse,
   GithubInstallationRepositoriesResponse,
-} from './githubApp.types';
+} from './githubApp.types.js';
 
 interface GithubErrorResponse {
   message?: string;
@@ -67,9 +66,10 @@ function readGithubError(responseBody: unknown): GithubErrorResponse {
 
 function getGenerateJwtConfig(): GenerateAppJwtConfig {
   const appId = env.GITHUB_APP_ID?.trim();
+  const privateKey = env.GITHUB_APP_PRIVATE_KEY?.replace(/\\n/g, '\n').trim();
   const privateKeyPath = env.GITHUB_APP_PRIVATE_KEY_PATH?.trim();
 
-  if (!appId || !privateKeyPath) {
+  if (!appId || (!privateKey && !privateKeyPath)) {
     throw new AppError(
       'Missing GitHub App JWT configuration',
       500,
@@ -77,8 +77,25 @@ function getGenerateJwtConfig(): GenerateAppJwtConfig {
     );
   }
 
+  if (privateKey) {
+    return {
+      appId,
+      privateKeySource: 'env',
+      privateKey: normalizePem(privateKey),
+    };
+  }
+
+  if (!privateKeyPath) {
+    throw new AppError(
+      'Missing GitHub App private key configuration',
+      500,
+      'GITHUB_APP_PRIVATE_KEY_MISSING',
+    );
+  }
+
   return {
     appId,
+    privateKeySource: 'path',
     privateKeyPath,
   };
 }
@@ -115,37 +132,14 @@ function toPkcs8Pem(pem: string): string {
   }
 }
 
-function resolvePrivateKeyPath(privateKeyPath: string): string {
-  if (isAbsolute(privateKeyPath)) {
-    return privateKeyPath;
-  }
-
-  const candidates = [
-    resolve(process.cwd(), privateKeyPath),
-    resolve(process.cwd(), 'apps/api', privateKeyPath),
-    resolve(process.cwd(), '..', 'apps/api', privateKeyPath),
-    resolve(process.cwd(), '..', '..', 'apps/api', privateKeyPath),
-  ];
-
-  for (const candidate of new Set(candidates)) {
-    if (existsSync(candidate)) {
-      return candidate;
-    }
-  }
-
-  return candidates[0];
-}
-
 async function readPrivateKeyFromPath(privateKeyPath: string): Promise<string> {
-  const resolvedPath = resolvePrivateKeyPath(privateKeyPath);
-
   try {
-    const rawPem = await readFile(resolvedPath, 'utf8');
+    const rawPem = await readFile(privateKeyPath, 'utf8');
     return normalizePem(rawPem);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       throw new AppError(
-        `GitHub App private key file not found (path: ${resolvedPath})`,
+        `GitHub App private key file not found (path: ${privateKeyPath})`,
         500,
         'GITHUB_APP_PRIVATE_KEY_NOT_FOUND',
       );
@@ -160,20 +154,49 @@ async function readPrivateKeyFromPath(privateKeyPath: string): Promise<string> {
 }
 
 export async function generateAppJwt(): Promise<string> {
-  const { appId, privateKeyPath } = getGenerateJwtConfig();
+  const {
+    appId,
+    privateKeySource,
+    privateKey: configuredPrivateKey,
+    privateKeyPath,
+  } = getGenerateJwtConfig();
+
+  if (privateKeySource === 'path' && !privateKeyPath) {
+    throw new AppError(
+      'Missing GitHub App private key path',
+      500,
+      'GITHUB_APP_PRIVATE_KEY_MISSING',
+    );
+  }
 
   console.info({
     event: 'github.app.jwt.generate.start',
     appId,
-    privateKeyFile: basename(privateKeyPath),
+    privateKeySource,
+    privateKeyFile: privateKeyPath ? basename(privateKeyPath) : undefined,
   });
 
-  const pem = await readPrivateKeyFromPath(privateKeyPath);
+  let pem: string;
+  if (privateKeySource === 'env') {
+    pem = normalizePem(configuredPrivateKey ?? '');
+  } else {
+    const keyPath = privateKeyPath;
+    if (!keyPath) {
+      throw new AppError(
+        'Missing GitHub App private key path',
+        500,
+        'GITHUB_APP_PRIVATE_KEY_MISSING',
+      );
+    }
+
+    pem = await readPrivateKeyFromPath(keyPath);
+  }
+
   const pkcs8Pem = toPkcs8Pem(pem);
 
-  let privateKey;
+  let signingKey: Awaited<ReturnType<typeof importPKCS8>>;
   try {
-    privateKey = await importPKCS8(pkcs8Pem, 'RS256');
+    signingKey = await importPKCS8(pkcs8Pem, 'RS256');
   } catch {
     throw new AppError(
       'Invalid GitHub App private key format',
@@ -195,7 +218,7 @@ export async function generateAppJwt(): Promise<string> {
     .setIssuedAt(payload.iat)
     .setExpirationTime(payload.exp)
     .setIssuer(payload.iss)
-    .sign(privateKey);
+    .sign(signingKey);
 
   console.info({
     event: 'github.app.jwt.generate.success',

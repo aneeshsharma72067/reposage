@@ -2,7 +2,9 @@ import type { JWTPayload } from 'jose';
 
 export interface GenerateAppJwtConfig {
   appId: string;
-  privateKeyPath: string;
+  privateKeySource: 'env' | 'path';
+  privateKey?: string;
+  privateKeyPath?: string;
 }
 
 export interface GithubAppJwtPayload extends JWTPayload {

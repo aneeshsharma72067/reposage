@@ -1,0 +1,48 @@
+# dependencies
+node_modules
+**/node_modules
+
+# build artifacts
+dist
+build
+.next
+out
+coverage
+
+# git
+.git
+.gitignore
+
+# environment files
+.env
+.env.*
+!.env.example
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# editor files
+.vscode
+.idea
+
+# local configs
+*.local
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# test artifacts
+coverage
+jest-cache
+
+# docker
+Dockerfile*
+docker-compose*
+
+# unnecessary project files
+README.md
+docs

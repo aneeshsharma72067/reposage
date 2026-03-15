@@ -4,19 +4,65 @@ import IORedis from 'ioredis';
 import {
   processAnalysisRun,
   type AdditionalAnalysisFindingContext,
-} from '../../../apps/api/src/modules/analysis/analysis.service';
-import type { RuleFinding } from '../../../apps/api/src/modules/analysis/rules/rule.types';
-import { analyzeWithAI } from '../../../packages/ai/aiAnalyzer';
+} from '../../../apps/api/dist/modules/analysis/analysis.service.js';
+import type { RuleFinding } from '../../../apps/api/src/modules/analysis/rules/rule.types.js';
+import { analyzeWithAI } from '../../../packages/ai/aiAnalyzer.js';
 import type {
   AIFinding,
   AnalysisContext as AIAnalysisContext,
-} from '../../../packages/ai/types';
-import { compressDiff } from '../../../packages/shared/src/diffCompression';
+} from '../../../packages/ai/types.js';
+import { compressDiff } from '../../../packages/shared/src/diffCompression.js';
 
 interface AnalysisJobPayload {
   analysisRunId: string;
   eventId: string;
   repositoryId: string;
+}
+
+const requiredWorkerEnvKeys = [
+  'DATABASE_URL',
+  'REDIS_URL',
+  'GEMINI_API_KEY',
+  'GITHUB_APP_ID',
+  'GITHUB_APP_SLUG',
+  'GITHUB_CLIENT_ID',
+  'GITHUB_CLIENT_SECRET',
+  'GITHUB_CALLBACK_URL',
+  'JWT_SECRET',
+  'FRONTEND_URL',
+] as const;
+
+function hasEnvValue(name: string): boolean {
+  const value = process.env[name];
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+const missingWorkerEnv: string[] = requiredWorkerEnvKeys.filter(
+  (key) => !hasEnvValue(key),
+);
+
+if (
+  !hasEnvValue('GITHUB_APP_PRIVATE_KEY') &&
+  !hasEnvValue('GITHUB_APP_PRIVATE_KEY_PATH')
+) {
+  missingWorkerEnv.push('GITHUB_APP_PRIVATE_KEY|GITHUB_APP_PRIVATE_KEY_PATH');
+}
+
+console.log(
+  JSON.stringify({
+    level: 'info',
+    event: 'worker.config.loaded',
+    redis: hasEnvValue('REDIS_URL'),
+    database: hasEnvValue('DATABASE_URL'),
+    gemini: hasEnvValue('GEMINI_API_KEY'),
+    githubApp: hasEnvValue('GITHUB_APP_ID'),
+  }),
+);
+
+if (missingWorkerEnv.length > 0) {
+  throw new Error(
+    `Missing required environment variables: ${missingWorkerEnv.join(', ')}`,
+  );
 }
 
 function normalizeAIFindingType(type: string): RuleFinding['type'] {
@@ -98,20 +144,30 @@ if (!redisUrl) {
   throw new Error('Missing required environment variable: REDIS_URL');
 }
 
+const parsedRedisUrl = new URL(redisUrl);
+const useTls = parsedRedisUrl.protocol === 'rediss:';
+const db = Number(parsedRedisUrl.pathname.replace('/', '') || 0);
+
+const redisConnectionOptions: ConnectionOptions = {
+  host: parsedRedisUrl.hostname,
+  port: Number(parsedRedisUrl.port || 6379),
+  db: Number.isFinite(db) ? db : 0,
+  username: parsedRedisUrl.username
+    ? decodeURIComponent(parsedRedisUrl.username)
+    : undefined,
+  password: parsedRedisUrl.password
+    ? decodeURIComponent(parsedRedisUrl.password)
+    : undefined,
+  maxRetriesPerRequest: null,
+  enableReadyCheck: true,
+  ...(useTls ? { tls: {} } : {}),
+};
+
 const connection = new IORedis(redisUrl, {
   maxRetriesPerRequest: null,
   enableReadyCheck: true,
+  ...(useTls ? { tls: {} } : {}),
 });
-
-const redisConnectionOptions: ConnectionOptions = {
-  host: connection.options.host,
-  port: connection.options.port,
-  db: connection.options.db,
-  username: connection.options.username,
-  password: connection.options.password,
-  maxRetriesPerRequest: null,
-  enableReadyCheck: true,
-};
 
 connection.on('error', (error) => {
   console.error(
@@ -166,7 +222,7 @@ const worker = new Worker<AnalysisJobPayload>(
   },
   {
     connection: redisConnectionOptions,
-    concurrency: 5,
+    concurrency: 3,
   },
 );
 

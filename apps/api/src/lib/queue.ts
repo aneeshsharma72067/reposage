@@ -1,5 +1,5 @@
 import { Queue, type ConnectionOptions } from 'bullmq';
-import { env } from '../config/env';
+import { env } from '../config/env.js';
 
 declare global {
   var analysisQueueGlobal:
@@ -16,15 +16,22 @@ export interface AnalysisQueueJobData {
 export type AnalysisQueueJobName = 'process-analysis';
 
 const redisUrl = new URL(env.REDIS_URL);
+const useTls = redisUrl.protocol === 'rediss:';
+const db = Number(redisUrl.pathname.replace('/', '') || 0);
 
 const redisConnection: ConnectionOptions = {
   host: redisUrl.hostname,
   port: Number(redisUrl.port || 6379),
-  db: redisUrl.pathname ? Number(redisUrl.pathname.replace('/', '') || 0) : 0,
-  username: redisUrl.username || undefined,
-  password: redisUrl.password || undefined,
+  db: Number.isFinite(db) ? db : 0,
+  username: redisUrl.username
+    ? decodeURIComponent(redisUrl.username)
+    : undefined,
+  password: redisUrl.password
+    ? decodeURIComponent(redisUrl.password)
+    : undefined,
   maxRetriesPerRequest: null,
   enableReadyCheck: true,
+  ...(useTls ? { tls: {} } : {}),
 };
 
 export const analysisQueue =
