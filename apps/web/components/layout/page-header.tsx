@@ -1,8 +1,6 @@
-import type { ReactNode } from 'react';
-
 interface PageHeaderProps {
-  leftContent: ReactNode;
-  actions?: ReactNode;
+  leftContent: React.ReactNode;
+  actions?: React.ReactNode;
   className?: string;
   actionsClassName?: string;
 }
