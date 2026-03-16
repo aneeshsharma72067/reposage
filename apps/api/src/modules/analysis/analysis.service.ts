@@ -6,18 +6,18 @@ import {
   RepositoryStatus,
   SeverityLevel,
 } from '@prisma/client';
-import { prisma } from '../../lib/prisma';
-import { analysisQueue } from '../../lib/queue';
-import { AppError } from '../../utils/errors';
-import { generateInstallationAccessToken } from '../githubApp/githubApp.service';
-import { analysisRules } from './rules';
-import type { AnalysisContext, RuleFinding } from './rules/rule.types';
+import { prisma } from '../../lib/prisma.js';
+import { analysisQueue } from '../../lib/queue.js';
+import { AppError } from '../../utils/errors.js';
+import { generateInstallationAccessToken } from '../githubApp/githubApp.service.js';
+import { analysisRules } from './rules/index.js';
+import type { AnalysisContext, RuleFinding } from './rules/rule.types.js';
 import type {
   AnalysisRunDetail,
   AnalysisFindingListItem,
   AnalysisRunListItem,
   GitHubPushPayload,
-} from './analysis.types';
+} from './analysis.types.js';
 
 interface TriggerAnalysisInput {
   payload: GitHubPushPayload;
@@ -892,4 +892,3 @@ export async function getAnalysisRunByIdForUser(
     })),
   };
 }
-
