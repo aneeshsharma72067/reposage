@@ -1,7 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
 import { createPrivateKey } from 'node:crypto';
-import { SignJWT, importPKCS8 } from 'jose';
 import { env } from '../../config/env.js';
 import { prisma } from '../../lib/prisma.js';
 import { AppError } from '../../utils/errors.js';
@@ -15,6 +14,18 @@ import type {
 interface GithubErrorResponse {
   message?: string;
   documentation_url?: string;
+}
+
+type JoseModule = typeof import('jose');
+
+let joseModulePromise: Promise<JoseModule> | undefined;
+
+function getJoseModule(): Promise<JoseModule> {
+  if (!joseModulePromise) {
+    joseModulePromise = import('jose');
+  }
+
+  return joseModulePromise;
 }
 
 function parseGithubDateHeader(dateHeader: string | null): Date | null {
@@ -154,6 +165,8 @@ async function readPrivateKeyFromPath(privateKeyPath: string): Promise<string> {
 }
 
 export async function generateAppJwt(): Promise<string> {
+  const { SignJWT, importPKCS8 } = await getJoseModule();
+
   const {
     appId,
     privateKeySource,

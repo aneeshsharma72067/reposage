@@ -1,5 +1,4 @@
 import { RepositoryStatus } from '@prisma/client';
-import { Octokit } from '@octokit/rest';
 import { prisma } from '../../lib/prisma';
 import { AppError } from '../../utils/errors';
 import { generateInstallationAccessToken } from '../../modules/githubApp/githubApp.service';
@@ -23,6 +22,18 @@ interface InstallationRepositoryPayload {
     login: string;
     type: string;
   };
+}
+
+type OctokitModule = typeof import('@octokit/rest');
+
+let octokitModulePromise: Promise<OctokitModule> | undefined;
+
+async function getOctokitModule(): Promise<OctokitModule> {
+  if (!octokitModulePromise) {
+    octokitModulePromise = import('@octokit/rest');
+  }
+
+  return octokitModulePromise;
 }
 
 function isInstallationRepositoryPayload(
@@ -67,6 +78,8 @@ async function fetchInstallationRepositories(
 ): Promise<InstallationRepositoryPayload[]> {
   const installationToken =
     await generateInstallationAccessToken(installationId);
+
+  const { Octokit } = await getOctokitModule();
 
   const octokit = new Octokit({
     auth: installationToken,
@@ -212,4 +225,3 @@ export async function syncRepositories(
 
   return { created };
 }
-
