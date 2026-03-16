@@ -1,8 +1,10 @@
 const { spawnSync } = require('node:child_process');
 const { existsSync } = require('node:fs');
+const { createRequire } = require('node:module');
 const path = require('node:path');
 
 const repoRoot = path.resolve(__dirname, '..');
+const apiRoot = path.join(repoRoot, 'apps', 'api');
 const schemaPath = path.join(
   repoRoot,
   'apps',
@@ -40,15 +42,31 @@ function getPrismaCliPath() {
   return null;
 }
 
-async function isClientUsable() {
-  try {
-    const { PrismaClient } = require('@prisma/client');
-    const prisma = new PrismaClient({ log: ['error'] });
-    await prisma.$disconnect();
-    return true;
-  } catch {
-    return false;
+function resolvePrismaClientModule() {
+  const requireBases = [apiRoot, repoRoot];
+
+  for (const basePath of requireBases) {
+    const packageJsonPath = path.join(basePath, 'package.json');
+    if (!existsSync(packageJsonPath)) {
+      continue;
+    }
+
+    try {
+      const scopedRequire = createRequire(packageJsonPath);
+      return scopedRequire('@prisma/client');
+    } catch {
+      // Try next base path.
+    }
   }
+
+  return null;
+}
+
+async function isClientUsable() {
+  const prismaClientModule = resolvePrismaClientModule();
+  return Boolean(
+    prismaClientModule && typeof prismaClientModule.PrismaClient === 'function',
+  );
 }
 
 async function main() {

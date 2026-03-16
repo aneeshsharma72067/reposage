@@ -4,7 +4,7 @@
     "private": true,
     "scripts": {
         "dev": "tsx watch src/server.ts",
-        "build": "tsc",
+        "build": "npx prisma generate --schema=prisma/schema.prisma && tsc",
         "start": "node dist/server.js",
         "lint": "eslint .",
         "prisma:generate": "prisma generate",
@@ -28,7 +28,7 @@
     },
     "devDependencies": {
         "@types/node": "^20",
-        "prisma": "^6.16.2",
+        "prisma": "^6.19.2",
         "tsx": "latest"
     }
 }

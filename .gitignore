@@ -14,3 +14,5 @@ keys/
 .agents/
 ngrok/
 skills-lock.json
+.vercel
+.env*.local

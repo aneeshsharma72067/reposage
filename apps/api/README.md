@@ -40,7 +40,11 @@ All incoming paths are routed to the Fastify app using [vercel.json](vercel.json
 - /webhooks/\*
 - /findings/\*
 
-### 4. Important Runtime Note
+### 4. Prisma Generation In Vercel
+
+The Vercel build command in [vercel.json](vercel.json) runs [scripts/ensure-prisma-client.cjs](../../scripts/ensure-prisma-client.cjs) to avoid npm workspace resolution issues with `prisma generate` in monorepos.
+
+### 5. Important Runtime Note
 
 This API enqueues analysis jobs in Redis/BullMQ. The queue worker is not hosted on Vercel by this setup.
 
