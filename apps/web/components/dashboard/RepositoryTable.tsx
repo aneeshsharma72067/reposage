@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { Search } from 'lucide-react';
+import { ChevronDown, Search } from 'lucide-react';
 
 export interface DashboardRepositoryRow {
   id: string;
@@ -117,19 +117,25 @@ export function RepositoryTable({
             />
           </div>
 
-          <select
-            value={statusFilter}
-            onChange={(event) =>
-              setStatusFilter(event.target.value as 'ALL' | DashboardRepositoryRow['status'])
-            }
-            className="glass-input h-10 rounded-xl px-3 text-[13px]"
-          >
-            <option value="ALL">All statuses</option>
-            <option value="HEALTHY">Healthy</option>
-            <option value="ISSUES_FOUND">Issues Found</option>
-            <option value="ANALYZING">Analyzing</option>
-            <option value="IDLE">Idle</option>
-          </select>
+          <div className="relative">
+            <select
+              value={statusFilter}
+              onChange={(event) =>
+                setStatusFilter(event.target.value as 'ALL' | DashboardRepositoryRow['status'])
+              }
+              className="glass-input h-10 appearance-none rounded-xl bg-[#0f1218] pl-3 pr-9 text-[13px] text-white/85"
+            >
+              <option value="ALL">All statuses</option>
+              <option value="HEALTHY">Healthy</option>
+              <option value="ISSUES_FOUND">Issues Found</option>
+              <option value="ANALYZING">Analyzing</option>
+              <option value="IDLE">Idle</option>
+            </select>
+            <ChevronDown
+              aria-hidden="true"
+              className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/55"
+            />
+          </div>
         </div>
       </div>
 
