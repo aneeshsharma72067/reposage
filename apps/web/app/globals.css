@@ -94,6 +94,17 @@ a {
         outline: none;
     }
 
+    select.glass-input {
+        color-scheme: dark;
+        background-color: rgba(255, 255, 255, 0.04);
+    }
+
+    select.glass-input option,
+    select.glass-input optgroup {
+        background-color: #0f141d;
+        color: rgba(255, 255, 255, 0.92);
+    }
+
     .glass-pill {
         border: 1px solid rgba(255, 255, 255, 0.14);
         background: rgba(255, 255, 255, 0.06);

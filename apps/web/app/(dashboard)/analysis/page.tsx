@@ -43,6 +43,8 @@ interface TrendPoint {
   failed: number;
 }
 
+type AnalysisDateRangeFilter = 'all' | '24h' | '7d' | '30d' | '90d';
+
 function toReadableDate(value: string | null): string {
   if (!value) {
     return 'N/A';
@@ -58,6 +60,32 @@ function toReadableDate(value: string | null): string {
 
 function formatShortDate(value: Date): string {
   return value.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+function isWithinAnalysisDateRange(value: string, range: AnalysisDateRangeFilter): boolean {
+  if (range === 'all') {
+    return true;
+  }
+
+  const createdAtMs = new Date(value).getTime();
+  if (Number.isNaN(createdAtMs)) {
+    return false;
+  }
+
+  const now = Date.now();
+
+  switch (range) {
+    case '24h':
+      return createdAtMs >= now - 24 * 60 * 60 * 1000;
+    case '7d':
+      return createdAtMs >= now - 7 * 24 * 60 * 60 * 1000;
+    case '30d':
+      return createdAtMs >= now - 30 * 24 * 60 * 60 * 1000;
+    case '90d':
+      return createdAtMs >= now - 90 * 24 * 60 * 60 * 1000;
+    default:
+      return true;
+  }
 }
 
 function eventTypeLabel(type: string): string {
@@ -199,6 +227,10 @@ export default function AnalysisPage() {
   const [analysisRuns, setAnalysisRuns] = useState<AggregatedRun[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [repositoryFilter, setRepositoryFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [eventTypeFilter, setEventTypeFilter] = useState('all');
+  const [dateRangeFilter, setDateRangeFilter] = useState<AnalysisDateRangeFilter>('all');
 
   const loadAnalysisRuns = async () => {
     setIsLoading(true);
@@ -248,12 +280,89 @@ export default function AnalysisPage() {
     void loadAnalysisRuns();
   }, []);
 
+  const repositoryOptions = useMemo(() => {
+    const repositoryMap = new Map<string, { id: string; label: string }>();
+
+    for (const run of analysisRuns) {
+      repositoryMap.set(run.repository.id, {
+        id: run.repository.id,
+        label: run.repository.fullName,
+      });
+    }
+
+    return Array.from(repositoryMap.values()).sort((left, right) =>
+      left.label.localeCompare(right.label),
+    );
+  }, [analysisRuns]);
+
+  const statusOptions = useMemo(() => {
+    const statusSet = new Set<string>();
+    for (const run of analysisRuns) {
+      statusSet.add(run.status);
+    }
+
+    const preferredOrder = ['COMPLETED', 'RUNNING', 'PENDING', 'FAILED'];
+    return preferredOrder.filter((status) => statusSet.has(status));
+  }, [analysisRuns]);
+
+  const eventTypeOptions = useMemo(() => {
+    const typeSet = new Set<string>();
+    for (const run of analysisRuns) {
+      typeSet.add(run.event.type);
+    }
+
+    const preferredOrder = ['PUSH', 'PR_OPENED', 'PR_MERGED'];
+    const preferred = preferredOrder.filter((type) => typeSet.has(type));
+    const custom = Array.from(typeSet)
+      .filter((type) => !preferredOrder.includes(type))
+      .sort();
+
+    return [...preferred, ...custom];
+  }, [analysisRuns]);
+
+  const filteredAnalysisRuns = useMemo(
+    () =>
+      analysisRuns.filter((run) => {
+        if (repositoryFilter !== 'all' && run.repository.id !== repositoryFilter) {
+          return false;
+        }
+
+        if (statusFilter !== 'all' && run.status !== statusFilter) {
+          return false;
+        }
+
+        if (eventTypeFilter !== 'all' && run.event.type !== eventTypeFilter) {
+          return false;
+        }
+
+        if (!isWithinAnalysisDateRange(run.event.createdAt, dateRangeFilter)) {
+          return false;
+        }
+
+        return true;
+      }),
+    [analysisRuns, dateRangeFilter, eventTypeFilter, repositoryFilter, statusFilter],
+  );
+
+  const hasActiveFilters =
+    repositoryFilter !== 'all' ||
+    statusFilter !== 'all' ||
+    eventTypeFilter !== 'all' ||
+    dateRangeFilter !== 'all';
+
+  const clearFilters = () => {
+    setRepositoryFilter('all');
+    setStatusFilter('all');
+    setEventTypeFilter('all');
+    setDateRangeFilter('all');
+  };
+
   const metrics = useMemo(() => {
-    const total = analysisRuns.length;
-    const completed = analysisRuns.filter((run) => run.status === 'COMPLETED').length;
-    const running = analysisRuns.filter((run) => run.status === 'RUNNING').length;
-    const pending = analysisRuns.filter((run) => run.status === 'PENDING').length;
-    const failed = analysisRuns.filter((run) => run.status === 'FAILED').length;
+    const total = filteredAnalysisRuns.length;
+    const completed = filteredAnalysisRuns.filter((run) => run.status === 'COMPLETED').length;
+    const running = filteredAnalysisRuns.filter((run) => run.status === 'RUNNING').length;
+    const pending = filteredAnalysisRuns.filter((run) => run.status === 'PENDING').length;
+    const failed = filteredAnalysisRuns.filter((run) => run.status === 'FAILED').length;
 
     const successRate = total > 0 ? (completed / total) * 100 : 0;
 
@@ -265,7 +374,7 @@ export default function AnalysisPage() {
       failed,
       successRate,
     };
-  }, [analysisRuns]);
+  }, [filteredAnalysisRuns]);
 
   const trendData = useMemo<TrendPoint[]>(() => {
     const days = 10;
@@ -285,7 +394,7 @@ export default function AnalysisPage() {
       });
     }
 
-    analysisRuns.forEach((run) => {
+    filteredAnalysisRuns.forEach((run) => {
       const createdDate = new Date(run.event.createdAt);
       if (Number.isNaN(createdDate.getTime())) {
         return;
@@ -310,7 +419,7 @@ export default function AnalysisPage() {
     });
 
     return Array.from(buckets.values());
-  }, [analysisRuns]);
+  }, [filteredAnalysisRuns]);
 
   const trendDelta = useMemo(() => {
     if (trendData.length < 2) {
@@ -424,6 +533,109 @@ export default function AnalysisPage() {
               }}
               className="grid grid-cols-1 gap-4 xl:grid-cols-12"
             >
+              <motion.div
+                variants={{ hidden: { opacity: 0, y: 14 }, visible: { opacity: 1, y: 0 } }}
+                className="xl:col-span-12"
+              >
+                <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-md shadow-[0_22px_70px_rgba(0,0,0,0.45)]">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h2 className="text-[16px] font-semibold text-white/90">
+                      Filter Analysis Runs
+                    </h2>
+                    <p className="text-[12px] text-white/45">
+                      Showing {filteredAnalysisRuns.length.toLocaleString()} of{' '}
+                      {analysisRuns.length.toLocaleString()} runs
+                    </p>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <label className="space-y-1.5">
+                      <span className="text-[11px] uppercase tracking-[0.09em] text-white/40">
+                        Repository
+                      </span>
+                      <select
+                        value={repositoryFilter}
+                        onChange={(event) => setRepositoryFilter(event.target.value)}
+                        className="glass-input h-10 w-full rounded-tokenLg px-3 text-[13px]"
+                      >
+                        <option value="all">All repositories</option>
+                        {repositoryOptions.map((repository) => (
+                          <option key={repository.id} value={repository.id}>
+                            {repository.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="space-y-1.5">
+                      <span className="text-[11px] uppercase tracking-[0.09em] text-white/40">
+                        Analysis Status
+                      </span>
+                      <select
+                        value={statusFilter}
+                        onChange={(event) => setStatusFilter(event.target.value)}
+                        className="glass-input h-10 w-full rounded-tokenLg px-3 text-[13px]"
+                      >
+                        <option value="all">All statuses</option>
+                        {statusOptions.map((status) => (
+                          <option key={status} value={status}>
+                            {runStatusStyle(status).label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="space-y-1.5">
+                      <span className="text-[11px] uppercase tracking-[0.09em] text-white/40">
+                        Event Type
+                      </span>
+                      <select
+                        value={eventTypeFilter}
+                        onChange={(event) => setEventTypeFilter(event.target.value)}
+                        className="glass-input h-10 w-full rounded-tokenLg px-3 text-[13px]"
+                      >
+                        <option value="all">All events</option>
+                        {eventTypeOptions.map((type) => (
+                          <option key={type} value={type}>
+                            {eventTypeLabel(type)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="space-y-1.5">
+                      <span className="text-[11px] uppercase tracking-[0.09em] text-white/40">
+                        Date Range
+                      </span>
+                      <select
+                        value={dateRangeFilter}
+                        onChange={(event) =>
+                          setDateRangeFilter(event.target.value as AnalysisDateRangeFilter)
+                        }
+                        className="glass-input h-10 w-full rounded-tokenLg px-3 text-[13px]"
+                      >
+                        <option value="all">All time</option>
+                        <option value="24h">Last 24 hours</option>
+                        <option value="7d">Last 7 days</option>
+                        <option value="30d">Last 30 days</option>
+                        <option value="90d">Last 90 days</option>
+                      </select>
+                    </label>
+                  </div>
+
+                  <div className="mt-4 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={clearFilters}
+                      disabled={!hasActiveFilters}
+                      className="glass-input inline-flex h-9 items-center rounded-full px-4 text-[12px] font-medium text-white/75 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Reset Filters
+                    </button>
+                  </div>
+                </section>
+              </motion.div>
+
               <motion.div
                 variants={{ hidden: { opacity: 0, y: 14 }, visible: { opacity: 1, y: 0 } }}
                 className="xl:col-span-6"
@@ -549,17 +761,19 @@ export default function AnalysisPage() {
                   <div className="mb-4 flex items-center justify-between">
                     <h2 className="text-[18px] font-semibold text-white/92">Analysis Runs</h2>
                     <p className="text-[11px] uppercase tracking-[0.08em] text-white/45">
-                      {analysisRuns.length} records
+                      {filteredAnalysisRuns.length} records
                     </p>
                   </div>
 
-                  {analysisRuns.length === 0 ? (
+                  {filteredAnalysisRuns.length === 0 ? (
                     <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-6 text-center text-[13px] text-white/55">
-                      No analysis runs found.
+                      {analysisRuns.length === 0
+                        ? 'No analysis runs found.'
+                        : 'No analysis runs match the current filters.'}
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      {analysisRuns.map((run, index) => {
+                      {filteredAnalysisRuns.map((run, index) => {
                         const style = runStatusStyle(run.status);
                         const StatusIcon = style.icon;
                         const runDetailHref = `/analysis/${run.id}`;

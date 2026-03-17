@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AlertCircle, AlertTriangle, FolderGit2, Info, RefreshCw } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { FindingsList } from '@/components/dashboard/FindingsList';
@@ -63,6 +63,59 @@ function hasMetadataValue(metadata: unknown): boolean {
   return true;
 }
 
+type FindingsDateRangeFilter = 'all' | '24h' | '7d' | '30d' | '90d';
+
+function isWithinFindingsDateRange(value: string, range: FindingsDateRangeFilter): boolean {
+  if (range === 'all') {
+    return true;
+  }
+
+  const createdAtMs = new Date(value).getTime();
+  if (Number.isNaN(createdAtMs)) {
+    return false;
+  }
+
+  const now = Date.now();
+
+  switch (range) {
+    case '24h':
+      return createdAtMs >= now - 24 * 60 * 60 * 1000;
+    case '7d':
+      return createdAtMs >= now - 7 * 24 * 60 * 60 * 1000;
+    case '30d':
+      return createdAtMs >= now - 30 * 24 * 60 * 60 * 1000;
+    case '90d':
+      return createdAtMs >= now - 90 * 24 * 60 * 60 * 1000;
+    default:
+      return true;
+  }
+}
+
+function normalizeAnalysisStatus(status: string | null | undefined): string {
+  if (!status) {
+    return 'UNKNOWN';
+  }
+
+  return status.toUpperCase();
+}
+
+function analysisStatusLabel(status: string): string {
+  switch (status) {
+    case 'COMPLETED':
+      return 'Completed';
+    case 'RUNNING':
+      return 'Running';
+    case 'FAILED':
+      return 'Failed';
+    case 'PENDING':
+      return 'Pending';
+    case 'UNKNOWN':
+      return 'Unknown';
+    default:
+      return status;
+  }
+}
+
 export default function FindingsPage() {
   const {
     data: findingsData = [],
@@ -71,6 +124,15 @@ export default function FindingsPage() {
     refetch: refetchFindings,
   } = useFindingsQuery();
   const { data: repositories = [], isLoading: reposLoading } = useRepositoriesQuery();
+  const [repositoryFilter, setRepositoryFilter] = useState('all');
+  const [severityFilter, setSeverityFilter] = useState<'all' | 'CRITICAL' | 'WARNING' | 'INFO'>(
+    'all',
+  );
+  const [suggestionFilter, setSuggestionFilter] = useState<
+    'all' | 'suggestions' | 'non_suggestions'
+  >('all');
+  const [analysisStatusFilter, setAnalysisStatusFilter] = useState('all');
+  const [dateRangeFilter, setDateRangeFilter] = useState<FindingsDateRangeFilter>('all');
 
   const isLoading = findingsLoading || reposLoading;
   const errorMessage = findingsError ? 'Unable to load findings. Please try again.' : null;
@@ -107,6 +169,84 @@ export default function FindingsPage() {
     [findings],
   );
 
+  const repositoryOptions = useMemo(
+    () =>
+      repositories
+        .map((repository) => ({
+          id: repository.id,
+          label: repository.fullName || repository.name,
+        }))
+        .sort((left, right) => left.label.localeCompare(right.label)),
+    [repositories],
+  );
+
+  const analysisStatusOptions = useMemo(() => {
+    const statusSet = new Set<string>();
+
+    for (const finding of sortedFindings) {
+      statusSet.add(normalizeAnalysisStatus(finding.analysisRun?.status));
+    }
+
+    const preferredOrder = ['COMPLETED', 'RUNNING', 'PENDING', 'FAILED', 'UNKNOWN'];
+
+    return preferredOrder.filter((status) => statusSet.has(status));
+  }, [sortedFindings]);
+
+  const filteredFindings = useMemo(() => {
+    return sortedFindings.filter((finding) => {
+      if (repositoryFilter !== 'all' && finding.repositoryId !== repositoryFilter) {
+        return false;
+      }
+
+      if (severityFilter !== 'all' && finding.severity !== severityFilter) {
+        return false;
+      }
+
+      if (suggestionFilter === 'suggestions' && finding.type !== 'REFACTOR_SUGGESTION') {
+        return false;
+      }
+
+      if (suggestionFilter === 'non_suggestions' && finding.type === 'REFACTOR_SUGGESTION') {
+        return false;
+      }
+
+      if (analysisStatusFilter !== 'all') {
+        const status = normalizeAnalysisStatus(finding.analysisRun?.status);
+        if (status !== analysisStatusFilter) {
+          return false;
+        }
+      }
+
+      if (!isWithinFindingsDateRange(finding.createdAt, dateRangeFilter)) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [
+    analysisStatusFilter,
+    dateRangeFilter,
+    repositoryFilter,
+    severityFilter,
+    sortedFindings,
+    suggestionFilter,
+  ]);
+
+  const hasActiveFilters =
+    repositoryFilter !== 'all' ||
+    severityFilter !== 'all' ||
+    suggestionFilter !== 'all' ||
+    analysisStatusFilter !== 'all' ||
+    dateRangeFilter !== 'all';
+
+  const clearFilters = () => {
+    setRepositoryFilter('all');
+    setSeverityFilter('all');
+    setSuggestionFilter('all');
+    setAnalysisStatusFilter('all');
+    setDateRangeFilter('all');
+  };
+
   const findingsStats = useMemo(() => {
     const now = Date.now();
     const last24HoursWindowStart = now - 24 * 60 * 60 * 1000;
@@ -119,7 +259,7 @@ export default function FindingsPage() {
 
     const affectedRepositories = new Set<string>();
 
-    for (const finding of sortedFindings) {
+    for (const finding of filteredFindings) {
       affectedRepositories.add(finding.repositoryId);
 
       if (finding.severity === 'CRITICAL') {
@@ -141,7 +281,7 @@ export default function FindingsPage() {
     }
 
     return {
-      total: sortedFindings.length,
+      total: filteredFindings.length,
       criticalCount,
       warningCount,
       infoCount,
@@ -149,7 +289,7 @@ export default function FindingsPage() {
       affectedRepositoriesCount: affectedRepositories.size,
       findingsWithMetadataCount,
     };
-  }, [sortedFindings]);
+  }, [filteredFindings]);
 
   return (
     <main className="page-shell flex h-screen overflow-hidden text-white">
@@ -176,6 +316,121 @@ export default function FindingsPage() {
         />
 
         <div className="content-wrap">
+          <section className="glass-panel mb-5 rounded-tokenLg border border-white/10 p-4 sm:p-5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-[16px] font-semibold text-white/90">Filter Findings</h2>
+              <p className="text-[12px] text-white/45">
+                Showing {filteredFindings.length.toLocaleString()} of{' '}
+                {sortedFindings.length.toLocaleString()} findings
+              </p>
+            </div>
+
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+              <label className="space-y-1.5">
+                <span className="text-[11px] uppercase tracking-[0.09em] text-white/40">
+                  Repository
+                </span>
+                <select
+                  value={repositoryFilter}
+                  onChange={(event) => setRepositoryFilter(event.target.value)}
+                  className="glass-input h-10 w-full rounded-tokenLg px-3 text-[13px]"
+                >
+                  <option value="all">All repositories</option>
+                  {repositoryOptions.map((repository) => (
+                    <option key={repository.id} value={repository.id}>
+                      {repository.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="space-y-1.5">
+                <span className="text-[11px] uppercase tracking-[0.09em] text-white/40">
+                  Severity
+                </span>
+                <select
+                  value={severityFilter}
+                  onChange={(event) =>
+                    setSeverityFilter(event.target.value as 'all' | 'CRITICAL' | 'WARNING' | 'INFO')
+                  }
+                  className="glass-input h-10 w-full rounded-tokenLg px-3 text-[13px]"
+                >
+                  <option value="all">All severities</option>
+                  <option value="CRITICAL">Critical</option>
+                  <option value="WARNING">Warning</option>
+                  <option value="INFO">Info</option>
+                </select>
+              </label>
+
+              <label className="space-y-1.5">
+                <span className="text-[11px] uppercase tracking-[0.09em] text-white/40">
+                  Suggestion Type
+                </span>
+                <select
+                  value={suggestionFilter}
+                  onChange={(event) =>
+                    setSuggestionFilter(
+                      event.target.value as 'all' | 'suggestions' | 'non_suggestions',
+                    )
+                  }
+                  className="glass-input h-10 w-full rounded-tokenLg px-3 text-[13px]"
+                >
+                  <option value="all">All findings</option>
+                  <option value="suggestions">Suggestions only</option>
+                  <option value="non_suggestions">Exclude suggestions</option>
+                </select>
+              </label>
+
+              <label className="space-y-1.5">
+                <span className="text-[11px] uppercase tracking-[0.09em] text-white/40">
+                  Analysis Status
+                </span>
+                <select
+                  value={analysisStatusFilter}
+                  onChange={(event) => setAnalysisStatusFilter(event.target.value)}
+                  className="glass-input h-10 w-full rounded-tokenLg px-3 text-[13px]"
+                >
+                  <option value="all">All statuses</option>
+                  {analysisStatusOptions.map((status) => (
+                    <option key={status} value={status}>
+                      {analysisStatusLabel(status)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="space-y-1.5">
+                <span className="text-[11px] uppercase tracking-[0.09em] text-white/40">
+                  Date Range
+                </span>
+                <select
+                  value={dateRangeFilter}
+                  onChange={(event) =>
+                    setDateRangeFilter(event.target.value as FindingsDateRangeFilter)
+                  }
+                  className="glass-input h-10 w-full rounded-tokenLg px-3 text-[13px]"
+                >
+                  <option value="all">All time</option>
+                  <option value="24h">Last 24 hours</option>
+                  <option value="7d">Last 7 days</option>
+                  <option value="30d">Last 30 days</option>
+                  <option value="90d">Last 90 days</option>
+                </select>
+              </label>
+            </div>
+
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={clearFilters}
+                disabled={!hasActiveFilters}
+                className="glass-input inline-flex h-9 items-center rounded-full px-4 text-[12px] font-medium text-white/75 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Reset Filters
+              </button>
+            </div>
+          </section>
+
           <section className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
             <FindingsStatWidget
               label="Total Findings"
@@ -229,7 +484,7 @@ export default function FindingsPage() {
                 {errorMessage}
               </div>
             ) : (
-              <FindingsList findings={sortedFindings} />
+              <FindingsList findings={filteredFindings} />
             )}
           </section>
         </div>

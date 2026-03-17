@@ -23,6 +23,8 @@ import type { EventListItem } from '@/types/event';
 /* ─── Helpers ─── */
 
 type EventTypeFilter = 'all' | 'PUSH' | 'PR_OPENED' | 'PR_MERGED';
+type EventStatusFilter = 'all' | 'processed' | 'pending';
+type EventDateRangeFilter = 'all' | '24h' | '7d' | '30d' | '90d';
 
 function eventTypeLabel(type: string): string {
   const labels: Record<string, string> = {
@@ -44,6 +46,32 @@ function relativeTime(iso: string): string {
   const days = Math.floor(hours / 24);
   if (days < 30) return `${days}d ago`;
   return new Date(iso).toLocaleDateString();
+}
+
+function isWithinEventDateRange(value: string, range: EventDateRangeFilter): boolean {
+  if (range === 'all') {
+    return true;
+  }
+
+  const createdAtMs = new Date(value).getTime();
+  if (Number.isNaN(createdAtMs)) {
+    return false;
+  }
+
+  const now = Date.now();
+
+  switch (range) {
+    case '24h':
+      return createdAtMs >= now - 24 * 60 * 60 * 1000;
+    case '7d':
+      return createdAtMs >= now - 7 * 24 * 60 * 60 * 1000;
+    case '30d':
+      return createdAtMs >= now - 30 * 24 * 60 * 60 * 1000;
+    case '90d':
+      return createdAtMs >= now - 90 * 24 * 60 * 60 * 1000;
+    default:
+      return true;
+  }
 }
 
 /* ─── Sub‑components ─── */
@@ -283,6 +311,9 @@ export default function EventsPage() {
   const { data: events = [], isLoading, error, refetch } = useEventsQuery();
   const [searchText, setSearchText] = useState('');
   const [activeFilter, setActiveFilter] = useState<EventTypeFilter>('all');
+  const [repositoryFilter, setRepositoryFilter] = useState('all');
+  const [eventStatusFilter, setEventStatusFilter] = useState<EventStatusFilter>('all');
+  const [dateRangeFilter, setDateRangeFilter] = useState<EventDateRangeFilter>('all');
   const errorMessage = error ? 'Unable to load events. Please try again.' : null;
 
   useEffect(() => {
@@ -301,12 +332,38 @@ export default function EventsPage() {
     [events],
   );
 
+  const repositoryOptions = useMemo(() => {
+    const repositoryMap = new Map<string, string>();
+
+    for (const event of events) {
+      repositoryMap.set(event.repositoryId, event.repositoryName);
+    }
+
+    return Array.from(repositoryMap.entries())
+      .map(([id, name]) => ({ id, name }))
+      .sort((left, right) => left.name.localeCompare(right.name));
+  }, [events]);
+
   const filteredEvents = useMemo(() => {
     let results = events;
 
     if (activeFilter !== 'all') {
       results = results.filter((e) => e.type === activeFilter);
     }
+
+    if (repositoryFilter !== 'all') {
+      results = results.filter((e) => e.repositoryId === repositoryFilter);
+    }
+
+    if (eventStatusFilter === 'processed') {
+      results = results.filter((e) => e.processed);
+    }
+
+    if (eventStatusFilter === 'pending') {
+      results = results.filter((e) => !e.processed);
+    }
+
+    results = results.filter((e) => isWithinEventDateRange(e.createdAt, dateRangeFilter));
 
     const query = searchText.trim().toLowerCase();
     if (query) {
@@ -319,7 +376,34 @@ export default function EventsPage() {
     }
 
     return results;
-  }, [activeFilter, events, searchText]);
+  }, [activeFilter, dateRangeFilter, eventStatusFilter, events, repositoryFilter, searchText]);
+
+  const filteredStats = useMemo(
+    () => ({
+      total: filteredEvents.length,
+      push: filteredEvents.filter((event) => event.type === 'PUSH').length,
+      prOpened: filteredEvents.filter((event) => event.type === 'PR_OPENED').length,
+      prMerged: filteredEvents.filter((event) => event.type === 'PR_MERGED').length,
+      processed: filteredEvents.filter((event) => event.processed).length,
+      pending: filteredEvents.filter((event) => !event.processed).length,
+    }),
+    [filteredEvents],
+  );
+
+  const hasActiveFilters =
+    searchText.trim().length > 0 ||
+    activeFilter !== 'all' ||
+    repositoryFilter !== 'all' ||
+    eventStatusFilter !== 'all' ||
+    dateRangeFilter !== 'all';
+
+  const clearFilters = () => {
+    setSearchText('');
+    setActiveFilter('all');
+    setRepositoryFilter('all');
+    setEventStatusFilter('all');
+    setDateRangeFilter('all');
+  };
 
   return (
     <main className="page-shell flex h-screen overflow-hidden text-white">
@@ -362,22 +446,109 @@ export default function EventsPage() {
 
         <div className="content-wrap space-y-6">
           {/* Summary cards */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <StatCard label="Total Events" value={events.length} icon={Activity} />
-            <StatCard label="Pushes" value={pushCount} color="text-violet-400" icon={Upload} />
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            <StatCard label="Events In View" value={filteredStats.total} icon={Activity} />
+            <StatCard
+              label="Pushes"
+              value={filteredStats.push}
+              color="text-violet-400"
+              icon={Upload}
+            />
             <StatCard
               label="PRs Opened"
-              value={prOpenedCount}
+              value={filteredStats.prOpened}
               color="text-sky-400"
               icon={GitPullRequest}
             />
             <StatCard
               label="PRs Merged"
-              value={prMergedCount}
+              value={filteredStats.prMerged}
               color="text-fuchsia-400"
               icon={GitMerge}
             />
+            <StatCard
+              label="Processed"
+              value={filteredStats.processed}
+              color="text-emerald-400"
+              icon={CheckCircle2}
+            />
           </div>
+
+          <section className="glass-panel rounded-tokenLg border border-white/10 p-4 sm:p-5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-[16px] font-semibold text-white/90">Filter Events</h2>
+              <p className="text-[12px] text-white/45">
+                {filteredStats.pending.toLocaleString()} pending in current view
+              </p>
+            </div>
+
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              <label className="space-y-1.5">
+                <span className="text-[11px] uppercase tracking-[0.09em] text-white/40">
+                  Repository
+                </span>
+                <select
+                  value={repositoryFilter}
+                  onChange={(event) => setRepositoryFilter(event.target.value)}
+                  className="glass-input h-10 w-full rounded-tokenLg px-3 text-[13px]"
+                >
+                  <option value="all">All repositories</option>
+                  {repositoryOptions.map((repository) => (
+                    <option key={repository.id} value={repository.id}>
+                      {repository.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="space-y-1.5">
+                <span className="text-[11px] uppercase tracking-[0.09em] text-white/40">
+                  Event Status
+                </span>
+                <select
+                  value={eventStatusFilter}
+                  onChange={(event) =>
+                    setEventStatusFilter(event.target.value as EventStatusFilter)
+                  }
+                  className="glass-input h-10 w-full rounded-tokenLg px-3 text-[13px]"
+                >
+                  <option value="all">All statuses</option>
+                  <option value="processed">Processed</option>
+                  <option value="pending">Pending</option>
+                </select>
+              </label>
+
+              <label className="space-y-1.5">
+                <span className="text-[11px] uppercase tracking-[0.09em] text-white/40">
+                  Date Range
+                </span>
+                <select
+                  value={dateRangeFilter}
+                  onChange={(event) =>
+                    setDateRangeFilter(event.target.value as EventDateRangeFilter)
+                  }
+                  className="glass-input h-10 w-full rounded-tokenLg px-3 text-[13px]"
+                >
+                  <option value="all">All time</option>
+                  <option value="24h">Last 24 hours</option>
+                  <option value="7d">Last 7 days</option>
+                  <option value="30d">Last 30 days</option>
+                  <option value="90d">Last 90 days</option>
+                </select>
+              </label>
+            </div>
+
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={clearFilters}
+                disabled={!hasActiveFilters}
+                className="glass-input inline-flex h-9 items-center rounded-full px-4 text-[12px] font-medium text-white/75 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Reset Filters
+              </button>
+            </div>
+          </section>
 
           {/* Toolbar */}
           <div className="flex flex-wrap items-center justify-between gap-2">

@@ -207,7 +207,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="relative z-20 mx-auto mt-[clamp(2rem,8.5vh,4.2rem)] grid w-[calc(100%-1rem)] max-w-[860px] grid-cols-1 gap-[0.85rem] min-[900px]:w-[min(92%,860px)] min-[900px]:grid-cols-3 min-[900px]:gap-[0.7rem]">
+        {/* <div className="relative z-20 mx-auto mt-[clamp(2rem,8.5vh,4.2rem)] grid w-[calc(100%-1rem)] max-w-[860px] grid-cols-1 gap-[0.85rem] min-[900px]:w-[min(92%,860px)] min-[900px]:grid-cols-3 min-[900px]:gap-[0.7rem]">
           <article className="rounded-[14px] border border-white/20 bg-[rgba(244,244,244,0.94)] px-[0.8rem] py-[0.76rem] text-[#0f0f0f] backdrop-blur-[16px]">
             <div className="mb-2 flex items-center justify-between">
               <h2 className="m-0 text-[0.86rem]">Live Threat Feed</h2>
@@ -271,9 +271,9 @@ export default function HomePage() {
               <strong className="mt-1 text-[1.55rem] font-bold">1339</strong>
             </div>
           </article>
-        </div>
+        </div> */}
 
-        <div className="relative z-20 mt-[clamp(1.2rem,4.6vh,2.4rem)] flex flex-wrap items-center justify-between gap-[0.9rem] px-[1.2rem] pb-[1.2rem] min-[900px]:flex-nowrap min-[900px]:items-end">
+        {/* <div className="relative z-20 mt-[clamp(1.2rem,4.6vh,2.4rem)] flex flex-wrap items-center justify-between gap-[0.9rem] px-[1.2rem] pb-[1.2rem] min-[900px]:flex-nowrap min-[900px]:items-end">
           <span className="inline-flex items-center gap-[0.3rem] rounded-full border border-white/20 bg-white/10 px-[0.66rem] py-[0.42rem] text-[0.74rem] text-white/75">
             02/03 . Scroll down
           </span>
@@ -287,7 +287,7 @@ export default function HomePage() {
               </span>
             ))}
           </div>
-        </div>
+        </div> */}
       </section>
     </main>
   );
