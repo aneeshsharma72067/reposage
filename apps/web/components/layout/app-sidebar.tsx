@@ -40,9 +40,9 @@ export function AppSidebar() {
     <aside className="glass-panel fixed inset-x-3 bottom-3 z-40 flex h-[64px] flex-col rounded-tokenXl border border-white/12 px-2 py-2 shadow-[0_18px_60px_rgba(0,0,0,0.45)] lg:sticky lg:top-0 lg:inset-auto lg:h-screen lg:w-[224px] lg:shrink-0 lg:rounded-none lg:border-r lg:px-3 lg:py-4 lg:shadow-none">
       <div className="mb-5 hidden items-center gap-3 px-2 lg:flex">
         <div className="glass-panel-soft overflow-hidden flex h-10 w-10 items-center justify-center rounded-tokenMd text-xs">
-          <Image src={Logo} fill alt="Traceon" />
+          <Image src={Logo} fill alt="Reposage" />
         </div>
-        <p className="text-[15px] font-semibold text-white">Traceon AI</p>
+        <p className="text-[15px] font-semibold text-white">Reposage AI</p>
       </div>
 
       <p className="mb-2 mt-2 hidden px-2 text-[10px] font-semibold uppercase tracking-[0.04em] text-textMuted lg:block">
