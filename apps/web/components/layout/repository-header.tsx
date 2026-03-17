@@ -31,22 +31,22 @@ export function RepositoryHeader({ repository }: RepositoryHeaderProps) {
         </div>
       }
       actionsClassName="sm:gap-3"
-      actions={
-        <>
-          <button
-            type="button"
-            className="glass-panel-soft h-10 flex-1 rounded-full px-4 text-[13px] font-medium text-textPrimary transition hover:bg-white/[0.08] sm:flex-none sm:text-[14px]"
-          >
-            ↻ Resync Repository
-          </button>
-          <button
-            type="button"
-            className="h-10 flex-1 rounded-full border border-white/20 bg-white px-4 text-[13px] font-semibold text-black transition hover:bg-white/90 sm:flex-none sm:text-[14px]"
-          >
-            ▶ Run Analysis
-          </button>
-        </>
-      }
+      // actions={
+      //   <>
+      //     <button
+      //       type="button"
+      //       className="glass-panel-soft h-10 flex-1 rounded-full px-4 text-[13px] font-medium text-textPrimary transition hover:bg-white/[0.08] sm:flex-none sm:text-[14px]"
+      //     >
+      //       ↻ Resync Repository
+      //     </button>
+      //     <button
+      //       type="button"
+      //       className="h-10 flex-1 rounded-full border border-white/20 bg-white px-4 text-[13px] font-semibold text-black transition hover:bg-white/90 sm:flex-none sm:text-[14px]"
+      //     >
+      //       ▶ Run Analysis
+      //     </button>
+      //   </>
+      // }
     />
   );
 }

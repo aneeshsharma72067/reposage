@@ -90,6 +90,7 @@ export async function analyzeWithAI(
   try {
     const prompt = buildCommitPrompt(context);
     const rawResponse = await callGemini(prompt);
+    console.debug('Raw Gemini response:', rawResponse);
     const parsed = parseJsonFromText(rawResponse);
 
     return parseFindings(parsed);

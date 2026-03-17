@@ -24,4 +24,4 @@ RUN npx prisma generate --schema=apps/api/prisma/schema.prisma
 RUN npm run build --workspace=apps/api
 RUN npm run build --workspace=workers/analyzer
 
-CMD ["node", "workers/analyzer/dist/index.js"]
+CMD ["node", "workers/analyzer/dist/workers/analyzer/src/index.js"]

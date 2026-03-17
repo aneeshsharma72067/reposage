@@ -508,9 +508,12 @@ export async function processAnalysisRun(
     );
 
     let additionalFindings: FindingDraft[] = [];
-
+    console.debug('options for additional findings collection', options);
     if (options?.collectAdditionalFindings) {
       try {
+        console.debug('collecting additional findings', {
+          analysisRunId: context.analysisRunId,
+        });
         additionalFindings = await options.collectAdditionalFindings({
           analysisRunId: context.analysisRunId,
           repositoryId: context.repositoryId,

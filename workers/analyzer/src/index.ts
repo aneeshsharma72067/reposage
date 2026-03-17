@@ -4,7 +4,7 @@ import IORedis from 'ioredis';
 import {
   processAnalysisRun,
   type AdditionalAnalysisFindingContext,
-} from '../../../apps/api/dist/modules/analysis/analysis.service.js';
+} from 'api/dist/modules/analysis/analysis.service.js';
 import type { RuleFinding } from '../../../apps/api/src/modules/analysis/rules/rule.types.js';
 import { analyzeWithAI } from '../../../packages/ai/aiAnalyzer.js';
 import type {
@@ -222,7 +222,7 @@ const worker = new Worker<AnalysisJobPayload>(
   },
   {
     connection: redisConnectionOptions,
-    concurrency: 3,
+    concurrency: 2,
   },
 );
 
